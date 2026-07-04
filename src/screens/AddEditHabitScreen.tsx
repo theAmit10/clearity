@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 
 const ICONS = ['💪', '📚', '💧', '🧘', '🏃', '🥗', '😴', '✍️', '🎯', '🚭', '💰', '🎸'];
-const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA', '#FFCC00'];
+const COLORS = ['#FF5A5F', '#4CAF50', '#FF9500', '#007AFF', '#AF52DE', '#5AC8FA', '#FFCC00'];
 
 export default function AddEditHabitScreen({ route, navigation }: any) {
   const editId = route.params?.id;
@@ -22,17 +22,26 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const updateHabit = useHabitStore(s => s.updateHabit);
 
   const [name, setName] = useState(existing?.name ?? '');
+  const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? ICONS[0]);
   const [color, setColor] = useState(existing?.color ?? COLORS[0]);
+  const [goal, setGoal] = useState(existing?.goal ?? '');
 
   const canSave = name.trim().length > 0;
 
   const handleSave = async () => {
     if (!canSave) return;
+    const trimmed = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      icon,
+      color,
+      goal: goal.trim() || undefined,
+    };
     if (existing) {
-      await updateHabit(existing.id, { name: name.trim(), icon, color });
+      await updateHabit(existing.id, trimmed);
     } else {
-      await addHabit({ name: name.trim(), icon, color, frequency: 'daily' });
+      await addHabit({ ...trimmed, frequency: 'daily' });
     }
     navigation.goBack();
   };
@@ -48,6 +57,26 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             value={name}
             onChangeText={setName}
             placeholder="e.g. Drink water"
+            placeholderTextColor="#C7C7CC"
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            placeholder="e.g. 8 glasses per day"
+            placeholderTextColor="#C7C7CC"
+            style={[styles.input, styles.multiline]}
+            multiline
+            numberOfLines={2}
+          />
+
+          <Text style={styles.label}>Goal</Text>
+          <TextInput
+            value={goal}
+            onChangeText={setGoal}
+            placeholder="e.g. Daily"
             placeholderTextColor="#C7C7CC"
             style={styles.input}
           />
@@ -126,4 +155,5 @@ const styles = StyleSheet.create({
   },
   saveButtonDisabled: { backgroundColor: '#C7C7CC' },
   saveButtonText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
+  multiline: { minHeight: 60, textAlignVertical: 'top' },
 });

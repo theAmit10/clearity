@@ -1,116 +1,190 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { useHabitStore, computeStats } from '../store/habitStore';
-import HeatmapGrid from '../components/HeatmapGrid';
-import ProgressRing from '../components/ProgressRing';
+import YearHeatmap from '../components/YearHeatmap';
+import StatsRow from '../components/StatsRow';
+import ActionButtons from '../components/ActionButtons';
+import MonthlyCalendar from '../components/MonthlyCalendar';
 
 export default function HabitDetailScreen({ route, navigation }: any) {
   const { id } = route.params;
   const habit = useHabitStore(s => s.habits.find(h => h.id === id));
-  const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const deleteHabit = useHabitStore(s => s.deleteHabit);
+
+  const cardScale = useSharedValue(0.95);
+  const cardOpacity = useSharedValue(0);
+
+  React.useEffect(() => {
+    cardScale.value = withSpring(1, { damping: 15, stiffness: 120 });
+    cardOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) });
+  }, []);
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: cardScale.value }],
+    opacity: cardOpacity.value,
+  }));
+
+  const confirmDelete = useCallback(() => {
+    Alert.alert(
+      'Habit Settings',
+      undefined,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Habit',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteHabit(id);
+            navigation.goBack();
+          },
+        },
+      ],
+    );
+  }, [id, deleteHabit, navigation]);
 
   if (!habit) return null;
   const stats = computeStats(habit);
 
-  const confirmDelete = () => {
-    Alert.alert('Delete habit?', `"${habit.name}" and all its history will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteHabit(habit.id);
-          navigation.goBack();
-        },
-      },
-    ]);
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <View style={styles.headerRow}>
-          <Text style={styles.icon}>{habit.icon}</Text>
-          <Text style={styles.name}>{habit.name}</Text>
-        </View>
-
-        <View style={styles.statsRow}>
-          <StatBlock label="Current" value={`${stats.currentStreak}d`} />
-          <StatBlock label="Best" value={`${stats.bestStreak}d`} />
-          <StatBlock label="Total" value={`${stats.totalCompletions}`} />
-          <View style={styles.ringBlock}>
-            <ProgressRing progress={stats.completionRate30d} color={habit.color} />
-            <Text style={styles.ringLabel}>30d</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Animated.View style={[styles.card, cardStyle]}>
+          {}
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.icon}>{habit.icon}</Text>
+              <View style={styles.headerText}>
+                <Text style={styles.name}>{habit.name}</Text>
+                {habit.description && (
+                  <Text style={styles.description}>{habit.description}</Text>
+                )}
+              </View>
+            </View>
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.closeText}>✕</Text>
+            </Pressable>
           </View>
-        </View>
 
-        <Text style={styles.sectionTitle}>History</Text>
-        <View style={styles.heatmapWrap}>
-          <HeatmapGrid
-            completions={habit.completions}
-            color={habit.color}
-            weeks={26}
-            cellSize={12}
-            gap={3}
-            onCellPress={key => toggleCompletion(habit.id, key)}
-          />
-        </View>
-        <Text style={styles.hint}>Tap any day to mark/unmark it complete.</Text>
+          {}
+          <View style={styles.section}>
+            <YearHeatmap
+              habitId={habit.id}
+              color={habit.color}
+            />
+          </View>
 
-        <Pressable
-          style={styles.editButton}
-          onPress={() => navigation.navigate('AddEditHabit', { id: habit.id })}>
-          <Text style={styles.editButtonText}>Edit Habit</Text>
-        </Pressable>
-        <Pressable style={styles.deleteButton} onPress={confirmDelete}>
-          <Text style={styles.deleteButtonText}>Delete Habit</Text>
-        </Pressable>
+          {}
+          <View style={styles.section}>
+            <StatsRow stats={stats} goal={habit.goal} />
+          </View>
+
+          {}
+          <View style={styles.actionRow}>
+            <ActionButtons
+              onEdit={() => navigation.navigate('AddEditHabit', { id: habit.id })}
+              onSettings={confirmDelete}
+            />
+          </View>
+
+          {}
+          <View style={styles.divider} />
+
+          {}
+          <View style={styles.section}>
+            <MonthlyCalendar
+              habitId={habit.id}
+            />
+          </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function StatBlock({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.statBlock}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F2F7' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  icon: { fontSize: 34, marginRight: 10 },
-  name: { fontSize: 26, fontWeight: '700', color: '#1C1C1E' },
-  statsRow: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    borderRadius: 14,
+  container: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: 'flex-start',
+    marginBottom: 20,
   },
-  statBlock: { alignItems: 'center' },
-  statValue: { fontSize: 20, fontWeight: '700', color: '#1C1C1E' },
-  statLabel: { fontSize: 12, color: '#8E8E93', marginTop: 2 },
-  ringBlock: { alignItems: 'center' },
-  ringLabel: { fontSize: 11, color: '#8E8E93', marginTop: 4 },
-  sectionTitle: { fontSize: 15, fontWeight: '600', color: '#1C1C1E', marginBottom: 10 },
-  heatmapWrap: { backgroundColor: '#FFF', borderRadius: 14, padding: 14, alignItems: 'center' },
-  hint: { fontSize: 12, color: '#8E8E93', marginTop: 8, textAlign: 'center' },
-  editButton: {
-    marginTop: 28,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 14,
+  headerLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    gap: 12,
   },
-  editButtonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
-  deleteButton: { marginTop: 12, paddingVertical: 14, alignItems: 'center' },
-  deleteButtonText: { color: '#FF3B30', fontWeight: '600', fontSize: 16 },
+  headerText: {
+    flex: 1,
+  },
+  icon: {
+    fontSize: 36,
+  },
+  name: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#111111',
+  },
+  description: {
+    fontSize: 14,
+    color: '#777777',
+    marginTop: 2,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F2F2F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  closeText: {
+    fontSize: 14,
+    color: '#777777',
+    fontWeight: '600',
+  },
+  section: {
+    marginBottom: 16,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginBottom: 16,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#E8E8E8',
+    marginBottom: 16,
+  },
 });

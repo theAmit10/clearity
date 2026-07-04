@@ -3,13 +3,14 @@ export type Frequency = 'daily' | 'weekly' | 'custom';
 export interface Habit {
   id: string;
   name: string;
-  icon: string; // emoji
-  color: string; // hex
+  description?: string;
+  icon: string;
+  color: string;
   frequency: Frequency;
-  targetDaysPerWeek?: number; // used when frequency === 'custom'
-  createdAt: string; // ISO date
+  targetDaysPerWeek?: number;
+  goal?: string;
+  createdAt: string;
   archived: boolean;
-  // completions map: 'YYYY-MM-DD' -> true
   completions: Record<string, boolean>;
 }
 
