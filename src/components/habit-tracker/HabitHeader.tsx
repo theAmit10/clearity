@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import XMarkIcon from 'react-native-heroicons/outline/XMarkIcon';
 import { colors, radii, spacing, typography } from './theme';
 import NeumorphicPressable from './NeumorphicPressable';
 import Raised from './Raised';
@@ -55,7 +55,7 @@ export default function HabitHeader({ habit, onClose }: HabitHeaderProps) {
         }}
         onPress={onClose}
       >
-        <Icon name="close" size={18} color={colors.textMuted} />
+        <XMarkIcon size={18} color={colors.textMuted} />
       </NeumorphicPressable>
     </View>
   );

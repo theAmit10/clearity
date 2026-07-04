@@ -47,17 +47,17 @@ export default function StatsRow({ stats, goal }: Props) {
   return (
     <View style={styles.row}>
       <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        <Text style={styles.chipIcon}>🔥</Text>
+        {/* <Text style={styles.chipIcon}>🔥</Text> */}
         <AnimatedNumber value={stats.currentStreak} suffix="d" />
         <Text style={styles.chipLabel}>Streak</Text>
       </Raised>
       <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        <Text style={styles.chipIcon}>🏆</Text>
+        {/* <Text style={styles.chipIcon}>🏆</Text> */}
         <AnimatedNumber value={stats.bestStreak} suffix="d" />
         <Text style={styles.chipLabel}>Best</Text>
       </Raised>
       <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        <Text style={styles.chipIcon}>✅</Text>
+        {/* <Text style={styles.chipIcon}>✅</Text> */}
         <AnimatedNumber value={stats.completionRate30d} suffix="%" />
         <Text style={styles.chipLabel}>30d</Text>
       </Raised>

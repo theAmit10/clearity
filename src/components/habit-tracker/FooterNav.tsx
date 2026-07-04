@@ -1,5 +1,7 @@
 import { View, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import CalendarDaysIcon from 'react-native-heroicons/outline/CalendarDaysIcon';
+import ChevronLeftIcon from 'react-native-heroicons/outline/ChevronLeftIcon';
+import ChevronRightIcon from 'react-native-heroicons/outline/ChevronRightIcon';
 import { colors, radii, spacing, typography } from './theme';
 import NeumorphicPressable from './NeumorphicPressable';
 
@@ -43,7 +45,7 @@ export default function FooterNav({
           borderRadius: radii.pill,
         }}
       >
-        <Icon name="calendar" size={14} color={colors.accent} />
+        <CalendarDaysIcon size={14} color={colors.accent} />
         <Text style={[typography.subtitle, { color: colors.textPrimary, fontWeight: '700' }]}>
           {label}
         </Text>
@@ -62,7 +64,7 @@ export default function FooterNav({
           }}
           onPress={onPrevMonth}
         >
-          <Icon name="chevron-left" size={20} color={colors.textPrimary} />
+          <ChevronLeftIcon size={20} color={colors.textPrimary} />
         </NeumorphicPressable>
 
         <NeumorphicPressable
@@ -77,7 +79,7 @@ export default function FooterNav({
           }}
           onPress={onNextMonth}
         >
-          <Icon name="chevron-right" size={20} color={colors.textPrimary} />
+          <ChevronRightIcon size={20} color={colors.textPrimary} />
         </NeumorphicPressable>
       </View>
     </View>

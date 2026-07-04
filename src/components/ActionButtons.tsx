@@ -49,7 +49,7 @@ function ActionButton({
     >
       <Wrapper radius={16} style={styles.button}>
         <Text style={styles.buttonIcon}>{icon}</Text>
-        <Text style={styles.buttonLabel}>{label}</Text>
+        {/* <Text style={styles.buttonLabel}>{label}</Text> */}
       </Wrapper>
     </AnimatedPressable>
   );
@@ -58,7 +58,7 @@ function ActionButton({
 export default function ActionButtons({ onEdit, onSettings }: Props) {
   return (
     <>
-      <ActionButton icon="✏️" label="Edit" onPress={onEdit} />
+      <ActionButton icon="✐" label="Edit" onPress={onEdit} />
       <ActionButton icon="⚙️" label="Settings" onPress={onSettings} />
     </>
   );

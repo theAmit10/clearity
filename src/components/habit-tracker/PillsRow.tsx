@@ -1,5 +1,7 @@
 import { View, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FireIcon from 'react-native-heroicons/solid/FireIcon';
+import PencilIcon from 'react-native-heroicons/outline/PencilIcon';
+import Cog6ToothIcon from 'react-native-heroicons/outline/Cog6ToothIcon';
 import { colors, radii, spacing, typography } from './theme';
 import NeumorphicPressable from './NeumorphicPressable';
 import Raised from './Raised';
@@ -57,7 +59,7 @@ export default function PillsRow({
               gap: spacing.xs,
             }}
           >
-            <Icon name="fire" size={14} color={colors.accent} />
+            <FireIcon size={14} color={colors.accent} />
             <Text style={[typography.subtitle, { color: colors.textPrimary, fontWeight: '700' }]}>
               {currentStreak}
             </Text>
@@ -78,7 +80,7 @@ export default function PillsRow({
           }}
           onPress={onEdit}
         >
-          <Icon name="pencil-outline" size={18} color={colors.textPrimary} />
+          <PencilIcon size={18} color={colors.textPrimary} />
         </NeumorphicPressable>
 
         <NeumorphicPressable
@@ -93,7 +95,7 @@ export default function PillsRow({
           }}
           onPress={onOpenSettings}
         >
-          <Icon name="cog-outline" size={18} color={colors.textPrimary} />
+          <Cog6ToothIcon size={18} color={colors.textPrimary} />
         </NeumorphicPressable>
       </View>
     </View>

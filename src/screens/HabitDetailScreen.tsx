@@ -97,14 +97,14 @@ export default function HabitDetailScreen({ route, navigation }: any) {
             {}
             <View style={styles.section}>
               <StatsRow stats={stats} goal={habit.goal} />
-              <View style={styles.actionRow}>
+              {/* <View style={styles.actionRow}>
                 <ActionButtons
                   onEdit={() =>
                     navigation.navigate('AddEditHabit', { id: habit.id })
                   }
                   onSettings={confirmDelete}
                 />
-              </View>
+              </View> */}
             </View>
 
             {}
@@ -123,6 +123,15 @@ export default function HabitDetailScreen({ route, navigation }: any) {
             {}
             <View style={styles.section}>
               <MonthlyCalendar habitId={habit.id} color={habit.color} />
+            </View>
+
+            <View style={styles.actionRow}>
+              <ActionButtons
+                onEdit={() =>
+                  navigation.navigate('AddEditHabit', { id: habit.id })
+                }
+                onSettings={confirmDelete}
+              />
             </View>
           </Raised>
         </Animated.View>
@@ -195,7 +204,7 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     gap: 12,
     marginBottom: 16,
   },
