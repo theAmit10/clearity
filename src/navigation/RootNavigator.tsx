@@ -36,12 +36,16 @@ export default function RootNavigator() {
         <Tab.Screen
           name="Home"
           component={HomeStack}
-          options={{ tabBarIcon: () => <Text style={{ fontSize: 20 }}>📋</Text> }}
+          options={{
+            tabBarIcon: () => <Text style={{ fontSize: 20 }}>📋</Text>,
+          }}
         />
         <Tab.Screen
           name="Settings"
           component={SettingsScreen}
-          options={{ tabBarIcon: () => <Text style={{ fontSize: 20 }}>⚙️</Text> }}
+          options={{
+            tabBarIcon: () => <Text style={{ fontSize: 20 }}>⚙️</Text>,
+          }}
         />
       </Tab.Navigator>
     </NavigationContainer>
