@@ -63,7 +63,7 @@ export default function StatsRow({ stats, goal }: Props) {
       </Raised>
       {goal && (
         <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-          <Text style={styles.chipIcon}>🎯</Text>
+          {/* <Text style={styles.chipIcon}>🎯</Text> */}
           <Text style={styles.statValue}>{goal}</Text>
           <Text style={styles.chipLabel}>Goal</Text>
         </Raised>
