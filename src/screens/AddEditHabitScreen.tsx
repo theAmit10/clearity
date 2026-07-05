@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     borderColor: neumorphic.colors.textPrimary,
   },
   saveButton: {
-    marginTop: 32,
+    marginTop: 36,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',

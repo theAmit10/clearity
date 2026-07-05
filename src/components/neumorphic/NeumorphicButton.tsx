@@ -13,6 +13,7 @@ interface Props {
    * for things like a completed calendar day, which should stay sunken
    * even when the finger isn't on it. */
   forcePressed?: boolean;
+  backgroundColor?: string;
 }
 
 export function NeumorphicButton({
@@ -23,6 +24,7 @@ export function NeumorphicButton({
   distance = 6,
   style,
   forcePressed = false,
+  backgroundColor,
 }: Props) {
   const [touching, setTouching] = useState(false);
   const showInset = forcePressed || touching;
@@ -35,7 +37,7 @@ export function NeumorphicButton({
       onPressIn={() => setTouching(true)}
       onPressOut={() => setTouching(false)}
     >
-      <Wrapper radius={radius} style={style}>
+      <Wrapper radius={radius} style={style} backgroundColor={backgroundColor}>
         {children}
       </Wrapper>
     </Pressable>
