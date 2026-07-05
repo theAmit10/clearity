@@ -16,20 +16,58 @@ import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { neumorphic } from '../theme/neumorphicTheme';
 
+// const COLORS = [
+//   '#FF5A5F',
+//   '#FF9500',
+//   '#FFCC00',
+//   '#4CD964',
+//   '#34C759',
+//   '#00C7BE',
+//   '#32ADE6',
+//   '#007AFF',
+//   '#5856D6',
+//   '#AF52DE',
+//   '#FF2D55',
+//   '#A2845E',
+//   '#8E8E93',
+//   '#1C1C1E',
+// ];
+
 const COLORS = [
+  // Reds / oranges
+  '#FF3B30',
   '#FF5A5F',
+  '#FF6B35',
   '#FF9500',
+  // Yellows / greens
   '#FFCC00',
+  '#FFD60A',
   '#4CD964',
   '#34C759',
+  '#30D158',
+  // Teals / blues
   '#00C7BE',
+  '#00E5A0',
   '#32ADE6',
+  '#64D2FF',
   '#007AFF',
+  '#0A84FF',
+  // Indigos / purples
   '#5856D6',
+  '#5E5CE6',
   '#AF52DE',
+  '#BF5AF2',
+  // Pinks / rose
   '#FF2D55',
+  '#FF375F',
+  // Earth tones
   '#A2845E',
+  '#C2703D',
+  '#556B2F',
+  '#2E7D32',
+  // Neutrals
   '#8E8E93',
+  '#6E6E73',
   '#1C1C1E',
 ];
 
@@ -61,7 +99,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
     if (existing) {
       await updateHabit(existing.id, trimmed);
     } else {
-      await addHabit({ ...trimmed, frequency: 'daily' });
+      await addHabit({ ...trimmed, frequency: '' });
     }
     navigation.goBack();
   };
@@ -104,7 +142,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             />
           </Inset>
 
-          <Text style={styles.label}>Goal</Text>
+          {/* <Text style={styles.label}>Goal</Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={goal}
@@ -113,8 +151,8 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               placeholderTextColor={neumorphic.colors.textMuted}
               style={styles.input}
             />
-          </Inset>
-          <View style={styles.goalPresetRow}>
+          </Inset> */}
+          {/* <View style={styles.goalPresetRow}>
             {GOAL_PRESETS.map(preset => {
               const selected = goal === preset;
               return (
@@ -135,7 +173,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                 </NeumorphicButton>
               );
             })}
-          </View>
+          </View> */}
 
           <Text style={styles.label}>Icon</Text>
           <View style={styles.row}>
@@ -247,7 +285,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: neumorphic.colors.textMuted,
   },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 },
   iconOption: {
     width: 48,
     height: 48,
@@ -263,7 +301,7 @@ const styles = StyleSheet.create({
     borderColor: neumorphic.colors.textPrimary,
   },
   saveButton: {
-    marginTop: 36,
+    marginTop: 2,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -277,6 +315,7 @@ const styles = StyleSheet.create({
     color: neumorphic.colors.textMuted,
   },
 });
+
 // import React, { useState } from 'react';
 // import {
 //   View,
