@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useMemo, useEffect } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { toDateKey, isFuture, addDays } from '../services/dateUtils';
 import { Inset } from './neumorphic/NeumorphicView';
 import { neumorphic } from '../theme/neumorphicTheme';
@@ -7,111 +7,143 @@ import { neumorphic } from '../theme/neumorphicTheme';
 interface Props {
   completions: Record<string, boolean>;
   color: string;
-  weeks?: number;
   cellSize?: number;
   gap?: number;
+  /** Kept only for backwards compatibility with older call sites — this
+   * now always renders the full current year (scrollable), the same as
+   * YearHeatmap, so a fixed week count no longer applies. */
+  weeks?: number;
+}
+
+function yearWeeks(year: number): Date[][] {
+  const start = new Date(year, 0, 1);
+  const end = new Date(year, 11, 31);
+  const weeks: Date[][] = [];
+  let cursor = new Date(start);
+  cursor.setDate(cursor.getDate() - cursor.getDay());
+  while (cursor <= end) {
+    const week: Date[] = [];
+    for (let d = 0; d < 7; d++) {
+      week.push(addDays(cursor, d));
+    }
+    weeks.push(week);
+    cursor = addDays(cursor, 7);
+  }
+  return weeks;
 }
 
 /**
  * Compact read-only heatmap used inside HabitCard on the home list.
- * Same visual language as the big YearHeatmap on the detail screen —
- * a sunken tray with faintly-bordered empty cells and pressed-in filled
- * cells — just condensed to the last N weeks with no month/day labels,
- * so it stays legible at list-item size instead of disappearing into
- * the card background.
+ * Same data and scroll behavior as the big YearHeatmap on the detail
+ * screen (full current year, auto-scrolled to today) — just without the
+ * weekday/month label gutters, and the tray itself stretches to the
+ * card's full width instead of shrink-wrapping to a fixed pixel size.
+ * The grid content is still 52+ weeks wide, so it scrolls horizontally
+ * inside that full-width tray exactly like the detail screen version.
  */
 export default function HeatmapGrid({
   completions,
   color,
-  weeks = 14,
   cellSize = 10,
   gap = 2,
 }: Props) {
   const side = cellSize + gap;
+  const year = new Date().getFullYear();
+  const weeksData = useMemo(() => yearWeeks(year), [year]);
+  const scrollRef = useRef<ScrollView>(null);
 
-  const columns = useMemo(() => {
+  const todayWeekIndex = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Align to the start (Sunday) of the current week, then walk back
-    // `weeks - 1` more weeks so the grid ends on the current week.
-    const currentWeekStart = addDays(today, -today.getDay());
-    const gridStart = addDays(currentWeekStart, -(weeks - 1) * 7);
-
-    const cols: Date[][] = [];
-    for (let w = 0; w < weeks; w++) {
-      const weekStart = addDays(gridStart, w * 7);
-      const col: Date[] = [];
-      for (let d = 0; d < 7; d++) {
-        col.push(addDays(weekStart, d));
+    for (let i = 0; i < weeksData.length; i++) {
+      for (const d of weeksData[i]) {
+        if (d.getTime() === today.getTime()) return i;
       }
-      cols.push(col);
     }
-    return cols;
-  }, [weeks]);
+    return weeksData.length - 1;
+  }, [weeksData]);
 
-  const gridWidth = weeks * side;
+  useEffect(() => {
+    if (scrollRef.current) {
+      const offset = Math.max(0, todayWeekIndex - 6) * side;
+      setTimeout(
+        () => scrollRef.current?.scrollTo({ x: offset, animated: false }),
+        50,
+      );
+    }
+  }, [todayWeekIndex]);
+
   const gridHeight = 7 * side;
+  const totalWidth = weeksData.length * side;
 
   return (
-    <Inset
-      radius={neumorphic.radii.panel}
-      style={[styles.tray, { width: gridWidth + 16 }]}
-    >
-      <View style={{ width: gridWidth, height: gridHeight }}>
-        {columns.map((col, ci) => (
-          <View
-            key={ci}
-            style={{
-              position: 'absolute',
-              left: ci * side,
-              top: 0,
-              width: side,
-              height: gridHeight,
-            }}
-          >
-            {col.map((day, di) => {
-              const key = toDateKey(day);
-              const future = isFuture(day);
-              const done = !!completions[key];
+    <Inset radius={neumorphic.radii.panel} style={styles.tray}>
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        nestedScrollEnabled
+      >
+        <View style={{ width: totalWidth, height: gridHeight }}>
+          {weeksData.map((week, wi) => (
+            <View
+              key={wi}
+              style={{
+                position: 'absolute',
+                left: wi * side,
+                top: 0,
+                width: side,
+                height: gridHeight,
+              }}
+            >
+              {week.map((day, di) => {
+                const key = toDateKey(day);
+                const future = isFuture(day);
+                const daysInYear = day.getFullYear() === year;
+                const done = !!completions[key];
 
-              return (
-                <View
-                  key={key}
-                  style={[
-                    styles.cell,
-                    {
-                      top: di * side,
-                      width: cellSize,
-                      height: cellSize,
-                      backgroundColor: future
-                        ? 'transparent'
-                        : done
-                        ? color
-                        : neumorphic.colors.insetFill,
-                    },
-                    !future && !done && styles.cellEmpty,
-                    !future && done && styles.cellDone,
-                  ]}
-                />
-              );
-            })}
-          </View>
-        ))}
-      </View>
+                const cellBg = !daysInYear
+                  ? 'transparent'
+                  : future
+                  ? neumorphic.colors.background
+                  : done
+                  ? color
+                  : neumorphic.colors.insetFill;
+
+                return (
+                  <View key={key} style={[styles.cell, { top: di * side }]}>
+                    <View
+                      style={[
+                        {
+                          width: cellSize,
+                          height: cellSize,
+                          borderRadius: 2,
+                          backgroundColor: cellBg,
+                        },
+                        daysInYear && !future && !done && styles.cellEmpty,
+                        daysInYear && !future && done && styles.cellDone,
+                      ]}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </Inset>
   );
 }
 
 const styles = StyleSheet.create({
   tray: {
-    padding: 8,
-    alignSelf: 'flex-start',
+    width: '100%',
+    padding: 10,
     overflow: 'hidden',
   },
   cell: {
     position: 'absolute',
     left: 0,
-    borderRadius: 2,
   },
   cellEmpty: {
     borderTopWidth: 1,
@@ -259,93 +291,3 @@ const styles = StyleSheet.create({
 //     borderColor: 'rgba(0,0,0,0.14)',
 //   },
 // });
-
-// // import React, { useMemo } from 'react';
-// // import { View, Pressable, StyleSheet } from 'react-native';
-// // import Svg, { Rect } from 'react-native-svg';
-// // import { lastNWeeksGrid, toDateKey, isFuture } from '../services/dateUtils';
-
-// // interface Props {
-// //   completions: Record<string, boolean>;
-// //   color: string;
-// //   weeks?: number; // how many weeks of history to show
-// //   cellSize?: number;
-// //   gap?: number;
-// //   onCellPress?: (dateKey: string) => void;
-// // }
-
-// // const CELL_EMPTY = '#E5E5EA';
-
-// // export default function HeatmapGrid({
-// //   completions,
-// //   color,
-// //   weeks = 20,
-// //   cellSize = 12,
-// //   gap = 3,
-// //   onCellPress,
-// // }: Props) {
-// //   const grid = useMemo(() => lastNWeeksGrid(weeks), [weeks]);
-
-// //   const width = weeks * (cellSize + gap);
-// //   const height = 7 * (cellSize + gap);
-
-// //   return (
-// //     <View>
-// //       <Svg width={width} height={height}>
-// //         {grid.map((week, wi) =>
-// //           week.map((day, di) => {
-// //             const key = toDateKey(day);
-// //             const future = isFuture(day);
-// //             const done = !!completions[key];
-// //             const fill = future ? 'transparent' : done ? color : CELL_EMPTY;
-// //             return (
-// //               <Rect
-// //                 key={key}
-// //                 x={wi * (cellSize + gap)}
-// //                 y={di * (cellSize + gap)}
-// //                 width={cellSize}
-// //                 height={cellSize}
-// //                 rx={3}
-// //                 fill={fill}
-// //               />
-// //             );
-// //           }),
-// //         )}
-// //       </Svg>
-// //       {/* Invisible touch targets overlaid so cells stay tappable (useful on the
-// //           detail screen for backfilling a missed day). Skipped on tiny previews. */}
-// //       {onCellPress && cellSize >= 10 && (
-// //         <View style={[StyleSheet.absoluteFill, styles.touchOverlay]}>
-// //           {grid.map((week, wi) => (
-// //             <View key={wi} style={{ flexDirection: 'column' }}>
-// //               {week.map((day, di) => {
-// //                 const key = toDateKey(day);
-// //                 const future = isFuture(day);
-// //                 return (
-// //                   <Pressable
-// //                     key={key}
-// //                     disabled={future}
-// //                     onPress={() => onCellPress(key)}
-// //                     style={{
-// //                       width: cellSize + gap,
-// //                       height: cellSize + gap,
-// //                       position: 'absolute',
-// //                       left: wi * (cellSize + gap),
-// //                       top: di * (cellSize + gap),
-// //                     }}
-// //                   />
-// //                 );
-// //               })}
-// //             </View>
-// //           ))}
-// //         </View>
-// //       )}
-// //     </View>
-// //   );
-// // }
-
-// // const styles = StyleSheet.create({
-// //   touchOverlay: {
-// //     flexDirection: 'row',
-// //   },
-// // });
