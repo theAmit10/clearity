@@ -1,0 +1,419 @@
+2026-07-05 09:36:28 +0000  Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0x79d663300; archive(resolved)="<IDEArchive: 0x7af416530>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team(resolved)="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	Chain (16, self inclusive):
+	<IDEDistributionProcessingPipelineContext: 0x79d663300; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionProcessingPipelineContext: 0x7a0eced00; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7c2955680; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7c2131b80; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7c2130280; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7c2131900; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7bc2b2d00; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7bc289680; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7bc288c80; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="<IDEProvisioningDisambiguatableBasicTeam: 0x7a2649d00; teamID='4TUC4FDZ7L', teamName='Amit Prasad', teamType='Individual', username='prasadak66@gmail.com', isFreeProvisioningTeam='0'>">
+	<IDEDistributionContext: 0x7bc288780; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="(null)">
+	<IDEDistributionContext: 0x7bc28ad00; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="(null)">
+	<IDEDistributionContext: 0x7bc289400; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="(null)">
+	<IDEDistributionContext: 0x7bc288f00; archive = "<IDEArchive: 0x7af416530>", distributionMethod="<IDEDistributionMethodiOSAdHoc: 0x7a3053fc0>", team="(null)">
+	<IDEDistributionContext: 0x7bc28aa80; archive = "<IDEArchive: 0x7af416530>", distributionMethod="(null)", team="(null)">
+	<IDEDistributionContext: 0x7bc2b0c80; archive = "<IDEArchive: 0x7af416530>", distributionMethod="(null)", team="(null)">
+	<IDEDistributionContext: 0x7bc2b3980; archive = "<IDEArchive: 0x7af416530>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0x79d663300>
+2026-07-05 09:36:28 +0000  Processing step: IDEDistributionCreateDestRootStep
+2026-07-05 09:36:28 +0000  Processing step: IDEDistributionCopyItemStep
+2026-07-05 09:36:28 +0000  Running /usr/bin/ditto '-V' '/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app' '/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app'
+2026-07-05 09:36:28 +0000  >>> Copying /Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app 
+2026-07-05 09:36:28 +0000  copying file ./React-timing_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:28 +0000  553 bytes for ./React-timing_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:28 +0000  copying file ./React-timing_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:28 +0000  787 bytes for ./React-timing_privacy.bundle/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./_CodeSignature/CodeResources ... 
+2026-07-05 09:36:28 +0000  16499 bytes for ./_CodeSignature/CodeResources
+2026-07-05 09:36:28 +0000  copying file ./AppIcon60x60@2x.png ... 
+2026-07-05 09:36:28 +0000  19278 bytes for ./AppIcon60x60@2x.png
+2026-07-05 09:36:28 +0000  copying file ./Habita ... 
+2026-07-05 09:36:28 +0000  8145024 bytes for ./Habita
+2026-07-05 09:36:28 +0000  copying file ./React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:28 +0000  552 bytes for ./React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:28 +0000  copying file ./React-cxxreact_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:28 +0000  791 bytes for ./React-cxxreact_privacy.bundle/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./Assets.car ... 
+2026-07-05 09:36:28 +0000  2593464 bytes for ./Assets.car
+2026-07-05 09:36:28 +0000  copying file ./AppIcon76x76@2x~ipad.png ... 
+2026-07-05 09:36:28 +0000  27868 bytes for ./AppIcon76x76@2x~ipad.png
+2026-07-05 09:36:28 +0000  copying file ./main.jsbundle ... 
+2026-07-05 09:36:28 +0000  4542961 bytes for ./main.jsbundle
+2026-07-05 09:36:28 +0000  copying file ./PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:28 +0000  408 bytes for ./PrivacyInfo.xcprivacy
+2026-07-05 09:36:28 +0000  copying file ./LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib ... 
+2026-07-05 09:36:28 +0000  1644 bytes for ./LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
+2026-07-05 09:36:28 +0000  copying file ./LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib ... 
+2026-07-05 09:36:28 +0000  924 bytes for ./LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib
+2026-07-05 09:36:28 +0000  copying file ./LaunchScreen.storyboardc/Info.plist ... 
+2026-07-05 09:36:28 +0000  258 bytes for ./LaunchScreen.storyboardc/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./RNSVGFilters.bundle/RNSVGArithmeticFilter.iphoneos.metallib ... 
+2026-07-05 09:36:28 +0000  3993 bytes for ./RNSVGFilters.bundle/RNSVGArithmeticFilter.iphoneos.metallib
+2026-07-05 09:36:28 +0000  copying file ./RNSVGFilters.bundle/RNSVGCompositeXor.iphoneos.metallib ... 
+2026-07-05 09:36:28 +0000  3509 bytes for ./RNSVGFilters.bundle/RNSVGCompositeXor.iphoneos.metallib
+2026-07-05 09:36:28 +0000  copying file ./RNSVGFilters.bundle/Info.plist ... 
+2026-07-05 09:36:28 +0000  770 bytes for ./RNSVGFilters.bundle/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./AsyncStorage_resources.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:28 +0000  656 bytes for ./AsyncStorage_resources.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:28 +0000  copying file ./AsyncStorage_resources.bundle/Info.plist ... 
+2026-07-05 09:36:28 +0000  790 bytes for ./AsyncStorage_resources.bundle/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./Frameworks/hermesvm.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:28 +0000  1798 bytes for ./Frameworks/hermesvm.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:28 +0000  copying file ./Frameworks/hermesvm.framework/hermesvm ... 
+2026-07-05 09:36:28 +0000  5120000 bytes for ./Frameworks/hermesvm.framework/hermesvm
+2026-07-05 09:36:28 +0000  copying file ./Frameworks/hermesvm.framework/Info.plist ... 
+2026-07-05 09:36:28 +0000  859 bytes for ./Frameworks/hermesvm.framework/Info.plist
+2026-07-05 09:36:28 +0000  copying file ./Frameworks/React.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:28 +0000  1798 bytes for ./Frameworks/React.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:28 +0000  copying file ./Frameworks/React.framework/React ... 
+2026-07-05 09:36:29 +0000  12126528 bytes for ./Frameworks/React.framework/React
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/React.framework/Info.plist ... 
+2026-07-05 09:36:29 +0000  744 bytes for ./Frameworks/React.framework/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:29 +0000  3548 bytes for ./Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  552 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  689 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies ... 
+2026-07-05 09:36:29 +0000  1263760 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  552 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  687 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  776 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  689 bytes for ./Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Frameworks/ReactNativeDependencies.framework/Info.plist ... 
+2026-07-05 09:36:29 +0000  781 bytes for ./Frameworks/ReactNativeDependencies.framework/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./embedded.mobileprovision ... 
+2026-07-05 09:36:29 +0000  16202 bytes for ./embedded.mobileprovision
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@3x.png ... 
+2026-07-05 09:36:29 +0000  761 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@3x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@2x.png ... 
+2026-07-05 09:36:29 +0000  405 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@2x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@2x.png ... 
+2026-07-05 09:36:29 +0000  589 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@2x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@3x.png ... 
+2026-07-05 09:36:29 +0000  502 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@3x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon.png ... 
+2026-07-05 09:36:29 +0000  290 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@2x.png ... 
+2026-07-05 09:36:29 +0000  334 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@2x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@3x.png ... 
+2026-07-05 09:36:29 +0000  839 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@3x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon.png ... 
+2026-07-05 09:36:29 +0000  141 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png ... 
+2026-07-05 09:36:29 +0000  653 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@2x.png ... 
+2026-07-05 09:36:29 +0000  201 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@2x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@3x.png ... 
+2026-07-05 09:36:29 +0000  266 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@3x.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png ... 
+2026-07-05 09:36:29 +0000  220 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png
+2026-07-05 09:36:29 +0000  copying file ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon.png ... 
+2026-07-05 09:36:29 +0000  317 bytes for ./assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon.png
+2026-07-05 09:36:29 +0000  copying file ./Info.plist ... 
+2026-07-05 09:36:29 +0000  1596 bytes for ./Info.plist
+2026-07-05 09:36:29 +0000  copying file ./PkgInfo ... 
+2026-07-05 09:36:29 +0000  8 bytes for ./PkgInfo
+2026-07-05 09:36:29 +0000  copying file ./React-Core_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  768 bytes for ./React-Core_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./React-Core_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  783 bytes for ./React-Core_privacy.bundle/Info.plist
+2026-07-05 09:36:29 +0000  /usr/bin/ditto exited with 0
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionEmbedProfileStep
+2026-07-05 09:36:29 +0000  Skipping profile for item: <IDEDistributionItem: 0x7c1f19f80; bundleID='react-native.React', path='<DVTFilePath:0x7bc16ff00:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='react-native.React', executablePath='<DVTFilePath:0x7bc238240:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework/React'>', hardenedRuntime='0'>'>
+2026-07-05 09:36:29 +0000  Skipping profile for item: <IDEDistributionItem: 0x7c1f19e60; bundleID='third-party.ReactNativeDependencies', path='<DVTFilePath:0x7bc0b4e80:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='third-party.ReactNativeDependencies', executablePath='<DVTFilePath:0x7af416680:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies'>', hardenedRuntime='0'>'>
+2026-07-05 09:36:29 +0000  Skipping profile for item: <IDEDistributionItem: 0x7c1f1a760; bundleID='dev.hermesengine.iphoneos', path='<DVTFilePath:0x7af417aa0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19f20; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='dev.hermesengine.iphoneos', executablePath='<DVTFilePath:0x7bc16fd20:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework/hermesvm'>', hardenedRuntime='0'>'>
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionInfoPlistStep
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionAppThinningPlistStep
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionAppThinningPlistStep because it said so
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionSymbolsStep
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionSymbolsStep because it said so
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionAppThinningStep
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionAppThinningStep because it said so
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionArchThinningStep
+2026-07-05 09:36:29 +0000  Archs to thin for item /Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework are []
+2026-07-05 09:36:29 +0000  Archs to thin for item /Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework are []
+2026-07-05 09:36:29 +0000  Archs to thin for item /Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework are []
+2026-07-05 09:36:29 +0000  Archs to thin for item /Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app are []
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionODRStep
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionStripXattrsStep
+2026-07-05 09:36:29 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2026-07-05 09:36:29 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2026-07-05 09:36:29 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2026-07-05 09:36:29 +0000  Skipping stripping extended attributes because the codesign step will strip them.
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionCodesignStep
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f19f80; bundleID='react-native.React', path='<DVTFilePath:0x7bc16ff00:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='react-native.React', executablePath='<DVTFilePath:0x7bc238240:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework/React'>', hardenedRuntime='0'>'>: {
+}
+2026-07-05 09:36:29 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f19f80; bundleID='react-native.React', path='<DVTFilePath:0x7bc16ff00:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='react-native.React', executablePath='<DVTFilePath:0x7bc238240:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework/React'>', hardenedRuntime='0'>'> are: {
+}
+2026-07-05 09:36:29 +0000  Writing entitlements for <IDEDistributionItem: 0x7c1f19f80; bundleID='react-native.React', path='<DVTFilePath:0x7bc16ff00:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='react-native.React', executablePath='<DVTFilePath:0x7bc238240:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/React.framework/React'>', hardenedRuntime='0'>'> to: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~cCWTL6
+2026-07-05 09:36:29 +0000  invoking codesign: <NSConcreteTask: 0x79f3f72a0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6EA948A8EF8D4B6ADF31EB514DEA5019DE78699F,
+    "--entitlements",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~cCWTL6",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/React.framework"
+)'>
+2026-07-05 09:36:29 +0000  codesign output: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/React.framework: replacing existing signature
+/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/React.framework: signed bundle with Mach-O thin (arm64) [react-native.React]
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f19e60; bundleID='third-party.ReactNativeDependencies', path='<DVTFilePath:0x7bc0b4e80:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='third-party.ReactNativeDependencies', executablePath='<DVTFilePath:0x7af416680:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies'>', hardenedRuntime='0'>'>: {
+}
+2026-07-05 09:36:29 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f19e60; bundleID='third-party.ReactNativeDependencies', path='<DVTFilePath:0x7bc0b4e80:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='third-party.ReactNativeDependencies', executablePath='<DVTFilePath:0x7af416680:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies'>', hardenedRuntime='0'>'> are: {
+}
+2026-07-05 09:36:29 +0000  Writing entitlements for <IDEDistributionItem: 0x7c1f19e60; bundleID='third-party.ReactNativeDependencies', path='<DVTFilePath:0x7bc0b4e80:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ec0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='third-party.ReactNativeDependencies', executablePath='<DVTFilePath:0x7af416680:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies'>', hardenedRuntime='0'>'> to: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~uwyaYx
+2026-07-05 09:36:29 +0000  invoking codesign: <NSConcreteTask: 0x79f3f72a0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6EA948A8EF8D4B6ADF31EB514DEA5019DE78699F,
+    "--entitlements",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~uwyaYx",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/ReactNativeDependencies.framework"
+)'>
+2026-07-05 09:36:29 +0000  codesign output: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/ReactNativeDependencies.framework: replacing existing signature
+/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/ReactNativeDependencies.framework: signed bundle with Mach-O thin (arm64) [third-party.ReactNativeDependencies]
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f1a760; bundleID='dev.hermesengine.iphoneos', path='<DVTFilePath:0x7af417aa0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19f20; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='dev.hermesengine.iphoneos', executablePath='<DVTFilePath:0x7bc16fd20:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework/hermesvm'>', hardenedRuntime='0'>'>: {
+}
+2026-07-05 09:36:29 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f1a760; bundleID='dev.hermesengine.iphoneos', path='<DVTFilePath:0x7af417aa0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19f20; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='dev.hermesengine.iphoneos', executablePath='<DVTFilePath:0x7bc16fd20:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework/hermesvm'>', hardenedRuntime='0'>'> are: {
+}
+2026-07-05 09:36:29 +0000  Writing entitlements for <IDEDistributionItem: 0x7c1f1a760; bundleID='dev.hermesengine.iphoneos', path='<DVTFilePath:0x7af417aa0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19f20; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='(null)', teamID='4TUC4FDZ7L', identifier='dev.hermesengine.iphoneos', executablePath='<DVTFilePath:0x7bc16fd20:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Frameworks/hermesvm.framework/hermesvm'>', hardenedRuntime='0'>'> to: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~EniAcS
+2026-07-05 09:36:29 +0000  invoking codesign: <NSConcreteTask: 0x79f3f72a0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6EA948A8EF8D4B6ADF31EB514DEA5019DE78699F,
+    "--entitlements",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~EniAcS",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/hermesvm.framework"
+)'>
+2026-07-05 09:36:29 +0000  codesign output: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/hermesvm.framework: replacing existing signature
+/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/hermesvm.framework: signed bundle with Mach-O thin (arm64) [dev.hermesengine.iphoneos]
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f18d80; bundleID='com.codethenic.habita', path='<DVTFilePath:0x7bc16e880:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ce0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d48ba80; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='{
+    "application-identifier" = "4TUC4FDZ7L.com.codethenic.habita";
+    "com.apple.developer.team-identifier" = 4TUC4FDZ7L;
+    "get-task-allow" = 1;
+}', teamID='4TUC4FDZ7L', identifier='com.codethenic.habita', executablePath='<DVTFilePath:0x7bc16f7e0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Habita'>', hardenedRuntime='0'>'>: {
+    "application-identifier" = "4TUC4FDZ7L.com.codethenic.habita";
+    "com.apple.developer.team-identifier" = 4TUC4FDZ7L;
+    "get-task-allow" = 0;
+}
+2026-07-05 09:36:29 +0000  Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-07-05 09:36:29 +0000  Entitlements for <IDEDistributionItem: 0x7c1f18d80; bundleID='com.codethenic.habita', path='<DVTFilePath:0x7bc16e880:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ce0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='{
+    "application-identifier" = "4TUC4FDZ7L.com.codethenic.habita";
+    "com.apple.developer.team-identifier" = 4TUC4FDZ7L;
+    "get-task-allow" = 1;
+}', teamID='4TUC4FDZ7L', identifier='com.codethenic.habita', executablePath='<DVTFilePath:0x7bc16f7e0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Habita'>', hardenedRuntime='0'>'> are: {
+    "application-identifier" = "4TUC4FDZ7L.com.codethenic.habita";
+    "com.apple.developer.team-identifier" = 4TUC4FDZ7L;
+    "get-task-allow" = 0;
+}
+2026-07-05 09:36:29 +0000  Writing entitlements for <IDEDistributionItem: 0x7c1f18d80; bundleID='com.codethenic.habita', path='<DVTFilePath:0x7bc16e880:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x7c1f19ce0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0x79d488780; name='Apple Development: Amit Prasad (6QC5W6M9D6)', hash='C36F671723586363B9CCE6D6725017A76BBF7C74', serialNumber='14173F80F9618B1D3C0DA154E5B6FBD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2025-09-10 08:54:22 +0000''>', entitlements='{
+    "application-identifier" = "4TUC4FDZ7L.com.codethenic.habita";
+    "com.apple.developer.team-identifier" = 4TUC4FDZ7L;
+    "get-task-allow" = 1;
+}', teamID='4TUC4FDZ7L', identifier='com.codethenic.habita', executablePath='<DVTFilePath:0x7bc16f7e0:'/Users/codethenic/Library/Developer/Xcode/Archives/2026-07-05/Habita 1 05-07-26, 2.40 PM.xcarchive/Products/Applications/Habita.app/Habita'>', hardenedRuntime='0'>'> to: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~EJx6sd
+2026-07-05 09:36:29 +0000  invoking codesign: <NSConcreteTask: 0x79f3f72a0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6EA948A8EF8D4B6ADF31EB514DEA5019DE78699F,
+    "--entitlements",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/entitlements~~~EJx6sd",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app"
+)'>
+2026-07-05 09:36:29 +0000  codesign output: /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app: replacing existing signature
+/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app: signed app bundle with Mach-O thin (arm64) [com.codethenic.habita]
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionZipODRItemStep
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-07-05 09:36:29 +0000  Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-07-05 09:36:29 +0000  Processing step: IDEDistributionCreateIPAStep
+2026-07-05 09:36:29 +0000  Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root' '/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Packages/Habita.ipa'
+2026-07-05 09:36:29 +0000  >>> Copying /var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root 
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/React-timing_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  553 bytes for ./Payload/Habita.app/React-timing_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/React-timing_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  787 bytes for ./Payload/Habita.app/React-timing_privacy.bundle/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:29 +0000  16499 bytes for ./Payload/Habita.app/_CodeSignature/CodeResources
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/AppIcon60x60@2x.png ... 
+2026-07-05 09:36:29 +0000  19278 bytes for ./Payload/Habita.app/AppIcon60x60@2x.png
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/Habita ... 
+2026-07-05 09:36:29 +0000  8145024 bytes for ./Payload/Habita.app/Habita
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:29 +0000  552 bytes for ./Payload/Habita.app/React-cxxreact_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/React-cxxreact_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:29 +0000  791 bytes for ./Payload/Habita.app/React-cxxreact_privacy.bundle/Info.plist
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/Assets.car ... 
+2026-07-05 09:36:29 +0000  2593464 bytes for ./Payload/Habita.app/Assets.car
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/AppIcon76x76@2x~ipad.png ... 
+2026-07-05 09:36:29 +0000  27868 bytes for ./Payload/Habita.app/AppIcon76x76@2x~ipad.png
+2026-07-05 09:36:29 +0000  copying file ./Payload/Habita.app/main.jsbundle ... 
+2026-07-05 09:36:30 +0000  4542961 bytes for ./Payload/Habita.app/main.jsbundle
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  408 bytes for ./Payload/Habita.app/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib ... 
+2026-07-05 09:36:30 +0000  1644 bytes for ./Payload/Habita.app/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib ... 
+2026-07-05 09:36:30 +0000  924 bytes for ./Payload/Habita.app/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/LaunchScreen.storyboardc/Info.plist ... 
+2026-07-05 09:36:30 +0000  258 bytes for ./Payload/Habita.app/LaunchScreen.storyboardc/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/RNSVGFilters.bundle/RNSVGArithmeticFilter.iphoneos.metallib ... 
+2026-07-05 09:36:30 +0000  3993 bytes for ./Payload/Habita.app/RNSVGFilters.bundle/RNSVGArithmeticFilter.iphoneos.metallib
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/RNSVGFilters.bundle/RNSVGCompositeXor.iphoneos.metallib ... 
+2026-07-05 09:36:30 +0000  3509 bytes for ./Payload/Habita.app/RNSVGFilters.bundle/RNSVGCompositeXor.iphoneos.metallib
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/RNSVGFilters.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  770 bytes for ./Payload/Habita.app/RNSVGFilters.bundle/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/AsyncStorage_resources.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  656 bytes for ./Payload/Habita.app/AsyncStorage_resources.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/AsyncStorage_resources.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  790 bytes for ./Payload/Habita.app/AsyncStorage_resources.bundle/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/hermesvm.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:30 +0000  1798 bytes for ./Payload/Habita.app/Frameworks/hermesvm.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/hermesvm.framework/hermesvm ... 
+2026-07-05 09:36:30 +0000  5120000 bytes for ./Payload/Habita.app/Frameworks/hermesvm.framework/hermesvm
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/hermesvm.framework/Info.plist ... 
+859 bytes for ./Payload/Habita.app/Frameworks/hermesvm.framework/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/React.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:30 +0000  1798 bytes for ./Payload/Habita.app/Frameworks/React.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/React.framework/React ... 
+2026-07-05 09:36:30 +0000  12126528 bytes for ./Payload/Habita.app/Frameworks/React.framework/React
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/React.framework/Info.plist ... 
+2026-07-05 09:36:30 +0000  744 bytes for ./Payload/Habita.app/Frameworks/React.framework/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources ... 
+2026-07-05 09:36:30 +0000  3548 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/_CodeSignature/CodeResources
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  552 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  689 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_folly.bundle/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies ... 
+2026-07-05 09:36:30 +0000  1263760 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  552 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  687 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_glog.bundle/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  776 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  689 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/ReactNativeDependencies_boost.bundle/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/Info.plist ... 
+2026-07-05 09:36:30 +0000  781 bytes for ./Payload/Habita.app/Frameworks/ReactNativeDependencies.framework/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/embedded.mobileprovision ... 
+2026-07-05 09:36:30 +0000  18463 bytes for ./Payload/Habita.app/embedded.mobileprovision
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@3x.png ... 
+2026-07-05 09:36:30 +0000  761 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@3x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@2x.png ... 
+2026-07-05 09:36:30 +0000  405 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon@2x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@2x.png ... 
+2026-07-05 09:36:30 +0000  589 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@2x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@3x.png ... 
+2026-07-05 09:36:30 +0000  502 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@3x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon.png ... 
+2026-07-05 09:36:30 +0000  290 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@2x.png ... 
+2026-07-05 09:36:30 +0000  334 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon@2x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@3x.png ... 
+2026-07-05 09:36:30 +0000  839 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon@3x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon.png ... 
+2026-07-05 09:36:30 +0000  141 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png ... 
+2026-07-05 09:36:30 +0000  653 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@2x.png ... 
+2026-07-05 09:36:30 +0000  201 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@2x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@3x.png ... 
+2026-07-05 09:36:30 +0000  266 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/close-icon@3x.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png ... 
+2026-07-05 09:36:30 +0000  220 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon.png ... 
+2026-07-05 09:36:30 +0000  317 bytes for ./Payload/Habita.app/assets/node_modules/@react-navigation/elements/lib/module/assets/search-icon.png
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/Info.plist ... 
+2026-07-05 09:36:30 +0000  1596 bytes for ./Payload/Habita.app/Info.plist
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/PkgInfo ... 
+2026-07-05 09:36:30 +0000  8 bytes for ./Payload/Habita.app/PkgInfo
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/React-Core_privacy.bundle/PrivacyInfo.xcprivacy ... 
+2026-07-05 09:36:30 +0000  768 bytes for ./Payload/Habita.app/React-Core_privacy.bundle/PrivacyInfo.xcprivacy
+2026-07-05 09:36:30 +0000  copying file ./Payload/Habita.app/React-Core_privacy.bundle/Info.plist ... 
+2026-07-05 09:36:30 +0000  783 bytes for ./Payload/Habita.app/React-Core_privacy.bundle/Info.plist
+2026-07-05 09:36:30 +0000  /usr/bin/ditto exited with 0
+2026-07-05 09:36:30 +0000  Processing step: IDEDistributionAppStoreInformationStep
+2026-07-05 09:36:30 +0000  Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2026-07-05 09:36:30 +0000  Processing step: IDEDistributionGenerateProcessedDistributionItems
+2026-07-05 09:36:30 +0000  IDEDistributionItem init <DVTFilePath:0x7afebfd20:'/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/React.framework'>
+2026-07-05 09:36:30 +0000  IDEDistributionItem init <DVTFilePath:0x7c2111d80:'/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/ReactNativeDependencies.framework'>
+2026-07-05 09:36:30 +0000  IDEDistributionItem init <DVTFilePath:0x7bc28dc00:'/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app/Frameworks/hermesvm.framework'>
+2026-07-05 09:36:30 +0000  IDEDistributionItem init <DVTFilePath:0x7afebfb40:'/var/folders/nq/8c5dhym57rdc7t0w4lh2vkm80000gn/T/XcodeDistPipeline.~~~ZMTyxo/Root/Payload/Habita.app'>
+2026-07-05 09:36:30 +0000  Processing step: IDEDistributionCreateManifestStep

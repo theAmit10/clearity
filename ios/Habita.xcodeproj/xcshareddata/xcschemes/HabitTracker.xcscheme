@@ -83,6 +83,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"
+      customArchiveName = "Habita"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

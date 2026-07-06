@@ -19,7 +19,7 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Habits</Text>
+        <Text style={styles.title}>Habita</Text>
         <NeumorphicButton
           radius={18}
           distance={5}
@@ -74,8 +74,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800',
+    fontWeight: '900',
     color: neumorphic.colors.textPrimary,
+    letterSpacing: 0 - 0.5,
   },
   addButton: {
     width: 36,
