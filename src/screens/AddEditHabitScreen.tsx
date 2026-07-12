@@ -128,6 +128,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Text style={styles.title}>
             {existing ? 'Edit Habit' : 'New Habit'}
