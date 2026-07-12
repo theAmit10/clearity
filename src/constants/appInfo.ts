@@ -20,5 +20,5 @@ export const FEEDBACK_EMAIL = 'codethenic@gmail.com';
 // TODO: replace these with your real store identifiers once the app is
 // actually published — these are placeholders and won't open a real
 // listing until you do.
-export const IOS_APP_STORE_ID = 'YOUR_IOS_APP_STORE_ID';
+export const IOS_APP_STORE_ID = '6787651215';
 export const ANDROID_PACKAGE_NAME = 'com.codethenic.habittracker';

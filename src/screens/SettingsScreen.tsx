@@ -204,7 +204,7 @@ export default function SettingsScreen() {
           <Row label="Rate this app" onPress={handleRateApp} />
         </Section>
 
-        <Section title="Diagnostics (stored locally only)">
+        {/* <Section title="Diagnostics (stored locally only)">
           <Text style={styles.description}>
             The app never sends anything over the network. Errors and events are
             logged on-device so you can export and inspect them yourself.
@@ -215,7 +215,7 @@ export default function SettingsScreen() {
             onPress={handleClearLogs}
             destructive
           />
-        </Section>
+        </Section> */}
 
         <Section title="Danger Zone">
           <Row
