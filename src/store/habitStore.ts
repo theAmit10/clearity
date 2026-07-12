@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { Habit, HabitStats } from '../types/habit';
-import { loadHabits, saveHabits } from '../services/storage';
+import { loadHabits, saveHabits, loadReviewState, saveReviewState } from '../services/storage';
 import { logEvent } from '../services/logger';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 
 interface HabitState {
   habits: Habit[];
   loaded: boolean;
+  reviewPromptShown: boolean;
   init: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
@@ -14,6 +15,8 @@ interface HabitState {
   toggleCompletion: (id: string, dateKey?: string) => Promise<void>;
   replaceAllHabits: (habits: Habit[]) => Promise<void>;
   mergeHabits: (incoming: Habit[]) => Promise<void>;
+  markReviewPromptShown: () => Promise<void>;
+  reorderHabits: (reordered: Habit[]) => Promise<void>;
 }
 
 function persist(habits: Habit[]) {
@@ -23,11 +26,15 @@ function persist(habits: Habit[]) {
 export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   loaded: false,
+  reviewPromptShown: false,
 
   init: async () => {
     try {
-      const stored = await loadHabits<Habit[]>();
-      set({ habits: stored ?? [], loaded: true });
+      const [stored, reviewShown] = await Promise.all([
+        loadHabits<Habit[]>(),
+        loadReviewState(),
+      ]);
+      set({ habits: stored ?? [], loaded: true, reviewPromptShown: reviewShown });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
     } catch (err) {
       logEvent('error', 'Failed to load habits', err);
@@ -104,6 +111,18 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     logEvent('info', 'Habits merged via import', { count: habits.length });
+  },
+
+  markReviewPromptShown: async () => {
+    set({ reviewPromptShown: true });
+    await saveReviewState(true);
+    logEvent('info', 'Review prompt marked as shown');
+  },
+
+  reorderHabits: async (reordered: Habit[]) => {
+    set({ habits: reordered });
+    persist(reordered);
+    logEvent('info', 'Habits reordered');
   },
 }));
 

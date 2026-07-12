@@ -8,6 +8,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
@@ -15,6 +17,10 @@ import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { neumorphic } from '../theme/neumorphicTheme';
+import {
+  IOS_APP_STORE_ID,
+  ANDROID_PACKAGE_NAME,
+} from '../constants/appInfo';
 
 // const COLORS = [
 //   '#FF5A5F',
@@ -78,6 +84,9 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const existing = useHabitStore(s => s.habits.find(h => h.id === editId));
   const addHabit = useHabitStore(s => s.addHabit);
   const updateHabit = useHabitStore(s => s.updateHabit);
+  const habits = useHabitStore(s => s.habits);
+  const reviewPromptShown = useHabitStore(s => s.reviewPromptShown);
+  const markReviewPromptShown = useHabitStore(s => s.markReviewPromptShown);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -99,7 +108,38 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
     if (existing) {
       await updateHabit(existing.id, trimmed);
     } else {
+      const isFirstHabit = habits.length === 0;
       await addHabit({ ...trimmed, frequency: '' });
+      if (isFirstHabit && !reviewPromptShown) {
+        await markReviewPromptShown();
+        const url = Platform.select({
+          ios: `itms-apps://itunes.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`,
+          android: `market://details?id=${ANDROID_PACKAGE_NAME}`,
+        });
+        Alert.alert(
+          'Enjoying Habita?',
+          'Take a moment to rate the app on the App Store. Your feedback helps others discover better habits!',
+          [
+            {
+              text: 'Later',
+              style: 'cancel',
+            },
+            {
+              text: 'Rate Now',
+              onPress: () => {
+                if (url) {
+                  Linking.openURL(url).catch(() => {
+                    Alert.alert(
+                      'Could not open the store',
+                      'Please search for Habita in the App Store to leave a review.',
+                    );
+                  });
+                }
+              },
+            },
+          ],
+        );
+      }
     }
     navigation.goBack();
   };

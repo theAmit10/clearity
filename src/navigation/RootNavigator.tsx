@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ReorderHabitsScreen from '../screens/ReorderHabitsScreen';
 import { neumorphic } from '../theme/neumorphicTheme';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
@@ -62,6 +63,28 @@ function HomeStack() {
   );
 }
 
+function SettingsStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: neumorphic.colors.background },
+      }}
+    >
+      <Stack.Screen name="SettingsMain" component={SettingsScreen} />
+      <Stack.Screen
+        name="ReorderHabits"
+        component={ReorderHabitsScreen}
+        options={{
+          ...neumorphicHeaderOptions,
+          title: 'Reorder Habits',
+          headerBackTitle: 'Back',
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function RootNavigator() {
   return (
     <NavigationContainer theme={navigationTheme}>
@@ -70,7 +93,7 @@ export default function RootNavigator() {
         tabBar={props => <NeumorphicTabBar {...props} />}
       >
         <Tab.Screen name="Home" component={HomeStack} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
+        <Tab.Screen name="Settings" component={SettingsStack} />
       </Tab.Navigator>
     </NavigationContainer>
   );

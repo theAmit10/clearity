@@ -28,7 +28,7 @@ import {
   ANDROID_PACKAGE_NAME,
 } from '../constants/appInfo';
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
   const mergeHabits = useHabitStore(s => s.mergeHabits);
@@ -180,12 +180,15 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Text style={styles.title}>Settings</Text>
 
-        <Section title="Backup & Transfer">
+        <Section title="Habits">
           <Text style={styles.description}>
-            Everything is stored only on this device. Export a backup file and
-            share it (AirDrop, email, files app, etc.) to move your data to
-            another device.
+            Reorder your habits by long-pressing them on the home screen, or
+            use the dedicated reorder screen below.
           </Text>
+          <Row
+            label="Reorder habits"
+            onPress={() => navigation.navigate('ReorderHabits')}
+          />
           <Row
             label={`Export data (${habits.length} habits)`}
             onPress={handleExport}

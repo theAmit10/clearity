@@ -17,9 +17,11 @@ interface Props {
   habit: Habit;
   onToggleToday: () => void;
   onPress: () => void;
+  onLongPress?: () => void;
+  isDragging?: boolean;
 }
 
-export default function HabitCard({ habit, onToggleToday, onPress }: Props) {
+export default function HabitCard({ habit, onToggleToday, onPress, onLongPress, isDragging }: Props) {
   const stats = computeStats(habit);
   const doneToday = !!habit.completions[todayKey()];
   const scale = useSharedValue(1);
@@ -39,8 +41,8 @@ export default function HabitCard({ habit, onToggleToday, onPress }: Props) {
   };
 
   return (
-    <Pressable onPress={onPress}>
-      <Raised radius={neumorphic.radii.panel} distance={7} style={styles.card}>
+    <Pressable onPress={onPress} onLongPress={onLongPress}>
+      <Raised radius={neumorphic.radii.panel} distance={7} style={[styles.card, isDragging && styles.dragging]}>
         <View style={styles.header}>
           <Raised radius={16} distance={4} style={styles.iconBadge}>
             <Icon size={22} color={habit.color} />
@@ -106,6 +108,10 @@ export default function HabitCard({ habit, onToggleToday, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
+  dragging: {
+    opacity: 0.8,
+    transform: [{ scale: 1.05 }],
+  },
   card: {
     padding: 16,
     marginHorizontal: 16,

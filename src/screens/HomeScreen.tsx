@@ -1,6 +1,10 @@
-import React, { useMemo } from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import DraggableFlatList, {
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 import { useHabitStore } from '../store/habitStore';
+import { Habit } from '../types/habit';
 import HabitCard from '../components/HabitCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -14,7 +18,25 @@ export default function HomeScreen({ navigation }: any) {
   // an infinite render loop ("Maximum update depth exceeded").
   const allHabits = useHabitStore(s => s.habits);
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
+  const reorderHabits = useHabitStore(s => s.reorderHabits);
   const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
+
+  const renderItem = useCallback(
+    ({ item, drag, isActive }: { item: Habit; drag: () => void; isActive: boolean }) => {
+      return (
+        <ScaleDecorator>
+          <HabitCard
+            habit={item}
+            onToggleToday={() => toggleCompletion(item.id)}
+            onPress={() => navigation.navigate('HabitDetail', { id: item.id })}
+            onLongPress={drag}
+            isDragging={isActive}
+          />
+        </ScaleDecorator>
+      );
+    },
+    [navigation, toggleCompletion],
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,19 +65,12 @@ export default function HomeScreen({ navigation }: any) {
           </Raised>
         </View>
       ) : (
-        <FlatList
+        <DraggableFlatList
           data={habits}
           keyExtractor={h => h.id}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <HabitCard
-              habit={item}
-              onToggleToday={() => toggleCompletion(item.id)}
-              onPress={() =>
-                navigation.navigate('HabitDetail', { id: item.id })
-              }
-            />
-          )}
+          renderItem={renderItem}
+          onDragEnd={({ data }) => reorderHabits(data)}
         />
       )}
     </SafeAreaView>
