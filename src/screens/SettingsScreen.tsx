@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import {
   exportHabits,
@@ -128,17 +129,22 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleRateApp = () => {
-    const url = Platform.select({
-      ios: `itms-apps://itunes.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`,
-      android: `market://details?id=${ANDROID_PACKAGE_NAME}`,
-    });
-    if (!url) return;
-    Linking.openURL(url).catch(() => {
-      Alert.alert(
-        'Could not open the store',
-        'Please search for the app manually to leave a review.',
-      );
-    });
+    try {
+      requestReview();
+    } catch {
+      const url = Platform.select({
+        ios: `itms-apps://itunes.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`,
+        android: `market://details?id=${ANDROID_PACKAGE_NAME}`,
+      });
+      if (url) {
+        Linking.openURL(url).catch(() => {
+          Alert.alert(
+            'Could not open the store',
+            'Please search for the app manually to leave a review.',
+          );
+        });
+      }
+    }
   };
 
   const handleResetApp = () => {

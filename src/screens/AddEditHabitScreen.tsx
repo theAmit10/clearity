@@ -8,19 +8,15 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
+import { logEvent } from '../services/logger';
 import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { neumorphic } from '../theme/neumorphicTheme';
-import {
-  IOS_APP_STORE_ID,
-  ANDROID_PACKAGE_NAME,
-} from '../constants/appInfo';
 
 // const COLORS = [
 //   '#FF5A5F',
@@ -112,33 +108,12 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
       await addHabit({ ...trimmed, frequency: '' });
       if (isFirstHabit && !reviewPromptShown) {
         await markReviewPromptShown();
-        const url = Platform.select({
-          ios: `itms-apps://itunes.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`,
-          android: `market://details?id=${ANDROID_PACKAGE_NAME}`,
-        });
-        Alert.alert(
-          'Enjoying Habita?',
-          'Take a moment to rate the app on the App Store. Your feedback helps others discover better habits!',
-          [
-            {
-              text: 'Later',
-              style: 'cancel',
-            },
-            {
-              text: 'Rate Now',
-              onPress: () => {
-                if (url) {
-                  Linking.openURL(url).catch(() => {
-                    Alert.alert(
-                      'Could not open the store',
-                      'Please search for Habita in the App Store to leave a review.',
-                    );
-                  });
-                }
-              },
-            },
-          ],
-        );
+        logEvent('info', 'In-app review requested');
+        try {
+          requestReview();
+        } catch (e) {
+          logEvent('error', 'In-app review failed', e);
+        }
       }
     }
     navigation.goBack();

@@ -22,7 +22,15 @@ export default function HomeScreen({ navigation }: any) {
   const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
 
   const renderItem = useCallback(
-    ({ item, drag, isActive }: { item: Habit; drag: () => void; isActive: boolean }) => {
+    ({
+      item,
+      drag,
+      isActive,
+    }: {
+      item: Habit;
+      drag: () => void;
+      isActive: boolean;
+    }) => {
       return (
         <ScaleDecorator>
           <HabitCard
@@ -41,7 +49,7 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Habita</Text>
+        <Text style={styles.title}>Habitic</Text>
         <NeumorphicButton
           radius={18}
           distance={5}
