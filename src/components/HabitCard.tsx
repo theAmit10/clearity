@@ -21,7 +21,13 @@ interface Props {
   isDragging?: boolean;
 }
 
-export default function HabitCard({ habit, onToggleToday, onPress, onLongPress, isDragging }: Props) {
+export default function HabitCard({
+  habit,
+  onToggleToday,
+  onPress,
+  onLongPress,
+  isDragging,
+}: Props) {
   const stats = computeStats(habit);
   const doneToday = !!habit.completions[todayKey()];
   const scale = useSharedValue(1);
@@ -42,7 +48,11 @@ export default function HabitCard({ habit, onToggleToday, onPress, onLongPress, 
 
   return (
     <Pressable onPress={onPress} onLongPress={onLongPress}>
-      <Raised radius={neumorphic.radii.panel} distance={7} style={[styles.card, isDragging && styles.dragging]}>
+      <Raised
+        radius={neumorphic.radii.panel}
+        distance={7}
+        style={[styles.card, isDragging && styles.dragging]}
+      >
         <View style={styles.header}>
           <Raised radius={16} distance={4} style={styles.iconBadge}>
             <Icon size={22} color={habit.color} />
@@ -55,7 +65,8 @@ export default function HabitCard({ habit, onToggleToday, onPress, onLongPress, 
             <View style={styles.streakRow}>
               {/* <Text style={styles.flame}>🔥</Text> */}
               <Text style={styles.streak}>
-                {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}
+                {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
+                Streak
               </Text>
             </View>
           </View>

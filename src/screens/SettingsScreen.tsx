@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Pressable,
+  TouchableHighlight,
   StyleSheet,
   Alert,
   ScrollView,
@@ -276,7 +276,13 @@ function Row({
   destructive?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={styles.row}>
+    <TouchableHighlight
+      onPress={onPress}
+      disabled={disabled}
+      underlayColor="#E5E5EA"
+      activeOpacity={1}
+      style={styles.row}
+    >
       <Text
         style={[
           styles.rowLabel,
@@ -286,7 +292,7 @@ function Row({
       >
         {label}
       </Text>
-    </Pressable>
+    </TouchableHighlight>
   );
 }
 
