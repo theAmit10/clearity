@@ -1,13 +1,17 @@
 import { create } from 'zustand';
 import { Habit, HabitStats } from '../types/habit';
-import { loadHabits, saveHabits, loadReviewState, saveReviewState } from '../services/storage';
+import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
+import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData } from '../services/storage';
 import { logEvent } from '../services/logger';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
+import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 
 interface HabitState {
   habits: Habit[];
   loaded: boolean;
   reviewPromptShown: boolean;
+  habitNotifications: Record<string, HabitNotificationConfig>;
+  adminNotifications: AdminNotificationConfig[];
   init: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
@@ -17,6 +21,11 @@ interface HabitState {
   mergeHabits: (incoming: Habit[]) => Promise<void>;
   markReviewPromptShown: () => Promise<void>;
   reorderHabits: (reordered: Habit[]) => Promise<void>;
+  setHabitNotification: (habitId: string, config: Partial<HabitNotificationConfig>) => Promise<void>;
+  removeHabitNotification: (habitId: string) => Promise<void>;
+  addAdminNotification: (config: AdminNotificationConfig) => Promise<void>;
+  updateAdminNotification: (id: string, patch: Partial<AdminNotificationConfig>) => Promise<void>;
+  removeAdminNotification: (id: string) => Promise<void>;
 }
 
 function persist(habits: Habit[]) {
@@ -27,14 +36,23 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   loaded: false,
   reviewPromptShown: false,
+  habitNotifications: {},
+  adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
 
   init: async () => {
     try {
-      const [stored, reviewShown] = await Promise.all([
+      const [stored, reviewShown, notifData] = await Promise.all([
         loadHabits<Habit[]>(),
         loadReviewState(),
+        loadNotificationData<NotificationStoreData>(),
       ]);
-      set({ habits: stored ?? [], loaded: true, reviewPromptShown: reviewShown });
+      set({
+        habits: stored ?? [],
+        loaded: true,
+        reviewPromptShown: reviewShown,
+        habitNotifications: notifData?.habitNotifications ?? {},
+        adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
+      });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
     } catch (err) {
       logEvent('error', 'Failed to load habits', err);
@@ -123,6 +141,74 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits: reordered });
     persist(reordered);
     logEvent('info', 'Habits reordered');
+  },
+
+  setHabitNotification: async (habitId, partial) => {
+    const existing = get().habitNotifications[habitId];
+    const config: HabitNotificationConfig = {
+      habitId,
+      enabled: partial.enabled ?? existing?.enabled ?? true,
+      title: partial.title ?? existing?.title ?? 'Habit reminder',
+      hour: partial.hour ?? existing?.hour ?? 9,
+      minute: partial.minute ?? existing?.minute ?? 0,
+    };
+    const habitNotifications = { ...get().habitNotifications, [habitId]: config };
+    set({ habitNotifications });
+    await saveNotificationData({
+      habitNotifications,
+      adminNotifications: get().adminNotifications,
+    });
+    await scheduleHabitNotification(config);
+    logEvent('info', 'Habit notification set', { habitId, time: `${config.hour}:${config.minute}` });
+  },
+
+  removeHabitNotification: async habitId => {
+    const { [habitId]: _, ...habitNotifications } = get().habitNotifications;
+    set({ habitNotifications });
+    await saveNotificationData({
+      habitNotifications,
+      adminNotifications: get().adminNotifications,
+    });
+    await cancelHabitNotification(habitId);
+    logEvent('info', 'Habit notification removed', { habitId });
+  },
+
+  addAdminNotification: async config => {
+    const adminNotifications = [...get().adminNotifications, config];
+    set({ adminNotifications });
+    await saveNotificationData({
+      habitNotifications: get().habitNotifications,
+      adminNotifications,
+    });
+    await scheduleAdminNotification(config);
+    logEvent('info', 'Admin notification added', { id: config.id });
+  },
+
+  updateAdminNotification: async (id, patch) => {
+    const adminNotifications = get().adminNotifications.map(n =>
+      n.id === id ? { ...n, ...patch } : n,
+    );
+    set({ adminNotifications });
+    await saveNotificationData({
+      habitNotifications: get().habitNotifications,
+      adminNotifications,
+    });
+    const updated = adminNotifications.find(n => n.id === id);
+    if (updated) {
+      await scheduleAdminNotification(updated);
+    }
+    logEvent('info', 'Admin notification updated', { id });
+  },
+
+  removeAdminNotification: async id => {
+    const adminNotifications = get().adminNotifications.filter(n => n.id !== id);
+    set({ adminNotifications });
+    await saveNotificationData({
+      habitNotifications: get().habitNotifications,
+      adminNotifications,
+    });
+    await cancelAdminNotification(id);
+    logEvent('info', 'Admin notification removed', { id });
   },
 }));
 

@@ -7,6 +7,9 @@ import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ReorderHabitsScreen from '../screens/ReorderHabitsScreen';
+import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
+import HabitNotificationConfigScreen from '../screens/HabitNotificationConfigScreen';
+import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import { neumorphic } from '../theme/neumorphicTheme';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
@@ -80,6 +83,21 @@ function SettingsStack() {
           title: 'Reorder Habits',
           headerBackTitle: 'Back',
         }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="HabitNotificationConfig"
+        component={HabitNotificationConfigScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminNotification"
+        component={AdminNotificationScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

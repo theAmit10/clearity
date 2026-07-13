@@ -6,15 +6,32 @@ import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { useHabitStore } from './src/store/habitStore';
 import { installGlobalErrorHandler } from './src/services/logger';
+import { setupChannel, requestPermission, rescheduleAll } from './src/services/notification';
 
 export default function App() {
   const init = useHabitStore(s => s.init);
   const loaded = useHabitStore(s => s.loaded);
+  const habitNotifications = useHabitStore(s => s.habitNotifications);
+  const adminNotifications = useHabitStore(s => s.adminNotifications);
 
   useEffect(() => {
     installGlobalErrorHandler();
     init();
   }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    (async () => {
+      try {
+        await setupChannel();
+        await requestPermission();
+        const habitConfigs = Object.values(habitNotifications);
+        await rescheduleAll(habitConfigs, adminNotifications);
+      } catch (err) {
+        // notification setup is non-critical
+      }
+    })();
+  }, [loaded]);
 
   if (!loaded) {
     return (

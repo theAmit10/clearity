@@ -207,6 +207,17 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
+        <Section title="Notifications & Reminders">
+          <Text style={styles.description}>
+            Set daily reminders for each habit and configure admin-level
+            scheduled notifications.
+          </Text>
+          <Row
+            label="Notification settings"
+            onPress={() => navigation.navigate('NotificationSettings')}
+          />
+        </Section>
+
         <Section title="Community & Feedback">
           <Row label={`Follow @${X_HANDLE} on X`} onPress={handleFollowX} />
           <Row label="Send feedback" onPress={handleSendFeedback} />
