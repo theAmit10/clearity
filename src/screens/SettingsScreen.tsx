@@ -207,6 +207,17 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
+        <Section title="Widget">
+          <Text style={styles.description}>
+            Select habits to display on your iOS home screen widget with a
+            weekly heatmap.
+          </Text>
+          <Row
+            label="Widget settings"
+            onPress={() => navigation.navigate('WidgetSettings')}
+          />
+        </Section>
+
         <Section title="Notifications & Reminders">
           <Text style={styles.description}>
             Set daily reminders for each habit and configure admin-level

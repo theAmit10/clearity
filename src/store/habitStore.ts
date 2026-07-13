@@ -5,6 +5,7 @@ import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificat
 import { logEvent } from '../services/logger';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
+import { WidgetModule } from '../native/WidgetModule';
 
 interface HabitState {
   habits: Habit[];
@@ -30,6 +31,12 @@ interface HabitState {
 
 function persist(habits: Habit[]) {
   saveHabits(habits).catch(err => logEvent('error', 'Failed to persist habits', err));
+}
+
+function updateWidget(habits: Habit[]) {
+  const active = habits.filter(h => !h.archived);
+  const payload = WidgetModule.buildPayload(active);
+  WidgetModule.updateWidgetData(payload).catch(() => {});
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -71,6 +78,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = [...get().habits, habit];
     set({ habits });
     persist(habits);
+    updateWidget(habits);
     logEvent('info', 'Habit added', { id: habit.id, name: habit.name });
   },
 
@@ -78,6 +86,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.map(h => (h.id === id ? { ...h, ...patch } : h));
     set({ habits });
     persist(habits);
+    updateWidget(habits);
   },
 
   deleteHabit: async id => {
@@ -101,11 +110,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
     set({ habits });
     persist(habits);
+    updateWidget(habits);
   },
 
   replaceAllHabits: async habits => {
     set({ habits });
     persist(habits);
+    updateWidget(habits);
     logEvent('info', 'Habits replaced via import', { count: habits.length });
   },
 
@@ -128,6 +139,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = Array.from(byId.values());
     set({ habits });
     persist(habits);
+    updateWidget(habits);
     logEvent('info', 'Habits merged via import', { count: habits.length });
   },
 
@@ -140,6 +152,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   reorderHabits: async (reordered: Habit[]) => {
     set({ habits: reordered });
     persist(reordered);
+    updateWidget(reordered);
     logEvent('info', 'Habits reordered');
   },
 
