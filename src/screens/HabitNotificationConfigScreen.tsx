@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,51 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  Platform,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
+import { getHabitIcon, HABIT_ICONS } from '../constants/habitIcons';
 import { neumorphic } from '../theme/neumorphicTheme';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+function TimePickerItem({ value, selected, onPress, label }: {
+  value: number;
+  selected: boolean;
+  onPress: () => void;
+  label: string;
+}) {
+  const scale = useRef(new Animated.Value(selected ? 1 : 0.85)).current;
+
+  useEffect(() => {
+    Animated.spring(scale, {
+      toValue: selected ? 1 : 0.85,
+      useNativeDriver: true,
+      friction: 7,
+      tension: 100,
+    }).start();
+  }, [selected]);
+
+  return (
+    <Pressable onPress={onPress}>
+      <Animated.View
+        style={[
+          styles.pickerItem,
+          selected && styles.pickerItemSelected,
+          { transform: [{ scale }] },
+        ]}
+      >
+        <Text style={[styles.pickerText, selected && styles.pickerTextSelected]}>
+          {label}
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
 
 export default function HabitNotificationConfigScreen({ route, navigation }: any) {
   const { habitId } = route.params;
@@ -25,11 +62,49 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
 
   const habit = habits.find(h => h.id === habitId);
   const existing = habitNotifications[habitId];
+  const IconComponent = getHabitIcon(habit?.icon);
 
   const [title, setTitle] = useState(existing?.title ?? habit?.name ?? 'Habit reminder');
   const [hour, setHour] = useState(existing?.hour ?? 9);
   const [minute, setMinute] = useState(existing?.minute ?? 0);
   const [enabled, setEnabled] = useState(existing?.enabled ?? true);
+
+  const hourScrollRef = useRef<ScrollView>(null);
+  const minuteScrollRef = useRef<ScrollView>(null);
+  const hourAnim = useRef(new Animated.Value(0)).current;
+  const minuteAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const hourIdx = HOURS.indexOf(hour);
+    if (hourIdx >= 0 && hourScrollRef.current) {
+      hourScrollRef.current.scrollTo({ x: hourIdx * 56, animated: true });
+    }
+  }, []);
+
+  useEffect(() => {
+    const minIdx = MINUTES.indexOf(minute);
+    if (minIdx >= 0 && minuteScrollRef.current) {
+      minuteScrollRef.current.scrollTo({ x: minIdx * 64, animated: true });
+    }
+  }, []);
+
+  useEffect(() => {
+    Animated.spring(hourAnim, {
+      toValue: hour,
+      useNativeDriver: true,
+      friction: 6,
+      tension: 80,
+    }).start();
+  }, [hour]);
+
+  useEffect(() => {
+    Animated.spring(minuteAnim, {
+      toValue: minute,
+      useNativeDriver: true,
+      friction: 6,
+      tension: 80,
+    }).start();
+  }, [minute]);
 
   if (!habit) {
     return (
@@ -68,9 +143,12 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
 
         <View style={styles.headerRow}>
           <View style={[styles.colorBadge, { backgroundColor: habit.color || '#007AFF' }]}>
-            <Text style={styles.badgeIcon}>{habit.icon || '📋'}</Text>
+            <IconComponent size={22} color="#FFF" />
           </View>
-          <Text style={styles.title}>{habit.name}</Text>
+          <View style={styles.headerTextCol}>
+            <Text style={styles.title}>{habit.name}</Text>
+            <Text style={styles.subtitle}>Configure your daily reminder</Text>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -88,58 +166,80 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>TIME</Text>
-          <View style={styles.timeRow}>
-            <View style={styles.timeColumn}>
-              <Text style={styles.unitLabel}>Hour</Text>
-              <ScrollView style={styles.pickerScroll} nestedScrollEnabled>
-                {HOURS.map(h => (
-                  <Pressable
-                    key={h}
-                    style={[styles.pickerItem, hour === h && styles.pickerItemSelected]}
-                    onPress={() => setHour(h)}
-                  >
-                    <Text style={[styles.pickerText, hour === h && styles.pickerTextSelected]}>
-                      {String(h).padStart(2, '0')}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
+          <View style={styles.timeCard}>
+            <View style={styles.timeDisplay}>
+              <Animated.Text style={styles.timeDigits}>
+                {String(hour).padStart(2, '0')}
+              </Animated.Text>
+              <Text style={styles.timeColon}>:</Text>
+              <Animated.Text style={styles.timeDigits}>
+                {String(minute).padStart(2, '0')}
+              </Animated.Text>
             </View>
-            <Text style={styles.colon}>:</Text>
-            <View style={styles.timeColumn}>
-              <Text style={styles.unitLabel}>Minute</Text>
-              <ScrollView style={styles.pickerScroll} nestedScrollEnabled>
-                {MINUTES.map(m => (
-                  <Pressable
-                    key={m}
-                    style={[styles.pickerItem, minute === m && styles.pickerItemSelected]}
-                    onPress={() => setMinute(m)}
-                  >
-                    <Text style={[styles.pickerText, minute === m && styles.pickerTextSelected]}>
-                      {String(m).padStart(2, '0')}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
+
+            <Text style={styles.unitLabel}>Hour</Text>
+            <ScrollView
+              ref={hourScrollRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.pickerRow}
+            >
+              {HOURS.map(h => (
+                <TimePickerItem
+                  key={h}
+                  value={h}
+                  selected={hour === h}
+                  onPress={() => setHour(h)}
+                  label={String(h).padStart(2, '0')}
+                />
+              ))}
+            </ScrollView>
+
+            <Text style={[styles.unitLabel, { marginTop: 12 }]}>Minute</Text>
+            <ScrollView
+              ref={minuteScrollRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.pickerRow}
+            >
+              {MINUTES.map(m => (
+                <TimePickerItem
+                  key={m}
+                  value={m}
+                  selected={minute === m}
+                  onPress={() => setMinute(m)}
+                  label={String(m).padStart(2, '0')}
+                />
+              ))}
+            </ScrollView>
+
+            <Text style={styles.timezoneNote}>
+              Fires daily at this time based on your device timezone.
+            </Text>
           </View>
-          <Text style={styles.timezoneNote}>
-            Notification will fire daily at the selected time based on your device timezone.
-          </Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>STATUS</Text>
           <View style={styles.sectionBody}>
             <View style={styles.statusRow}>
-              <Text style={styles.statusLabel}>
-                {enabled ? 'Notifications on' : 'Notifications off'}
-              </Text>
+              <View>
+                <Text style={styles.statusLabel}>
+                  {enabled ? 'Notifications on' : 'Notifications off'}
+                </Text>
+                <Text style={styles.statusHint}>
+                  {enabled
+                    ? `Daily at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+                    : 'Tap to enable reminders'}
+                </Text>
+              </View>
               <Pressable
                 style={[styles.toggleBtn, enabled ? styles.toggleActive : styles.toggleInactive]}
                 onPress={() => setEnabled(!enabled)}
               >
-                <View style={[styles.toggleKnob, enabled ? styles.knobRight : styles.knobLeft]} />
+                <Animated.View style={[styles.toggleKnob, {
+                  alignSelf: enabled ? 'flex-end' : 'flex-start',
+                }]} />
               </Pressable>
             </View>
           </View>
@@ -164,15 +264,16 @@ const styles = StyleSheet.create({
   backText: { fontSize: 17, color: '#007AFF' },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
   colorBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
-  badgeIcon: { fontSize: 22 },
+  headerTextCol: { flex: 1 },
   title: { fontSize: 24, fontWeight: '700', color: '#1C1C1E' },
+  subtitle: { fontSize: 14, color: '#8E8E93', marginTop: 2 },
   errorText: { fontSize: 16, color: '#FF3B30', textAlign: 'center', marginTop: 40 },
   section: { marginBottom: 24 },
   sectionTitle: {
@@ -193,31 +294,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
+  timeCard: {
     backgroundColor: '#FFF',
     borderRadius: 14,
-    paddingVertical: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
   },
-  timeColumn: { alignItems: 'center', width: 100 },
-  colon: { fontSize: 28, fontWeight: '700', color: '#1C1C1E', marginHorizontal: 8, marginTop: 40 },
-  unitLabel: { fontSize: 12, fontWeight: '600', color: '#8E8E93', marginBottom: 8, textTransform: 'uppercase' },
-  pickerScroll: { maxHeight: 200 },
+  timeDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  timeDigits: {
+    fontSize: 48,
+    fontWeight: '800',
+    color: '#1C1C1E',
+    letterSpacing: 4,
+  },
+  timeColon: {
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#8E8E93',
+    marginHorizontal: 6,
+    marginTop: -4,
+  },
+  unitLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8E8E93',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    alignSelf: 'flex-start',
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
   pickerItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 2,
+    width: 48,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
   },
   pickerItemSelected: { backgroundColor: '#007AFF' },
-  pickerText: { fontSize: 18, color: '#1C1C1E', textAlign: 'center' },
+  pickerText: { fontSize: 16, color: '#1C1C1E', fontWeight: '600' },
   pickerTextSelected: { color: '#FFF', fontWeight: '700' },
   timezoneNote: {
     fontSize: 12,
     color: '#8E8E93',
-    marginTop: 8,
+    marginTop: 12,
     textAlign: 'center',
     lineHeight: 16,
   },
@@ -229,6 +360,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   statusLabel: { fontSize: 16, color: '#1C1C1E' },
+  statusHint: { fontSize: 12, color: '#8E8E93', marginTop: 2 },
   toggleBtn: {
     width: 51,
     height: 31,
@@ -249,8 +381,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  knobLeft: { alignSelf: 'flex-start' },
-  knobRight: { alignSelf: 'flex-end' },
   saveButton: {
     backgroundColor: '#007AFF',
     borderRadius: 14,

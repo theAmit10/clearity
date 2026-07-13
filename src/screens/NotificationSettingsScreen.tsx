@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,15 @@ import {
   StyleSheet,
   ScrollView,
   Switch,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
+import { getHabitIcon } from '../constants/habitIcons';
 import { neumorphic } from '../theme/neumorphicTheme';
 
 const NOTIF_COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA'];
+const REVEAL_TAPS = 15;
 
 export default function NotificationSettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
@@ -19,6 +22,29 @@ export default function NotificationSettingsScreen({ navigation }: any) {
   const removeHabitNotification = useHabitStore(s => s.removeHabitNotification);
   const setHabitNotification = useHabitStore(s => s.setHabitNotification);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
+
+  const [adminRevealed, setAdminRevealed] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (adminRevealed) {
+      Animated.spring(opacityAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 6,
+        tension: 40,
+      }).start();
+    }
+  }, [adminRevealed]);
+
+  const handleSecretTap = () => {
+    const next = tapCount + 1;
+    setTapCount(next);
+    if (next >= REVEAL_TAPS && !adminRevealed) {
+      setAdminRevealed(true);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,7 +57,9 @@ export default function NotificationSettingsScreen({ navigation }: any) {
         <Text style={styles.title}>Notifications</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PER-HABIT REMINDERS</Text>
+          <Pressable onPress={handleSecretTap}>
+            <Text style={styles.sectionTitle}>PER-HABIT REMINDERS</Text>
+          </Pressable>
           <View style={styles.sectionBody}>
             {habits.length === 0 && (
               <Text style={styles.emptyText}>No habits yet. Create one first.</Text>
@@ -42,6 +70,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
               const label = enabled
                 ? `${String(notif!.hour).padStart(2, '0')}:${String(notif!.minute).padStart(2, '0')}`
                 : 'Off';
+              const IconComp = getHabitIcon(h.icon);
 
               return (
                 <Pressable
@@ -50,7 +79,9 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                   onPress={() => navigation.navigate('HabitNotificationConfig', { habitId: h.id })}
                 >
                   <View style={styles.habitLeft}>
-                    <View style={[styles.colorDot, { backgroundColor: h.color || NOTIF_COLORS[i % NOTIF_COLORS.length] }]} />
+                    <View style={[styles.colorDot, { backgroundColor: h.color || NOTIF_COLORS[i % NOTIF_COLORS.length] }]}>
+                      <IconComp size={12} color="#FFF" />
+                    </View>
                     <View>
                       <Text style={styles.habitName}>{h.name}</Text>
                       <Text style={styles.notifStatus}>{label}</Text>
@@ -73,45 +104,54 @@ export default function NotificationSettingsScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DAILY REMINDERS (ADMIN)</Text>
-          <View style={styles.sectionBody}>
-            {adminNotifications.map((n, i) => {
-              const label = n.enabled
-                ? `${String(n.hour).padStart(2, '0')}:${String(n.minute).padStart(2, '0')}`
-                : 'Off';
+        {adminRevealed && (
+          <Animated.View style={{ opacity: opacityAnim }}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>DAILY REMINDERS (ADMIN)</Text>
+              <View style={styles.sectionBody}>
+                {adminNotifications.map((n, i) => {
+                  const label = n.enabled
+                    ? `${String(n.hour).padStart(2, '0')}:${String(n.minute).padStart(2, '0')}`
+                    : 'Off';
 
-              return (
-                <View
-                  key={n.id}
-                  style={[styles.habitRow, i > 0 && styles.habitRowBorder]}
-                >
-                  <View style={styles.habitLeft}>
-                    <View style={[styles.colorDot, { backgroundColor: '#8E8E93' }]} />
-                    <View>
-                      <Text style={styles.habitName}>{n.title}</Text>
-                      <Text style={styles.notifStatus}>{label}</Text>
+                  return (
+                    <View
+                      key={n.id}
+                      style={[styles.habitRow, i > 0 && styles.habitRowBorder]}
+                    >
+                      <View style={styles.habitLeft}>
+                        <View style={[styles.colorDot, { backgroundColor: '#8E8E93' }]} />
+                        <View>
+                          <Text style={styles.habitName}>{n.title}</Text>
+                          <Text style={styles.notifStatus}>{label}</Text>
+                        </View>
+                      </View>
+                      <Switch
+                        value={n.enabled}
+                        onValueChange={val => {
+                          const store = useHabitStore.getState();
+                          store.updateAdminNotification(n.id, { enabled: val });
+                        }}
+                        trackColor={{ false: '#E5E5EA', true: '#34C759' }}
+                      />
                     </View>
-                  </View>
-                  <Switch
-                    value={n.enabled}
-                    onValueChange={val => {
-                      const store = useHabitStore.getState();
-                      store.updateAdminNotification(n.id, { enabled: val });
-                    }}
-                    trackColor={{ false: '#E5E5EA', true: '#34C759' }}
-                  />
-                </View>
-              );
-            })}
-          </View>
-          <Pressable
-            style={styles.adminButton}
-            onPress={() => navigation.navigate('AdminNotification')}
-          >
-            <Text style={styles.adminButtonText}>Edit Admin Notifications</Text>
-          </Pressable>
-        </View>
+                  );
+                })}
+              </View>
+              <Pressable
+                style={styles.adminButton}
+                onPress={() => navigation.navigate('AdminNotification')}
+              >
+                <Text style={styles.adminButtonText}>Edit Admin Notifications</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        )}
+        {!adminRevealed && tapCount > 0 && (
+          <Text style={styles.secretHint}>
+            {REVEAL_TAPS - tapCount} more tap{REVEAL_TAPS - tapCount !== 1 ? 's' : ''}
+          </Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -159,7 +199,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E5EA',
   },
   habitLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  colorDot: { width: 12, height: 12, borderRadius: 6, marginRight: 12 },
+  colorDot: { width: 28, height: 28, borderRadius: 14, marginRight: 12, alignItems: 'center', justifyContent: 'center' },
   habitName: { fontSize: 16, color: '#1C1C1E' },
   notifStatus: { fontSize: 13, color: '#8E8E93', marginTop: 2 },
   adminButton: {
@@ -171,4 +211,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   adminButtonText: { fontSize: 16, color: '#007AFF', fontWeight: '600' },
+  secretHint: {
+    fontSize: 11,
+    color: '#C7C7CC',
+    textAlign: 'center',
+    marginTop: -12,
+    marginBottom: 12,
+  },
 });
