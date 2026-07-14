@@ -1,6 +1,18 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Neumorphic Colors
+
+struct NeumorphicColors {
+  static let background = Color(hex: "#E6E9EF")!
+  static let backgroundDeep = Color(hex: "#DDE1E8")!
+  static let insetFill = Color(hex: "#DADFE7")!
+  static let shadowLight = Color.white
+  static let shadowDark = Color(hex: "#B3BBC9")!
+  static let textPrimary = Color(hex: "#3A4250")!
+  static let textMuted = Color(hex: "#96A0B2")!
+}
+
 // MARK: - Shared Data
 
 struct WidgetHabitData: Codable {
@@ -91,8 +103,6 @@ struct Provider: TimelineProvider {
     )
   }
 
-  // MARK: - Date Helpers
-
   private func todayKeyString() -> String {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy-MM-dd"
@@ -139,44 +149,165 @@ struct WeekHeatmapWidget: Widget {
   }
 }
 
-// MARK: - Views
+// MARK: - Entry View
 
 struct WeekHeatmapEntryView: View {
   var entry: Provider.Entry
+  @Environment(\.widgetFamily) var family
 
-  private var weekdaySymbols: [String] {
-    let symbols = Calendar.current.shortStandaloneWeekdaySymbols
-    return [symbols[0], symbols[1], symbols[2], symbols[3], symbols[4], symbols[5], symbols[6]]
+  var body: some View {
+    if family == .systemSmall {
+      SmallWidgetView(entry: entry)
+    } else {
+      MediumWidgetView(entry: entry)
+    }
   }
+}
+
+// MARK: - Small Widget
+
+struct SmallWidgetView: View {
+  var entry: Provider.Entry
 
   var body: some View {
     VStack(spacing: 4) {
-      HStack {
+      HStack(spacing: 3) {
         Image(systemName: "checkmark.circle.fill")
-          .font(.caption2)
-          .foregroundColor(.green)
+          .font(.system(size: 8))
+          .foregroundColor(Color(hex: "#34C759")!)
         Text("This Week")
-          .font(.caption)
-          .fontWeight(.semibold)
-          .foregroundColor(.primary)
+          .font(.system(size: 9, weight: .semibold))
+          .foregroundColor(NeumorphicColors.textPrimary)
         Spacer()
       }
-      .padding(.bottom, 2)
+
+      if entry.isEmpty {
+        Spacer()
+        Image(systemName: "square.grid.3x3.topleft.filled")
+          .font(.system(size: 16))
+          .foregroundColor(NeumorphicColors.textMuted)
+        Text("No habit selected")
+          .font(.system(size: 8))
+          .foregroundColor(NeumorphicColors.textMuted)
+        Spacer()
+      } else {
+        ForEach(entry.habits.prefix(3), id: \.id) { habit in
+          SmallHabitRow(
+            habit: habit,
+            weekDates: entry.weekDates,
+            todayKey: entry.todayKey
+          )
+        }
+      }
+    }
+    .padding(8)
+    .containerBackground(NeumorphicColors.background, for: .widget)
+  }
+}
+
+struct SmallHabitRow: View {
+  let habit: WidgetHabitData
+  let weekDates: [String]
+  let todayKey: String
+
+  var body: some View {
+    HStack(spacing: 4) {
+      Circle()
+        .fill(Color(hex: habit.color) ?? NeumorphicColors.textPrimary)
+        .frame(width: 6, height: 6)
+
+      Text(habit.name)
+        .font(.system(size: 8, weight: .medium))
+        .foregroundColor(NeumorphicColors.textPrimary)
+        .lineLimit(1)
+        .frame(maxWidth: 52, alignment: .leading)
+
+      Spacer(minLength: 2)
+
+      HStack(spacing: 1.5) {
+        ForEach(weekDates, id: \.self) { dateKey in
+          let completed = habit.completions[dateKey] ?? false
+          let isToday = dateKey == todayKey
+          SmallDayCell(
+            completed: completed,
+            isToday: isToday,
+            color: Color(hex: habit.color) ?? NeumorphicColors.textPrimary
+          )
+        }
+      }
+    }
+  }
+}
+
+struct SmallDayCell: View {
+  let completed: Bool
+  let isToday: Bool
+  let color: Color
+
+  var body: some View {
+    RoundedRectangle(cornerRadius: 2)
+      .fill(completed ? color : NeumorphicColors.insetFill)
+      .frame(width: 10, height: 10)
+      .overlay(
+        RoundedRectangle(cornerRadius: 2)
+          .stroke(isToday ? NeumorphicColors.textPrimary.opacity(0.4) : .clear, lineWidth: 0.8)
+      )
+      .shadow(
+        color: completed ? .clear : NeumorphicColors.shadowDark.opacity(0.25),
+        radius: 0.5, x: 0.5, y: 0.5
+      )
+      .shadow(
+        color: completed ? .clear : NeumorphicColors.shadowLight.opacity(0.7),
+        radius: 0.5, x: -0.5, y: -0.5
+      )
+  }
+}
+
+// MARK: - Medium Widget
+
+struct MediumWidgetView: View {
+  var entry: Provider.Entry
+
+  var body: some View {
+    VStack(spacing: 6) {
+      HStack(spacing: 5) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 5)
+            .fill(NeumorphicColors.insetFill)
+            .frame(width: 18, height: 18)
+            .shadow(color: NeumorphicColors.shadowDark.opacity(0.3), radius: 1, x: 1, y: 1)
+            .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 1, x: -1, y: -1)
+          Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 10))
+            .foregroundColor(Color(hex: "#34C759")!)
+        }
+        Text("This Week")
+          .font(.system(size: 12, weight: .semibold))
+          .foregroundColor(NeumorphicColors.textPrimary)
+        Spacer()
+      }
 
       if entry.isEmpty {
         Spacer()
         VStack(spacing: 6) {
-          Image(systemName: "square.grid.3x3.topleft.filled")
-            .font(.title2)
-            .foregroundColor(.secondary)
+          ZStack {
+            RoundedRectangle(cornerRadius: 8)
+              .fill(NeumorphicColors.insetFill)
+              .frame(width: 28, height: 28)
+              .shadow(color: NeumorphicColors.shadowDark.opacity(0.3), radius: 2, x: 2, y: 2)
+              .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 2, x: -2, y: -2)
+            Image(systemName: "square.grid.3x3.topleft.filled")
+              .font(.system(size: 14))
+              .foregroundColor(NeumorphicColors.textMuted)
+          }
           Text("No habit selected")
             .font(.caption2)
-            .foregroundColor(.secondary)
+            .foregroundColor(NeumorphicColors.textMuted)
         }
         Spacer()
       } else {
-        ForEach(entry.habits, id: \.id) { habit in
-          HabitWeekRow(
+        ForEach(entry.habits.prefix(3), id: \.id) { habit in
+          MediumHabitRow(
             habit: habit,
             weekDates: entry.weekDates,
             todayKey: entry.todayKey
@@ -185,25 +316,31 @@ struct WeekHeatmapEntryView: View {
       }
     }
     .padding(12)
-    .containerBackground(.background, for: .widget)
+    .containerBackground(NeumorphicColors.background, for: .widget)
   }
 }
 
-struct HabitWeekRow: View {
+struct MediumHabitRow: View {
   let habit: WidgetHabitData
   let weekDates: [String]
   let todayKey: String
 
   var body: some View {
     HStack(spacing: 6) {
-      Circle()
-        .fill(Color(hex: habit.color) ?? .accentColor)
-        .frame(width: 16, height: 16)
+      ZStack {
+        RoundedRectangle(cornerRadius: 6)
+          .fill(NeumorphicColors.insetFill)
+          .frame(width: 18, height: 18)
+          .shadow(color: NeumorphicColors.shadowDark.opacity(0.25), radius: 1, x: 1, y: 1)
+          .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 1, x: -1, y: -1)
+        Circle()
+          .fill(Color(hex: habit.color) ?? NeumorphicColors.textPrimary)
+          .frame(width: 10, height: 10)
+      }
 
       Text(habit.name)
-        .font(.caption2)
-        .fontWeight(.medium)
-        .foregroundColor(.primary)
+        .font(.system(size: 10, weight: .medium))
+        .foregroundColor(NeumorphicColors.textPrimary)
         .lineLimit(1)
 
       Spacer()
@@ -212,40 +349,54 @@ struct HabitWeekRow: View {
         ForEach(weekDates, id: \.self) { dateKey in
           let completed = habit.completions[dateKey] ?? false
           let isToday = dateKey == todayKey
-          DayCell(
+          MediumDayCell(
             completed: completed,
             isToday: isToday,
-            color: habit.color
+            color: Color(hex: habit.color) ?? NeumorphicColors.textPrimary
           )
         }
       }
     }
-    .padding(.vertical, 2)
+    .padding(.vertical, 3)
+    .padding(.horizontal, 6)
+    .background(
+      RoundedRectangle(cornerRadius: 8)
+        .fill(NeumorphicColors.background)
+        .shadow(color: NeumorphicColors.shadowDark.opacity(0.4), radius: 2, x: 2, y: 2)
+        .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 2, x: -2, y: -2)
+    )
   }
 }
 
-struct DayCell: View {
+struct MediumDayCell: View {
   let completed: Bool
   let isToday: Bool
-  let color: String
+  let color: Color
 
   var body: some View {
     ZStack {
       RoundedRectangle(cornerRadius: 3)
-        .fill(cellColor)
-        .frame(width: 14, height: 14)
+        .fill(completed ? color : NeumorphicColors.insetFill)
+        .frame(width: 16, height: 16)
+        .shadow(
+          color: completed ? .clear : NeumorphicColors.shadowDark.opacity(0.3),
+          radius: 1, x: 1, y: 1
+        )
+        .shadow(
+          color: completed ? .clear : NeumorphicColors.shadowLight.opacity(0.7),
+          radius: 1, x: -1, y: -1
+        )
         .overlay(
           RoundedRectangle(cornerRadius: 3)
-            .stroke(isToday ? Color.primary : .clear, lineWidth: isToday ? 1 : 0)
+            .stroke(isToday ? NeumorphicColors.textPrimary.opacity(0.4) : .clear, lineWidth: isToday ? 1 : 0)
         )
-    }
-  }
 
-  private var cellColor: Color {
-    if completed {
-      return Color(hex: color) ?? .green
+      if completed {
+        Image(systemName: "checkmark")
+          .font(.system(size: 8, weight: .bold))
+          .foregroundColor(.white)
+      }
     }
-    return Color(.systemGray5)
   }
 }
 
