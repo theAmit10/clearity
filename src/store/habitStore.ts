@@ -3,6 +3,7 @@ import { Habit, HabitStats } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
 import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData } from '../services/storage';
 import { logEvent } from '../services/logger';
+import { trackEvent } from '../services/analytics';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule } from '../native/WidgetModule';
@@ -60,6 +61,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         habitNotifications: notifData?.habitNotifications ?? {},
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
       });
+      trackEvent('app_opened', { habit_count: stored?.length ?? 0 });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
     } catch (err) {
       logEvent('error', 'Failed to load habits', err);
@@ -79,6 +81,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
+    trackEvent('habit_added', { icon: data.icon, frequency: data.frequency });
     logEvent('info', 'Habit added', { id: habit.id, name: habit.name });
   },
 
@@ -93,6 +96,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.filter(h => h.id !== id);
     set({ habits });
     persist(habits);
+    trackEvent('habit_deleted');
     logEvent('info', 'Habit deleted', { id });
   },
 
@@ -108,6 +112,8 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }
       return { ...h, completions };
     });
+    const wasChecked = !get().habits.find(h => h.id === id)?.completions[key];
+    trackEvent(wasChecked ? 'habit_uncompleted' : 'habit_completed');
     set({ habits });
     persist(habits);
     updateWidget(habits);
@@ -117,6 +123,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
+    trackEvent('habits_imported', { count: habits.length, type: 'replace' });
     logEvent('info', 'Habits replaced via import', { count: habits.length });
   },
 
@@ -140,6 +147,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
+    trackEvent('habits_imported', { count: habits.length, type: 'merge' });
     logEvent('info', 'Habits merged via import', { count: habits.length });
   },
 
@@ -153,6 +161,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits: reordered });
     persist(reordered);
     updateWidget(reordered);
+    trackEvent('habits_reordered');
     logEvent('info', 'Habits reordered');
   },
 

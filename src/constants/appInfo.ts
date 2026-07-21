@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Config from 'react-native-config';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../package.json');
 
@@ -22,3 +23,6 @@ export const FEEDBACK_EMAIL = 'codethenic@gmail.com';
 // listing until you do.
 export const IOS_APP_STORE_ID = '6787651215';
 export const ANDROID_PACKAGE_NAME = 'com.codethenic.habittracker';
+
+// Mixpanel — set via .env file (never committed to git)
+export const MIXPANEL_TOKEN: string = Config.MIXPANEL_TOKEN;

@@ -7,6 +7,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import { useHabitStore } from './src/store/habitStore';
 import { installGlobalErrorHandler } from './src/services/logger';
 import { setupChannel, requestPermission, rescheduleAll } from './src/services/notification';
+import { initAnalytics } from './src/services/analytics';
 
 export default function App() {
   const init = useHabitStore(s => s.init);
@@ -16,6 +17,7 @@ export default function App() {
 
   useEffect(() => {
     installGlobalErrorHandler();
+    initAnalytics();
     init();
   }, []);
 
