@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import PencilIcon from 'react-native-heroicons/outline/PencilIcon';
+import TrashIcon from 'react-native-heroicons/outline/TrashIcon';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { neumorphic } from '../theme/neumorphicTheme';
 
 interface Props {
   onEdit: () => void;
-  onSettings: () => void;
+  onDelete: () => void;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function ActionButton({
-  icon,
-  label,
+  icon: Icon,
   onPress,
 }: {
-  icon: string;
-  label: string;
+  icon: React.ComponentType<{ size: number; color: string }>;
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
@@ -30,8 +30,6 @@ function ActionButton({
     transform: [{ scale: scale.value }],
   }));
 
-  // Two layers of press feedback: reanimated scale (already existed)
-  // plus a neumorphic raised -> inset swap for the "soft UI" feel.
   const Wrapper = pressed ? Inset : Raised;
 
   return (
@@ -48,18 +46,17 @@ function ActionButton({
       }}
     >
       <Wrapper radius={16} style={styles.button}>
-        <Text style={styles.buttonIcon}>{icon}</Text>
-        {/* <Text style={styles.buttonLabel}>{label}</Text> */}
+        <Icon size={22} color={neumorphic.colors.textPrimary} />
       </Wrapper>
     </AnimatedPressable>
   );
 }
 
-export default function ActionButtons({ onEdit, onSettings }: Props) {
+export default function ActionButtons({ onEdit, onDelete }: Props) {
   return (
     <>
-      <ActionButton icon="✐" label="Edit" onPress={onEdit} />
-      <ActionButton icon="⚙️" label="Settings" onPress={onSettings} />
+      <ActionButton icon={PencilIcon} onPress={onEdit} />
+      <ActionButton icon={TrashIcon} onPress={onDelete} />
     </>
   );
 }
@@ -70,15 +67,6 @@ const styles = StyleSheet.create({
     height: 72,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonIcon: {
-    fontSize: 22,
-  },
-  buttonLabel: {
-    fontSize: 11,
-    color: neumorphic.colors.textMuted,
-    marginTop: 2,
-    fontWeight: '700',
   },
 });
 

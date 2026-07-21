@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  Pressable,
   StyleSheet,
   ScrollView,
   Switch,
@@ -12,8 +13,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { WidgetModule } from '../native/WidgetModule';
+import { neumorphic } from '../theme/neumorphicTheme';
 
-export default function WidgetSettingsScreen() {
+export default function WidgetSettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,43 +82,51 @@ export default function WidgetSettingsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
+          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>Settings</Text>
+        </Pressable>
+
         <Text style={styles.title}>Widget</Text>
+
         <Text style={styles.description}>
           Select which habits to display on your iOS widget. You can select up to
           3 habits. The widget shows a weekly heatmap for the current week.
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Selected Habits</Text>
-          {activeHabits.length === 0 && (
-            <Text style={styles.emptyText}>
-              No active habits. Create some habits first!
-            </Text>
-          )}
-          {activeHabits.map(habit => {
-            const isSelected = selectedIds.includes(habit.id);
-            return (
-              <View key={habit.id} style={styles.row}>
-                <View style={styles.rowLeft}>
-                  <View
-                    style={[styles.colorDot, { backgroundColor: habit.color }]}
-                  />
-                  <View>
-                    <Text style={styles.habitName}>{habit.name}</Text>
-                    <Text style={styles.habitMeta}>
-                      {Object.keys(habit.completions).length} days tracked
-                    </Text>
+          <Text style={styles.sectionTitle}>SELECTED HABITS</Text>
+          <View style={styles.sectionBody}>
+            {activeHabits.length === 0 && (
+              <Text style={styles.emptyText}>
+                No active habits. Create some habits first!
+              </Text>
+            )}
+            {activeHabits.map((habit, i) => {
+              const isSelected = selectedIds.includes(habit.id);
+              return (
+                <View key={habit.id} style={[styles.row, i > 0 && styles.rowBorder]}>
+                  <View style={styles.rowLeft}>
+                    <View
+                      style={[styles.colorDot, { backgroundColor: habit.color }]}
+                    />
+                    <View>
+                      <Text style={styles.habitName}>{habit.name}</Text>
+                      <Text style={styles.habitMeta}>
+                        {Object.keys(habit.completions).length} days tracked
+                      </Text>
+                    </View>
                   </View>
+                  <Switch
+                    value={isSelected}
+                    onValueChange={() => toggleHabit(habit.id)}
+                    trackColor={{ false: '#E5E5EA', true: '#34C759' }}
+                    thumbColor="#FFF"
+                  />
                 </View>
-                <Switch
-                  value={isSelected}
-                  onValueChange={() => toggleHabit(habit.id)}
-                  trackColor={{ false: '#E5E5EA', true: '#34C759' }}
-                  thumbColor="#FFF"
-                />
-              </View>
-            );
-          })}
+              );
+            })}
+          </View>
         </View>
 
         <View style={styles.infoBox}>
@@ -141,7 +151,10 @@ export default function WidgetSettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F2F7' },
+  container: { flex: 1, backgroundColor: neumorphic.colors.background },
+  backRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  backArrow: { fontSize: 22, color: '#007AFF', marginRight: 4 },
+  backText: { fontSize: 17, color: '#007AFF' },
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -152,7 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     color: '#1C1C1E',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   description: {
     fontSize: 14,
@@ -160,20 +173,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 24,
   },
-  section: {
+  section: { marginBottom: 24 },
+  sectionBody: {
     backgroundColor: '#FFF',
     borderRadius: 14,
     overflow: 'hidden',
-    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
     color: '#8E8E93',
+    marginBottom: 8,
     textTransform: 'uppercase',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
   },
   emptyText: {
     fontSize: 15,
@@ -187,6 +198,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  rowBorder: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E5EA',
   },

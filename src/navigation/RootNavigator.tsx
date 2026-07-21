@@ -1,5 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import { trackScreenView } from '../services/analytics';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -104,11 +108,7 @@ function SettingsStack() {
       <Stack.Screen
         name="WidgetSettings"
         component={WidgetSettingsScreen}
-        options={{
-          ...neumorphicHeaderOptions,
-          title: 'Widget Settings',
-          headerBackTitle: 'Back',
-        }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

@@ -135,7 +135,7 @@ export default function HabitDetailScreen({ route, navigation }: any) {
                 onEdit={() =>
                   navigation.navigate('AddEditHabit', { id: habit.id })
                 }
-                onSettings={confirmDelete}
+                onDelete={confirmDelete}
               />
             </View>
           </Raised>
