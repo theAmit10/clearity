@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
 const { WidgetModule: NativeWidgetModule } = NativeModules;
 
@@ -41,27 +41,25 @@ function getWeekRange(): { weekStart: string; weekEnd: string } {
   return { weekStart: fmt(start), weekEnd: fmt(end) };
 }
 
-const isIOS = Platform.OS === 'ios';
-
 export const WidgetModule = {
   setSelectedHabitIds: async (ids: string[]): Promise<void> => {
-    if (!isIOS || !NativeWidgetModule) return;
+    if (!NativeWidgetModule) return;
     return NativeWidgetModule.setSelectedHabitIds(ids);
   },
 
   getSelectedHabitIds: async (): Promise<string[]> => {
-    if (!isIOS || !NativeWidgetModule) return [];
+    if (!NativeWidgetModule) return [];
     return NativeWidgetModule.getSelectedHabitIds();
   },
 
   updateWidgetData: async (payload: WidgetDataPayload): Promise<void> => {
-    if (!isIOS || !NativeWidgetModule) return;
+    if (!NativeWidgetModule) return;
     const json = JSON.stringify(payload);
     return NativeWidgetModule.updateWidgetData(json);
   },
 
   reloadWidget: async (): Promise<void> => {
-    if (!isIOS || !NativeWidgetModule) return;
+    if (!NativeWidgetModule) return;
     return NativeWidgetModule.reloadWidget();
   },
 

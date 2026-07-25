@@ -57,26 +57,6 @@ export default function WidgetSettingsScreen({ navigation }: any) {
     await WidgetModule.updateWidgetData(payload);
   };
 
-  if (Platform.OS !== 'ios') {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={[styles.backRow, { padding: 20 }]}
-        >
-          <Text style={styles.backArrow}>←</Text>
-          <Text style={styles.backText}>Settings</Text>
-        </Pressable>
-        <View style={styles.center}>
-          <Text style={styles.title}>Widget</Text>
-          <Text style={styles.description}>
-            Widgets are only available on iOS.
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -100,8 +80,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <Text style={styles.title}>Widget</Text>
 
         <Text style={styles.description}>
-          Select which habits to display on your iOS widget. You can select up
-          to 3 habits. The widget shows a weekly heatmap for the current week.
+          Select which habits to display on your widget. You can select up to 3
+          habits. The widget shows a weekly heatmap for the current week.
         </Text>
 
         <View style={styles.section}>
@@ -148,17 +128,11 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>How it works</Text>
           <Text style={styles.infoText}>
-            After selecting habits, add the Habitic widget to your home screen:
+            After selecting habits, add the widget to your home screen:
             {'\n\n'}
-            1. Touch and hold an empty area on your Home Screen
-            {'\n'}
-            2. Tap the + button in the top-left corner
-            {'\n'}
-            3. Search for "Habitic Widget"
-            {'\n'}
-            4. Choose your preferred size
-            {'\n'}
-            5. Tap "Add Widget"
+            {Platform.OS === 'ios'
+              ? `1. Touch and hold an empty area on your Home Screen\n2. Tap the + button in the top-left corner\n3. Search for "Habitic Widget"\n4. Choose a size\n5. Tap "Add Widget"`
+              : `1. Touch and hold an empty area on your Home Screen\n2. Tap "Widgets"\n3. Find "Habit Tracker" in the list\n4. Drag the widget to your Home Screen`}
           </Text>
         </View>
       </ScrollView>

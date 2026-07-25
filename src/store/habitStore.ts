@@ -38,6 +38,7 @@ function updateWidget(habits: Habit[]) {
   const active = habits.filter(h => !h.archived);
   const payload = WidgetModule.buildPayload(active);
   WidgetModule.updateWidgetData(payload).catch(() => {});
+  WidgetModule.reloadWidget().catch(() => {});
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -63,6 +64,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       });
       trackEvent('app_opened', { habit_count: stored?.length ?? 0 });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
+      const h = stored ?? [];
+      const active = h.filter((x: { archived: boolean }) => !x.archived);
+      const payload = WidgetModule.buildPayload(active);
+      WidgetModule.updateWidgetData(payload).catch(() => {});
     } catch (err) {
       logEvent('error', 'Failed to load habits', err);
       set({ habits: [], loaded: true });
@@ -96,6 +101,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.filter(h => h.id !== id);
     set({ habits });
     persist(habits);
+    updateWidget(habits);
     trackEvent('habit_deleted');
     logEvent('info', 'Habit deleted', { id });
   },
