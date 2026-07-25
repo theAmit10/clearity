@@ -39,7 +39,10 @@ export default function WidgetSettingsScreen({ navigation }: any) {
       : [...selectedIds, habitId];
 
     if (next.length > 3) {
-      Alert.alert('Limit reached', 'You can select up to 3 habits for the widget.');
+      Alert.alert(
+        'Limit reached',
+        'You can select up to 3 habits for the widget.',
+      );
       return;
     }
 
@@ -57,6 +60,13 @@ export default function WidgetSettingsScreen({ navigation }: any) {
   if (Platform.OS !== 'ios') {
     return (
       <SafeAreaView style={styles.container}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={[styles.backRow, { padding: 20 }]}
+        >
+          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>Settings</Text>
+        </Pressable>
         <View style={styles.center}>
           <Text style={styles.title}>Widget</Text>
           <Text style={styles.description}>
@@ -90,8 +100,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <Text style={styles.title}>Widget</Text>
 
         <Text style={styles.description}>
-          Select which habits to display on your iOS widget. You can select up to
-          3 habits. The widget shows a weekly heatmap for the current week.
+          Select which habits to display on your iOS widget. You can select up
+          to 3 habits. The widget shows a weekly heatmap for the current week.
         </Text>
 
         <View style={styles.section}>
@@ -105,10 +115,16 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             {activeHabits.map((habit, i) => {
               const isSelected = selectedIds.includes(habit.id);
               return (
-                <View key={habit.id} style={[styles.row, i > 0 && styles.rowBorder]}>
+                <View
+                  key={habit.id}
+                  style={[styles.row, i > 0 && styles.rowBorder]}
+                >
                   <View style={styles.rowLeft}>
                     <View
-                      style={[styles.colorDot, { backgroundColor: habit.color }]}
+                      style={[
+                        styles.colorDot,
+                        { backgroundColor: habit.color },
+                      ]}
                     />
                     <View>
                       <Text style={styles.habitName}>{habit.name}</Text>
@@ -152,8 +168,17 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: neumorphic.colors.background },
-  backRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  backArrow: { fontSize: 22, color: '#007AFF', marginRight: 4 },
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  backArrow: {
+    fontSize: 22,
+    color: '#007AFF',
+    marginRight: 4,
+    ...Platform.select({ android: { lineHeight: 22, textAlignVertical: 'center', includeFontPadding: false } }),
+  },
   backText: { fontSize: 17, color: '#007AFF' },
   center: {
     flex: 1,

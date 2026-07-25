@@ -7,6 +7,7 @@ import {
   ScrollView,
   Switch,
   Animated,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
@@ -160,7 +161,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: neumorphic.colors.background },
   backRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  backArrow: { fontSize: 22, color: '#007AFF', marginRight: 4 },
+  backArrow: { fontSize: 22, color: '#007AFF', marginRight: 4, ...Platform.select({ android: { lineHeight: 22, textAlignVertical: 'center', includeFontPadding: false } }) },
   backText: { fontSize: 17, color: '#007AFF' },
   title: {
     fontSize: 32,
