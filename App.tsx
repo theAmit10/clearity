@@ -6,7 +6,11 @@ import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { useHabitStore } from './src/store/habitStore';
 import { installGlobalErrorHandler } from './src/services/logger';
-import { setupChannel, requestPermission, rescheduleAll } from './src/services/notification';
+import {
+  setupChannel,
+  requestPermission,
+  rescheduleAll,
+} from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
 
 export default function App() {
@@ -53,5 +57,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F2F2F7' },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F2F2F7',
+  },
 });
