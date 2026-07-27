@@ -22,7 +22,6 @@ export default function NotificationSettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const removeHabitNotification = useHabitStore(s => s.removeHabitNotification);
-  const setHabitNotification = useHabitStore(s => s.setHabitNotification);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
 
   const [adminRevealed, setAdminRevealed] = useState(false);
@@ -38,6 +37,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
         tension: 40,
       }).start();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminRevealed]);
 
   const handleSecretTap = () => {

@@ -16,6 +16,7 @@ import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 import HabitNotificationConfigScreen from '../screens/HabitNotificationConfigScreen';
 import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import WidgetSettingsScreen from '../screens/WidgetSettingsScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
 import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
@@ -103,6 +104,11 @@ function SettingsStack() {
         name="WidgetSettings"
         component={WidgetSettingsScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ ...headerOpts, title: 'Analytics' }}
       />
     </Stack.Navigator>
   );

@@ -191,6 +191,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   removeHabitNotification: async habitId => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [habitId]: _, ...habitNotifications } = get().habitNotifications;
     set({ habitNotifications });
     await saveNotificationData({

@@ -14,10 +14,8 @@ import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import {
   exportHabits,
-  exportLogs,
   pickAndParseImportFile,
 } from '../services/importExport';
-import { getAllLogs, clearLogs } from '../services/logger';
 import { clearAll } from '../services/storage';
 import {
   APP_NAME,
@@ -75,30 +73,6 @@ export default function SettingsScreen({ navigation }: any) {
     } finally {
       setBusy(false);
     }
-  };
-
-  const handleExportLogs = async () => {
-    const logs = await getAllLogs();
-    if (logs.length === 0) {
-      Alert.alert('No logs yet', 'Nothing has been logged on this device.');
-      return;
-    }
-    try {
-      await exportLogs(logs);
-    } catch (e: any) {
-      Alert.alert('Export failed', e?.message ?? 'Unknown error');
-    }
-  };
-
-  const handleClearLogs = () => {
-    Alert.alert(
-      'Clear logs?',
-      'This removes all locally stored diagnostic logs.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: clearLogs },
-      ],
-    );
   };
 
   const handleFollowX = () => {
@@ -256,6 +230,16 @@ export default function SettingsScreen({ navigation }: any) {
           <Row
             label="Widget settings"
             onPress={() => navigation.navigate('WidgetSettings')}
+          />
+        </Section>
+
+        <Section title="Analytics">
+          <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
+            View detailed stats, charts, and insights about your habit performance.
+          </Text>
+          <Row
+            label="View analytics"
+            onPress={() => navigation.navigate('Analytics')}
           />
         </Section>
 

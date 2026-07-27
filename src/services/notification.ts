@@ -2,8 +2,6 @@ import notifee, {
   AndroidImportance,
   RepeatFrequency,
   TriggerType,
-  EventType,
-  type TriggerNotification,
 } from '@notifee/react-native';
 import type { HabitNotificationConfig, AdminNotificationConfig } from '../types/notification';
 
