@@ -1,4 +1,4 @@
-package com.habittracker.widget
+package com.codethenic.habita.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -56,7 +56,7 @@ class WidgetModule(private val reactContext: ReactApplicationContext) :
   }
 
   companion object {
-    const val PREFS_NAME = "com.habittracker.widget_prefs"
+    const val PREFS_NAME = "com.codethenic.habita.widget_prefs"
     const val SELECTED_IDS_KEY = "selectedWidgetHabitIds"
     const val HABIT_DATA_KEY = "widgetHabitData"
   }

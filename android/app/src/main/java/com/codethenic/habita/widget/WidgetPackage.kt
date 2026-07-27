@@ -1,4 +1,4 @@
-package com.habittracker.widget
+package com.codethenic.habita.widget
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

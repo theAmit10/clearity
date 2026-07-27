@@ -1,4 +1,4 @@
-package com.habittracker
+package com.codethenic.habita
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -6,7 +6,7 @@ import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
-import com.habittracker.widget.WidgetPackage
+import com.codethenic.habita.widget.WidgetPackage
 
 class MainApplication : Application(), ReactApplication {
 

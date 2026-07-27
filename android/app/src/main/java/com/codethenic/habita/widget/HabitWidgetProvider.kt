@@ -1,4 +1,4 @@
-package com.habittracker.widget
+package com.codethenic.habita.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -7,7 +7,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
-import com.habittracker.R
+import com.codethenic.habita.R
 import org.json.JSONObject
 import java.util.Calendar
 
