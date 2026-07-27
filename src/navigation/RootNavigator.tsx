@@ -108,7 +108,7 @@ function SettingsStack() {
       <Stack.Screen
         name="Analytics"
         component={AnalyticsScreen}
-        options={{ ...headerOpts, title: 'Analytics' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
