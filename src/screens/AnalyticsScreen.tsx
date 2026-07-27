@@ -56,8 +56,21 @@
  *   3. Render it in this screen (add a new section or extend an existing one)
  *   4. Document it in this comment block.
  */
-import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, useWindowDimensions, StyleSheet, Pressable } from 'react-native';
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  useWindowDimensions,
+  StyleSheet,
+  Pressable,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, {
   Rect,
@@ -80,22 +93,50 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { useHabitStore } from '../store/habitStore';
-import { computeStats, type StatsData, type HabitDetailStats } from '../services/statsService';
+import {
+  computeStats,
+  type StatsData,
+  type HabitDetailStats,
+} from '../services/statsService';
 import { getHabitIcon } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_SHORT = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 function shortMonthDay(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   return MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate();
 }
 
-function TrendArrow({ trend, colors }: { trend: 'improving' | 'declining' | 'stable'; colors: any }) {
-  const color = trend === 'improving' ? colors.iosGreen : trend === 'declining' ? colors.iosRed : colors.textMuted;
+function TrendArrow({
+  trend,
+  colors,
+}: {
+  trend: 'improving' | 'declining' | 'stable';
+  colors: any;
+}) {
+  const color =
+    trend === 'improving'
+      ? colors.iosGreen
+      : trend === 'declining'
+      ? colors.iosRed
+      : colors.textMuted;
   const arrow = trend === 'improving' ? '↑' : trend === 'declining' ? '↓' : '→';
   return <Text style={[styles.trendArrow, { color }]}>{arrow}</Text>;
 }
@@ -112,14 +153,20 @@ export default function AnalyticsScreen({ navigation }: any) {
   const chartWidth = screenWidth - 64;
   const weeklyChartHeight = 180;
   const weeklyMargins = { left: 36, right: 8, top: 12, bottom: 44 };
-  const weeklyInnerWidth = chartWidth - weeklyMargins.left - weeklyMargins.right;
-  const weeklyBarWidth = Math.max(4, weeklyInnerWidth / stats.weeklyTrend.length - 4);
+  const weeklyInnerWidth =
+    chartWidth - weeklyMargins.left - weeklyMargins.right;
+  const weeklyBarWidth = Math.max(
+    4,
+    weeklyInnerWidth / stats.weeklyTrend.length - 4,
+  );
 
   const weekdayChartHeight = 160;
   const weekdayMargins = { left: 40, right: 16, top: 8, bottom: 8 };
-  const weekdayInnerWidth = chartWidth - weekdayMargins.left - weekdayMargins.right;
+  const weekdayInnerWidth =
+    chartWidth - weekdayMargins.left - weekdayMargins.right;
 
-  const weeklyPlotHeight = weeklyChartHeight - weeklyMargins.top - weeklyMargins.bottom;
+  const weeklyPlotHeight =
+    weeklyChartHeight - weeklyMargins.top - weeklyMargins.bottom;
 
   const weekdayBarHeight = 14;
   const weekdayGap = 8;
@@ -150,16 +197,21 @@ export default function AnalyticsScreen({ navigation }: any) {
     checkVisibleSections();
   };
 
-  const registerSection = useCallback((key: string, y: number) => {
-    sectionYs.current[key] = y;
-    if (y < scrollY.current + screenHeight + 60) {
-      markEntered(key);
-    }
-  }, [screenHeight, markEntered]);
+  const registerSection = useCallback(
+    (key: string, y: number) => {
+      sectionYs.current[key] = y;
+      if (y < scrollY.current + screenHeight + 60) {
+        markEntered(key);
+      }
+    },
+    [screenHeight, markEntered],
+  );
 
   if (activeHabits.length === 0) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: cs.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: cs.background }]}
+      >
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
           <Text style={[styles.backArrow, { color: cs.iosBlue }]}>←</Text>
           <Text style={[styles.backText, { color: cs.iosBlue }]}>Settings</Text>
@@ -175,11 +227,17 @@ export default function AnalyticsScreen({ navigation }: any) {
     );
   }
 
-  const improvingCount = stats.habitStats.filter(h => h.trend === 'improving').length;
-  const decliningCount = stats.habitStats.filter(h => h.trend === 'declining').length;
+  const improvingCount = stats.habitStats.filter(
+    h => h.trend === 'improving',
+  ).length;
+  const decliningCount = stats.habitStats.filter(
+    h => h.trend === 'declining',
+  ).length;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: cs.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: cs.background }]}
+    >
       <ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -264,7 +322,9 @@ export default function AnalyticsScreen({ navigation }: any) {
         </View>
 
         {/* Completion Rings */}
-        <View onLayout={e => registerSection('habitRings', e.nativeEvent.layout.y)}>
+        <View
+          onLayout={e => registerSection('habitRings', e.nativeEvent.layout.y)}
+        >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
             Completion Rings
           </Text>
@@ -297,7 +357,9 @@ export default function AnalyticsScreen({ navigation }: any) {
         </View>
 
         {/* Day-of-Week Breakdown */}
-        <View onLayout={e => registerSection('weekday', e.nativeEvent.layout.y)}>
+        <View
+          onLayout={e => registerSection('weekday', e.nativeEvent.layout.y)}
+        >
           <WeekdayChart
             data={stats.weekdayBreakdown}
             chartWidth={chartWidth}
@@ -325,7 +387,9 @@ export default function AnalyticsScreen({ navigation }: any) {
               {improvingCount > 0 ? `↑ ${improvingCount} improving` : ''}
               {improvingCount > 0 && decliningCount > 0 ? ' · ' : ''}
               {decliningCount > 0 ? `↓ ${decliningCount} declining` : ''}
-              {improvingCount === 0 && decliningCount === 0 ? '→ All stable' : ''}
+              {improvingCount === 0 && decliningCount === 0
+                ? '→ All stable'
+                : ''}
             </Text>
           )}
           {stats.habitStats
@@ -345,11 +409,18 @@ export default function AnalyticsScreen({ navigation }: any) {
 
         {/* Streak Analytics */}
         <View onLayout={e => registerSection('streak', e.nativeEvent.layout.y)}>
-          <StreakSection stats={stats} cs={cs} radii={theme.radii} entered={entered['streak']} />
+          <StreakSection
+            stats={stats}
+            cs={cs}
+            radii={theme.radii}
+            entered={entered['streak']}
+          />
         </View>
 
         {/* Habit Timeline */}
-        <View onLayout={e => registerSection('journey', e.nativeEvent.layout.y)}>
+        <View
+          onLayout={e => registerSection('journey', e.nativeEvent.layout.y)}
+        >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
             Habit Timeline
           </Text>
@@ -372,7 +443,9 @@ export default function AnalyticsScreen({ navigation }: any) {
         </View>
 
         {/* Insights */}
-        <View onLayout={e => registerSection('insights', e.nativeEvent.layout.y)}>
+        <View
+          onLayout={e => registerSection('insights', e.nativeEvent.layout.y)}
+        >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
             Insights
           </Text>
@@ -380,7 +453,12 @@ export default function AnalyticsScreen({ navigation }: any) {
             Smart observations about your habit patterns.
           </Text>
           {stats.insights.map((item, i) => (
-            <InsightItem key={'i-' + i} insight={item} cs={cs} radii={theme.radii} />
+            <InsightItem
+              key={'i-' + i}
+              insight={item}
+              cs={cs}
+              radii={theme.radii}
+            />
           ))}
         </View>
 
@@ -395,12 +473,15 @@ function useAnimateOnEnter(entered: boolean | undefined, delay = 0) {
   const progress = useSharedValue(0);
   useEffect(() => {
     if (entered) {
-      progress.value = withDelay(delay, withTiming(1, {
-        duration: 700,
-        easing: Easing.out(Easing.cubic),
-      }));
+      progress.value = withDelay(
+        delay,
+        withTiming(1, {
+          duration: 700,
+          easing: Easing.out(Easing.cubic),
+        }),
+      );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entered, delay]);
   return progress;
 }
@@ -470,7 +551,16 @@ function CircularRing({
           </SvgText>
         </Svg>
       </View>
-      <Text style={{ fontSize: 10, color: cs.textMuted, fontWeight: '600', marginTop: 6 }}>{label}</Text>
+      <Text
+        style={{
+          fontSize: 10,
+          color: cs.textMuted,
+          fontWeight: '600',
+          marginTop: 6,
+        }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -507,46 +597,73 @@ function MiniRing({
   }));
 
   return (
-      <View style={{ alignItems: 'center', marginHorizontal: 6, width: 88 }}>
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: size + 8, height: size + 8 }}>
-          <Svg width={size} height={size}>
-            <Circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={cs.backgroundDeep}
-              strokeWidth={strokeWidth}
-              fill="none"
-            />
-            <AnimatedCircle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={color}
-              strokeWidth={strokeWidth}
-              fill="none"
-              strokeDasharray={circumference}
-              animatedProps={animatedProps}
-              strokeLinecap="round"
-              rotation="-90"
-              origin={`${size / 2}, ${size / 2}`}
-            />
-          </Svg>
-          <View style={{ position: 'absolute' }}>
-            <Icon size={18} color={color} />
-          </View>
-        </View>
-        <Text style={{ fontSize: 11, fontWeight: '600', color: cs.textPrimary, marginTop: 6 }} numberOfLines={1}>
-          {label}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-          <View style={[styles.ringGradeBadge, { backgroundColor: color + '22' }]}>
-            <Text style={{ fontSize: 9, fontWeight: '800', color }}>{rate >= 90 ? 'A' : rate >= 75 ? 'B' : rate >= 50 ? 'C' : rate >= 25 ? 'D' : 'F'}</Text>
-          </View>
-          <Text style={{ fontSize: 12, fontWeight: '700', color }}>{rate}%</Text>
-          <TrendArrow trend={trend} colors={cs} />
+    <View style={{ alignItems: 'center', marginHorizontal: 6, width: 88 }}>
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: size + 8,
+          height: size + 8,
+        }}
+      >
+        <Svg width={size} height={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={cs.backgroundDeep}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          <AnimatedCircle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={circumference}
+            animatedProps={animatedProps}
+            strokeLinecap="round"
+            rotation="-90"
+            origin={`${size / 2}, ${size / 2}`}
+          />
+        </Svg>
+        <View style={{ position: 'absolute' }}>
+          <Icon size={18} color={color} />
         </View>
       </View>
+      <Text
+        style={{
+          fontSize: 11,
+          fontWeight: '600',
+          color: cs.textPrimary,
+          marginTop: 6,
+        }}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+        <View
+          style={[styles.ringGradeBadge, { backgroundColor: color + '22' }]}
+        >
+          <Text style={{ fontSize: 9, fontWeight: '800', color }}>
+            {rate >= 90
+              ? 'A'
+              : rate >= 75
+              ? 'B'
+              : rate >= 50
+              ? 'C'
+              : rate >= 25
+              ? 'D'
+              : 'F'}
+          </Text>
+        </View>
+        <Text style={{ fontSize: 12, fontWeight: '700', color }}>{rate}%</Text>
+        <TrendArrow trend={trend} colors={cs} />
+      </View>
+    </View>
   );
 }
 
@@ -578,7 +695,8 @@ function SummaryCard({
     <Animated.View style={[styles.summaryCardWrap, animStyle]}>
       <Raised radius={radii.card} distance={5} style={styles.summaryCard}>
         <Text style={[styles.summaryValue, { color: cs.textPrimary }]}>
-          {value}{suffix ?? ''}
+          {value}
+          {suffix ?? ''}
         </Text>
         <Text style={[styles.summaryLabel, { color: cs.textMuted }]}>
           {label}
@@ -620,8 +738,14 @@ function WeeklyChart({
 }) {
   const progress = useAnimateOnEnter(entered, 300);
 
-  const bestWeek = data.reduce((best, w) => w.rate > best.rate ? w : best, data[0]);
-  const worstWeek = data.reduce((worst, w) => w.rate < worst.rate ? w : worst, data[0]);
+  const bestWeek = data.reduce(
+    (best, w) => (w.rate > best.rate ? w : best),
+    data[0],
+  );
+  const worstWeek = data.reduce(
+    (worst, w) => (w.rate < worst.rate ? w : worst),
+    data[0],
+  );
 
   return (
     <Raised radius={radii.panel} distance={6} style={styles.chartContainer}>
@@ -648,11 +772,28 @@ function WeeklyChart({
         </Defs>
         <G x={margins.left} y={0}>
           {[0, 25, 50, 75, 100].map(pct => {
-            const yPos = chartHeight - margins.bottom - (pct / 100) * plotHeight;
+            const yPos =
+              chartHeight - margins.bottom - (pct / 100) * plotHeight;
             return (
               <React.Fragment key={pct}>
-                <Line x1={0} y1={yPos} x2={innerWidth} y2={yPos} stroke={cs.textMuted} strokeOpacity={0.15} strokeWidth={1} />
-                <SvgText x={-8} y={yPos + 4} fill={cs.textMuted} fontSize={10} textAnchor="end">{pct}%</SvgText>
+                <Line
+                  x1={0}
+                  y1={yPos}
+                  x2={innerWidth}
+                  y2={yPos}
+                  stroke={cs.textMuted}
+                  strokeOpacity={0.15}
+                  strokeWidth={1}
+                />
+                <SvgText
+                  x={-8}
+                  y={yPos + 4}
+                  fill={cs.textMuted}
+                  fontSize={10}
+                  textAnchor="end"
+                >
+                  {pct}%
+                </SvgText>
               </React.Fragment>
             );
           })}
@@ -693,16 +834,29 @@ function WeeklyChart({
         </G>
       </Svg>
       <Text style={[styles.chartHint, { color: cs.textMuted }]}>
-        ● Best week: {bestWeek.rate}% ({shortMonthDay(bestWeek.weekStart)}) · Lowest: {worstWeek.rate}% ({shortMonthDay(worstWeek.weekStart)})
+        ● Best week: {bestWeek.rate}% ({shortMonthDay(bestWeek.weekStart)}) ·
+        Lowest: {worstWeek.rate}% ({shortMonthDay(worstWeek.weekStart)})
       </Text>
     </Raised>
   );
 }
 
 function AnimatedBar({
-  x, y, width, targetHeight, progress, rx, gradientId,
+  x,
+  y,
+  width,
+  targetHeight,
+  progress,
+  rx,
+  gradientId,
 }: {
-  x: number; y: number; width: number; targetHeight: number; progress: SharedValue<number>; rx: number; gradientId: string;
+  x: number;
+  y: number;
+  width: number;
+  targetHeight: number;
+  progress: SharedValue<number>;
+  rx: number;
+  gradientId: string;
 }) {
   const animatedProps = useAnimatedProps(() => ({
     height: targetHeight * progress.value,
@@ -779,13 +933,33 @@ function WeekdayChart({
           {sorted.map((item, i) => {
             const y = i * (barHeight + gap);
             const targetWidth = Math.max(2, (item.rate / 100) * innerWidth);
-            const gId = item.rate >= 70 ? 'wdGreenGrad' : item.rate >= 40 ? 'wdAmberGrad' : 'wdRedGrad';
+            const gId =
+              item.rate >= 70
+                ? 'wdGreenGrad'
+                : item.rate >= 40
+                ? 'wdAmberGrad'
+                : 'wdRedGrad';
             return (
               <G key={item.day}>
-                <SvgText x={-8} y={y + barHeight - 2} fill={cs.textMuted} fontSize={11} textAnchor="end">
+                <SvgText
+                  x={-8}
+                  y={y + barHeight - 2}
+                  fill={cs.textMuted}
+                  fontSize={11}
+                  textAnchor="end"
+                >
                   {item.day}
                 </SvgText>
-                <Rect x={0} y={y} width={innerWidth} height={barHeight} rx={7} ry={7} fill={cs.backgroundDeep} opacity={0.5} />
+                <Rect
+                  x={0}
+                  y={y}
+                  width={innerWidth}
+                  height={barHeight}
+                  rx={7}
+                  ry={7}
+                  fill={cs.backgroundDeep}
+                  opacity={0.5}
+                />
                 <AnimatedBarWidth
                   x={0}
                   y={y}
@@ -811,9 +985,19 @@ function WeekdayChart({
 }
 
 function AnimatedBarWidth({
-  x, y, height, targetWidth, progress, gradientId,
+  x,
+  y,
+  height,
+  targetWidth,
+  progress,
+  gradientId,
 }: {
-  x: number; y: number; height: number; targetWidth: number; progress: SharedValue<number>; gradientId: string;
+  x: number;
+  y: number;
+  height: number;
+  targetWidth: number;
+  progress: SharedValue<number>;
+  gradientId: string;
 }) {
   const animatedProps = useAnimatedProps(() => ({
     width: targetWidth * progress.value,
@@ -855,10 +1039,31 @@ function HabitPerformanceRow({
     transform: [{ translateX: (1 - progress.value) * 30 }],
   }));
 
-  const grade = habit.completionRateAll >= 90 ? 'A' : habit.completionRateAll >= 75 ? 'B' : habit.completionRateAll >= 50 ? 'C' : habit.completionRateAll >= 25 ? 'D' : 'F';
-  const gradeColor = habit.completionRateAll >= 90 ? cs.iosGreen : habit.completionRateAll >= 75 ? cs.accent : habit.completionRateAll >= 50 ? cs.accent : cs.iosRed;
+  const grade =
+    habit.completionRateAll >= 90
+      ? 'A'
+      : habit.completionRateAll >= 75
+      ? 'B'
+      : habit.completionRateAll >= 50
+      ? 'C'
+      : habit.completionRateAll >= 25
+      ? 'D'
+      : 'F';
+  const gradeColor =
+    habit.completionRateAll >= 90
+      ? cs.iosGreen
+      : habit.completionRateAll >= 75
+      ? cs.accent
+      : habit.completionRateAll >= 50
+      ? cs.accent
+      : cs.iosRed;
 
-  const trendBg = habit.trend === 'improving' ? cs.iosGreen + '22' : habit.trend === 'declining' ? cs.iosRed + '22' : 'transparent';
+  const trendBg =
+    habit.trend === 'improving'
+      ? cs.iosGreen + '22'
+      : habit.trend === 'declining'
+      ? cs.iosRed + '22'
+      : 'transparent';
 
   return (
     <View style={styles.habitRowOuter}>
@@ -866,16 +1071,26 @@ function HabitPerformanceRow({
         <Raised radius={radii.panel} distance={5} style={styles.habitCard}>
           <View style={styles.habitRowTop}>
             <View style={styles.habitRowLeft}>
-              <View style={[styles.habitIconWrap, { backgroundColor: habit.color + '22' }]}>
+              <View
+                style={[
+                  styles.habitIconWrap,
+                  { backgroundColor: habit.color + '22' },
+                ]}
+              >
                 <Icon size={20} color={habit.color} />
               </View>
               <View style={styles.habitRowInfo}>
-                <Text style={[styles.habitRowName, { color: cs.textPrimary }]} numberOfLines={1}>
+                <Text
+                  style={[styles.habitRowName, { color: cs.textPrimary }]}
+                  numberOfLines={1}
+                >
                   {habit.name}
                 </Text>
                 <View style={styles.habitMetaRow}>
                   <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
-                    {habit.currentStreak > 0 ? `🔥 ${habit.currentStreak}d` : 'No streak'}
+                    {habit.currentStreak > 0
+                      ? `🔥 ${habit.currentStreak}d`
+                      : 'No streak'}
                   </Text>
                   <View style={[styles.trendTag, { backgroundColor: trendBg }]}>
                     <TrendArrow trend={habit.trend} colors={cs} />
@@ -884,16 +1099,32 @@ function HabitPerformanceRow({
               </View>
             </View>
             <View style={styles.habitRowRight}>
-              <View style={[styles.gradeBadge, { backgroundColor: gradeColor + '22' }]}>
-                <Text style={[styles.gradeText, { color: gradeColor }]}>{grade}</Text>
+              <View
+                style={[
+                  styles.gradeBadge,
+                  { backgroundColor: gradeColor + '22' },
+                ]}
+              >
+                <Text style={[styles.gradeText, { color: gradeColor }]}>
+                  {grade}
+                </Text>
               </View>
               <Text style={[styles.habitRowRate, { color: cs.accent }]}>
                 {habit.completionRateAll}%
               </Text>
             </View>
           </View>
-          <View style={[styles.progressBarOuter, { backgroundColor: cs.backgroundDeep }]}>
-            <GradientProgressBar progress={progress} rate={habit.completionRateAll} accent={cs.accent} />
+          <View
+            style={[
+              styles.progressBarOuter,
+              { backgroundColor: cs.backgroundDeep },
+            ]}
+          >
+            <GradientProgressBar
+              progress={progress}
+              rate={habit.completionRateAll}
+              accent={cs.accent}
+            />
           </View>
           <View style={styles.habitRowBottom}>
             <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
@@ -909,12 +1140,22 @@ function HabitPerformanceRow({
   );
 }
 
-function GradientProgressBar({ progress, rate, accent }: { progress: SharedValue<number>; rate: number; accent: string }) {
+function GradientProgressBar({
+  progress,
+  rate,
+  accent,
+}: {
+  progress: SharedValue<number>;
+  rate: number;
+  accent: string;
+}) {
   const animProps = useAnimatedProps(() => ({
-    width: (rate * progress.value) + '%',
+    width: rate * progress.value + '%',
   }));
   return (
-    <View style={{ width: '100%', height: 6, borderRadius: 3, overflow: 'hidden' }}>
+    <View
+      style={{ width: '100%', height: 6, borderRadius: 3, overflow: 'hidden' }}
+    >
       <Svg width="100%" height={6}>
         <Defs>
           <LinearGradient id="progGrad" x1="0" y1="0" x2="1" y2="0">
@@ -937,12 +1178,22 @@ function GradientProgressBar({ progress, rate, accent }: { progress: SharedValue
   );
 }
 
-function GradientJourneyBar({ progress, rate, accent }: { progress: SharedValue<number>; rate: number; accent: string }) {
+function GradientJourneyBar({
+  progress,
+  rate,
+  accent,
+}: {
+  progress: SharedValue<number>;
+  rate: number;
+  accent: string;
+}) {
   const animProps = useAnimatedProps(() => ({
-    width: (rate * progress.value) + '%',
+    width: rate * progress.value + '%',
   }));
   return (
-    <View style={{ width: '100%', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+    <View
+      style={{ width: '100%', height: 8, borderRadius: 4, overflow: 'hidden' }}
+    >
       <Svg width="100%" height={8}>
         <Defs>
           <LinearGradient id="journeyGrad" x1="0" y1="0" x2="1" y2="0">
@@ -987,18 +1238,48 @@ function StreakSection({
         Streak Analytics
       </Text>
       <View style={styles.streakRow}>
-        <StatPill label="Best Streak" value={stats.overall.bestStreak} suffix="d" cs={cs} radii={radii} progress={p1} />
-        <StatPill label="Avg Streak" value={stats.averageStreak} suffix="d" cs={cs} radii={radii} progress={p2} />
-        <StatPill label="Broken" value={stats.streaksBroken} cs={cs} radii={radii} progress={p3} />
+        <StatPill
+          label="Best Streak"
+          value={stats.overall.bestStreak}
+          suffix="d"
+          cs={cs}
+          radii={radii}
+          progress={p1}
+        />
+        <StatPill
+          label="Avg Streak"
+          value={stats.averageStreak}
+          suffix="d"
+          cs={cs}
+          radii={radii}
+          progress={p2}
+        />
+        <StatPill
+          label="Broken"
+          value={stats.streaksBroken}
+          cs={cs}
+          radii={radii}
+          progress={p3}
+        />
       </View>
     </Raised>
   );
 }
 
 function StatPill({
-  label, value, suffix, cs, radii, progress,
+  label,
+  value,
+  suffix,
+  cs,
+  radii,
+  progress,
 }: {
-  label: string; value: number; suffix?: string; cs: any; radii: any; progress: SharedValue<number>;
+  label: string;
+  value: number;
+  suffix?: string;
+  cs: any;
+  radii: any;
+  progress: SharedValue<number>;
 }) {
   const animStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
@@ -1008,7 +1289,8 @@ function StatPill({
     <Animated.View style={[{ flex: 1 }, animStyle]}>
       <Inset radius={radii.pill} style={styles.statPill}>
         <Text style={[styles.statPillValue, { color: cs.textPrimary }]}>
-          {value}{suffix ?? ''}
+          {value}
+          {suffix ?? ''}
         </Text>
         <Text style={[styles.statPillLabel, { color: cs.textMuted }]}>
           {label}
@@ -1047,11 +1329,19 @@ function HabitJourneyCard({
       <Animated.View style={slideInStyle}>
         <Raised radius={radii.panel} distance={5} style={styles.journeyCard}>
           <View style={styles.journeyTop}>
-            <View style={[styles.journeyIconWrap, { backgroundColor: habit.color + '22' }]}>
+            <View
+              style={[
+                styles.journeyIconWrap,
+                { backgroundColor: habit.color + '22' },
+              ]}
+            >
               <Icon size={20} color={habit.color} />
             </View>
             <View style={styles.journeyInfo}>
-              <Text style={[styles.journeyName, { color: cs.textPrimary }]} numberOfLines={1}>
+              <Text
+                style={[styles.journeyName, { color: cs.textPrimary }]}
+                numberOfLines={1}
+              >
                 {habit.name}
               </Text>
               <Text style={[styles.journeyMeta, { color: cs.textMuted }]}>
@@ -1064,8 +1354,14 @@ function HabitJourneyCard({
           </View>
 
           {/* Timeline bar: gradient fill for completed portion */}
-          <View style={[styles.journeyBar, { backgroundColor: cs.backgroundDeep }]}>
-            <GradientJourneyBar progress={progress} rate={completedPct} accent={cs.accent} />
+          <View
+            style={[styles.journeyBar, { backgroundColor: cs.backgroundDeep }]}
+          >
+            <GradientJourneyBar
+              progress={progress}
+              rate={completedPct}
+              accent={cs.accent}
+            />
           </View>
 
           <View style={styles.journeyBottom}>
@@ -1085,7 +1381,9 @@ function formatCreatedDate(habitId: string): string {
   const h = habits.find(x => x.id === habitId);
   if (!h) return 'Unknown';
   const d = new Date(h.createdAt);
-  return MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  return (
+    MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear()
+  );
 }
 
 /* ─── Insight Item ─── */
@@ -1098,13 +1396,31 @@ function InsightItem({
   cs: any;
   radii: any;
 }) {
-  const borderColor = insight.type === 'positive' ? cs.iosGreen : insight.type === 'negative' ? cs.iosRed : cs.accent;
-  const icon = insight.type === 'positive' ? '✓' : insight.type === 'negative' ? '!' : '•';
-  const iconColor = insight.type === 'positive' ? cs.iosGreen : insight.type === 'negative' ? cs.iosRed : cs.accent;
+  const borderColor =
+    insight.type === 'positive'
+      ? cs.iosGreen
+      : insight.type === 'negative'
+      ? cs.iosRed
+      : cs.accent;
+  const icon =
+    insight.type === 'positive' ? '✓' : insight.type === 'negative' ? '!' : '•';
+  const iconColor =
+    insight.type === 'positive'
+      ? cs.iosGreen
+      : insight.type === 'negative'
+      ? cs.iosRed
+      : cs.accent;
 
   return (
     <View style={{ paddingHorizontal: 16, marginBottom: 10 }}>
-      <Raised radius={radii.panel} distance={4} style={[styles.insightCard, { borderLeftColor: borderColor, borderLeftWidth: 4 }]}>
+      <Raised
+        radius={radii.panel}
+        distance={4}
+        style={[
+          styles.insightCard,
+          { borderLeftColor: borderColor, borderLeftWidth: 4 },
+        ]}
+      >
         <View style={styles.insightRow}>
           <Text style={[styles.insightIcon, { color: iconColor }]}>{icon}</Text>
           <Text style={[styles.insightText, { color: cs.textPrimary }]}>
@@ -1141,6 +1457,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     marginTop: 12,
+    marginBottom: 25,
     gap: 12,
   },
   summaryGrid: {
@@ -1172,6 +1489,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     marginHorizontal: 20,
     marginTop: 20,
+    marginBottom: 20,
     padding: 16,
   },
   sectionTitle: {
@@ -1209,10 +1527,12 @@ const styles = StyleSheet.create({
   },
   horizontalScrollContent: {
     paddingHorizontal: 16,
+    marginBottom: 36,
   },
   streakContainer: {
     marginHorizontal: 20,
     marginTop: 20,
+    marginBottom: 10,
     padding: 16,
   },
   streakRow: {
