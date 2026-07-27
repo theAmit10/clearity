@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import FireIcon from 'react-native-heroicons/solid/FireIcon';
 import PencilIcon from 'react-native-heroicons/outline/PencilIcon';
 import Cog6ToothIcon from 'react-native-heroicons/outline/Cog6ToothIcon';
-import { colors, radii, spacing, typography } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import NeumorphicPressable from './NeumorphicPressable';
 import Raised from './Raised';
 
@@ -19,6 +19,8 @@ export default function PillsRow({
   onEdit,
   onOpenSettings,
 }: PillsRowProps) {
+  const { theme } = useTheme();
+  const { colors, radii, spacing, typography } = theme;
   const iconBtnSize = 38;
 
   return (

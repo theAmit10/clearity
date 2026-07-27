@@ -16,68 +16,62 @@ import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 import HabitNotificationConfigScreen from '../screens/HabitNotificationConfigScreen';
 import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import WidgetSettingsScreen from '../screens/WidgetSettingsScreen';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Native header styling shared by both modal/detail screens — flat,
-// shadowless, and colored to match the rest of the soft-UI theme instead
-// of the platform default white bar with a hairline shadow.
-const neumorphicHeaderOptions = {
-  headerShown: true,
-  title: '',
-  headerShadowVisible: false,
-  headerStyle: { backgroundColor: neumorphic.colors.background },
-  headerTintColor: neumorphic.colors.textPrimary,
-  headerTitleStyle: {
-    fontWeight: '800' as const,
-    color: neumorphic.colors.textPrimary,
-  },
-};
-
-// Also used for NavigationContainer so the sliver visible during screen
-// transitions/gestures is the app background, not RN's default white.
-const navigationTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: neumorphic.colors.background,
-    card: neumorphic.colors.background,
-    border: 'transparent',
-  },
-};
+function useNeumorphicHeaderOptions() {
+  const { theme } = useTheme();
+  return {
+    headerShown: true as const,
+    title: '',
+    headerShadowVisible: false,
+    headerStyle: { backgroundColor: theme.colors.background },
+    headerTintColor: theme.colors.textPrimary,
+    headerTitleStyle: {
+      fontWeight: '800' as const,
+      color: theme.colors.textPrimary,
+    },
+  };
+}
 
 function HomeStack() {
+  const { theme } = useTheme();
+  const headerOpts = useNeumorphicHeaderOptions();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: neumorphic.colors.background },
+        contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Stack.Screen name="HomeMain" component={HomeScreen} />
       <Stack.Screen
         name="HabitDetail"
         component={HabitDetailScreen}
-        options={{ ...neumorphicHeaderOptions, presentation: 'modal' }}
+        options={{ ...headerOpts, presentation: 'modal' }}
       />
       <Stack.Screen
         name="AddEditHabit"
         component={AddEditHabitScreen}
-        options={{ ...neumorphicHeaderOptions, presentation: 'modal' }}
+        options={{ ...headerOpts, presentation: 'modal' }}
       />
     </Stack.Navigator>
   );
 }
 
 function SettingsStack() {
+  const { theme } = useTheme();
+  const headerOpts = useNeumorphicHeaderOptions();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: neumorphic.colors.background },
+        contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Stack.Screen name="SettingsMain" component={SettingsScreen} />
@@ -85,7 +79,7 @@ function SettingsStack() {
         name="ReorderHabits"
         component={ReorderHabitsScreen}
         options={{
-          ...neumorphicHeaderOptions,
+          ...headerOpts,
           title: 'Reorder Habits',
           headerBackTitle: 'Back',
         }}
@@ -118,6 +112,17 @@ const navigationRef = createNavigationContainerRef();
 
 export default function RootNavigator() {
   const prevScreen = useRef<string | null>(null);
+  const { theme } = useTheme();
+
+  const navigationTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.colors.background,
+      card: theme.colors.background,
+      border: 'transparent',
+    },
+  };
 
   function getActiveRouteName(state: any): string {
     const route = state?.routes?.[state.index];

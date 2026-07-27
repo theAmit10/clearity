@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { colors, radii, spacing, typography } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import Pressed from './Pressed';
 
 type CellState = 'empty' | 'faint' | 'filled';
@@ -52,15 +52,17 @@ function buildHeatmapData(completions: Record<string, boolean>) {
   });
 }
 
-function Cell({ state }: { state: CellState }) {
-  const bg = state === 'filled' ? colors.accent
-    : state === 'faint' ? colors.accent + '40'
-    : colors.backgroundDeep + '80';
+function Cell({ state, accent, backgroundDeep }: { state: CellState; accent: string; backgroundDeep: string }) {
+  const bg = state === 'filled' ? accent
+    : state === 'faint' ? accent + '40'
+    : backgroundDeep + '80';
 
   return <View style={{ width: CELL_SIZE, height: CELL_SIZE, borderRadius: 2, backgroundColor: bg }} />;
 }
 
 export default function StreakHeatmap({ completions }: StreakHeatmapProps) {
+  const { theme } = useTheme();
+  const { colors, radii, spacing, typography } = theme;
   const data = useMemo(() => buildHeatmapData(completions), [completions]);
 
   const maxCells = Math.max(...data.flatMap(m => [m.tue.length, m.thu.length, m.sat.length]));
@@ -122,7 +124,7 @@ export default function StreakHeatmap({ completions }: StreakHeatmapProps) {
                     }}
                   >
                     {monthCells.map((state, ci) => (
-                      <Cell key={`${row}-${mi}-${ci}`} state={state} />
+                      <Cell key={`${row}-${mi}-${ci}`} state={state} accent={colors.accent} backgroundDeep={colors.backgroundDeep} />
                     ))}
                   </View>
                 ))}

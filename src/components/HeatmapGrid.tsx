@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { toDateKey, isFuture, addDays } from '../services/dateUtils';
 import { Inset } from './neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Props {
   completions: Record<string, boolean>;
@@ -32,21 +32,14 @@ function yearWeeks(year: number): Date[][] {
   return weeks;
 }
 
-/**
- * Compact read-only heatmap used inside HabitCard on the home list.
- * Same data and scroll behavior as the big YearHeatmap on the detail
- * screen (full current year, auto-scrolled to today) — just without the
- * weekday/month label gutters, and the tray itself stretches to the
- * card's full width instead of shrink-wrapping to a fixed pixel size.
- * The grid content is still 52+ weeks wide, so it scrolls horizontally
- * inside that full-width tray exactly like the detail screen version.
- */
 export default function HeatmapGrid({
   completions,
   color,
   cellSize = 10,
   gap = 2,
 }: Props) {
+  const { theme } = useTheme();
+  const { colors, radii } = theme;
   const side = cellSize + gap;
   const year = new Date().getFullYear();
   const weeksData = useMemo(() => yearWeeks(year), [year]);
@@ -77,7 +70,7 @@ export default function HeatmapGrid({
   const totalWidth = weeksData.length * side;
 
   return (
-    <Inset radius={neumorphic.radii.panel} style={styles.tray}>
+    <Inset radius={radii.panel} style={styles.tray}>
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -105,10 +98,10 @@ export default function HeatmapGrid({
                 const cellBg = !daysInYear
                   ? 'transparent'
                   : future
-                  ? neumorphic.colors.background
+                  ? colors.background
                   : done
                   ? color
-                  : neumorphic.colors.insetFill;
+                  : colors.insetFill;
 
                 return (
                   <View key={key} style={[styles.cell, { top: di * side }]}>
@@ -120,8 +113,20 @@ export default function HeatmapGrid({
                           borderRadius: 2,
                           backgroundColor: cellBg,
                         },
-                        daysInYear && !future && !done && styles.cellEmpty,
-                        daysInYear && !future && done && styles.cellDone,
+                        daysInYear && !future && !done && {
+                          borderTopWidth: 1,
+                          borderTopColor: colors.shadowDark + '80',
+                          borderLeftWidth: 1,
+                          borderLeftColor: colors.shadowDark + '66',
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.shadowLight + '99',
+                          borderRightWidth: 1,
+                          borderRightColor: colors.shadowLight + '73',
+                        },
+                        daysInYear && !future && done && {
+                          borderWidth: 1,
+                          borderColor: 'rgba(0,0,0,0.14)',
+                        },
                       ]}
                     />
                   </View>
@@ -144,20 +149,6 @@ const styles = StyleSheet.create({
   cell: {
     position: 'absolute',
     left: 0,
-  },
-  cellEmpty: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(179,187,201,0.5)',
-    borderLeftWidth: 1,
-    borderLeftColor: 'rgba(179,187,201,0.4)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.6)',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(255,255,255,0.45)',
-  },
-  cellDone: {
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.14)',
   },
 });
 

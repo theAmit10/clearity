@@ -10,7 +10,7 @@ import { computeStats } from '../store/habitStore';
 import HeatmapGrid from './HeatmapGrid';
 import { todayKey } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
 
 interface Props {
@@ -28,6 +28,7 @@ export default function HabitCard({
   onLongPress,
   isDragging,
 }: Props) {
+  const { theme } = useTheme();
   const stats = computeStats(habit);
   const doneToday = !!habit.completions[todayKey()];
   const scale = useSharedValue(1);
@@ -49,7 +50,7 @@ export default function HabitCard({
   return (
     <Pressable onPress={onPress} onLongPress={onLongPress}>
       <Raised
-        radius={neumorphic.radii.panel}
+        radius={theme.radii.panel}
         distance={7}
         style={[styles.card, isDragging && styles.dragging]}
       >
@@ -59,12 +60,12 @@ export default function HabitCard({
           </Raised>
 
           <View style={styles.headerText}>
-            <Text style={styles.name} numberOfLines={1}>
+            <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
               {habit.name}
             </Text>
             <View style={styles.streakRow}>
               {/* <Text style={styles.flame}>🔥</Text> */}
-              <Text style={styles.streak}>
+              <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
                 {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
                 Streak
               </Text>
@@ -89,7 +90,7 @@ export default function HabitCard({
                     { backgroundColor: habit.color, borderColor: habit.color },
                   ]}
                 >
-                  <Text style={[styles.checkMarkDone]}>✓</Text>
+                  <Text style={[styles.checkMarkDone, { color: '#FFFFFF' }]}>✓</Text>
                 </Inset>
               ) : (
                 <Raised
@@ -98,7 +99,7 @@ export default function HabitCard({
                   style={[
                     styles.checkCircle,
                     styles.checkCircleEmpty,
-                    { borderColor: habit.color },
+                    { borderColor: habit.color, backgroundColor: theme.colors.background },
                   ]}
                 />
               )}
@@ -147,7 +148,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '800',
-    color: neumorphic.colors.textPrimary,
     letterSpacing: -0.2,
   },
   streakRow: {
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
   },
   streak: {
     fontSize: 13,
-    color: neumorphic.colors.textMuted,
     fontWeight: '700',
   },
   checkCircle: {
@@ -173,10 +172,8 @@ const styles = StyleSheet.create({
   },
   checkCircleEmpty: {
     borderWidth: 2.5,
-    backgroundColor: neumorphic.colors.background,
   },
   checkMarkDone: {
-    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 18,
   },

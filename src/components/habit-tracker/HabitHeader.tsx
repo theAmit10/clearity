@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import XMarkIcon from 'react-native-heroicons/outline/XMarkIcon';
-import { colors, radii, spacing, typography } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import NeumorphicPressable from './NeumorphicPressable';
 import Raised from './Raised';
 import { Habit } from '../../types/habit';
@@ -11,6 +11,9 @@ interface HabitHeaderProps {
 }
 
 export default function HabitHeader({ habit, onClose }: HabitHeaderProps) {
+  const { theme } = useTheme();
+  const { colors, radii, spacing, typography } = theme;
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <Raised radius={18} distance={5}>

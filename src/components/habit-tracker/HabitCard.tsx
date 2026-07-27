@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { View, useWindowDimensions } from 'react-native';
-import { colors, radii, spacing } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import Raised from './Raised';
 import HabitHeader from './HabitHeader';
 import StreakHeatmap from './StreakHeatmap';
@@ -28,6 +28,8 @@ export default function HabitCard({
   onOpenSettings,
   onToggleDay,
 }: HabitCardProps) {
+  const { theme } = useTheme();
+  const { colors, radii, spacing } = theme;
   const { width: screenWidth } = useWindowDimensions();
 
   const cardWidth = Math.min(screenWidth - CARD_MARGIN * 2, CARD_MAX_WIDTH);

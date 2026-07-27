@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeIcon, Cog6ToothIcon } from 'react-native-heroicons/outline';
 import {
@@ -7,7 +7,7 @@ import {
   Cog6ToothIcon as Cog6ToothIconSolid,
 } from 'react-native-heroicons/solid';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 type IconComponent = React.ComponentType<{ size?: number; color?: string }>;
 
@@ -31,11 +31,19 @@ const TAB_META: Record<
  */
 export default function NeumorphicTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   return (
-    <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-      <Raised radius={28} distance={8} style={styles.bar}>
-        <View style={styles.row}>
+    <View
+      style={{
+        paddingHorizontal: 20,
+        paddingTop: 8,
+        paddingBottom: Math.max(insets.bottom, 12),
+        backgroundColor: theme.colors.background,
+      }}
+    >
+      <Raised radius={28} distance={8} style={{ padding: 8 }}>
+        <View style={{ flexDirection: 'row' }}>
           {state.routes.map((route: any, index: number) => {
             const isFocused = state.index === index;
             const meta = TAB_META[route.name] ?? TAB_META.Home;
@@ -56,33 +64,56 @@ export default function NeumorphicTabBar({ state, navigation }: any) {
               <Pressable
                 key={route.key}
                 onPress={onPress}
-                style={styles.tabHit}
+                style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
                 hitSlop={6}
               >
                 {isFocused ? (
                   <Inset
                     radius={18}
-                    style={[
-                      styles.tabPill,
-                      {
-                        backgroundColor: `${neumorphic.colors.accentFallback}22`,
-                      },
-                    ]}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      paddingVertical: 10,
+                      paddingHorizontal: 16,
+                      width: '100%',
+                      backgroundColor: `${theme.colors.accent}22`,
+                    }}
                   >
-                    <Icon size={22} color={neumorphic.colors.accentFallback} />
+                    <Icon size={22} color={theme.colors.accent} />
                     <Text
-                      style={[
-                        styles.label,
-                        { color: neumorphic.colors.accentFallback },
-                      ]}
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '800',
+                        color: theme.colors.accent,
+                      }}
                     >
                       {meta.label}
                     </Text>
                   </Inset>
                 ) : (
-                  <View style={styles.tabPill}>
-                    <Icon size={22} color={neumorphic.colors.textMuted} />
-                    <Text style={styles.labelInactive}>{meta.label}</Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      paddingVertical: 10,
+                      paddingHorizontal: 16,
+                      width: '100%',
+                    }}
+                  >
+                    <Icon size={22} color={theme.colors.textMuted} />
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '700',
+                        color: theme.colors.textMuted,
+                      }}
+                    >
+                      {meta.label}
+                    </Text>
                   </View>
                 )}
               </Pressable>
@@ -93,40 +124,3 @@ export default function NeumorphicTabBar({ state, navigation }: any) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    backgroundColor: neumorphic.colors.background,
-  },
-  bar: {
-    padding: 8,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  tabHit: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    width: '100%',
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  labelInactive: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: neumorphic.colors.textMuted,
-  },
-});

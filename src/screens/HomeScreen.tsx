@@ -8,9 +8,10 @@ import { Habit } from '../types/habit';
 import HabitCard from '../components/HabitCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function HomeScreen({ navigation }: any) {
+  const { theme } = useTheme();
   // IMPORTANT: select the raw array (stable reference) from the store, then
   // derive the filtered list with useMemo. Never return a freshly-created
   // array/object directly from a Zustand selector — a new reference on every
@@ -47,27 +48,27 @@ export default function HomeScreen({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Habitic</Text>
+        <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Habitic</Text>
         <NeumorphicButton
           radius={18}
           distance={5}
           style={styles.addButton}
           onPress={() => navigation.navigate('AddEditHabit')}
         >
-          <Text style={styles.addButtonText}>+</Text>
+          <Text style={[styles.addButtonText, { color: theme.colors.textPrimary }]}>+</Text>
         </NeumorphicButton>
       </View>
 
       {habits.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Raised
-            radius={neumorphic.radii.panel}
+            radius={theme.radii.panel}
             distance={7}
             style={styles.empty}
           >
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
               No habits yet.{'\n'}Tap + to add your first one.
             </Text>
           </Raised>
@@ -86,7 +87,7 @@ export default function HomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: neumorphic.colors.background },
+  container: { flex: 1 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,8 +99,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '900',
-    color: neumorphic.colors.textPrimary,
-    letterSpacing: 0 - 0.5,
+    letterSpacing: -0.5,
   },
   addButton: {
     width: 36,
@@ -108,7 +108,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addButtonText: {
-    color: neumorphic.colors.textPrimary,
     fontSize: 22,
     fontWeight: '700',
     marginTop: -2,
@@ -130,7 +129,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: neumorphic.colors.textMuted,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',

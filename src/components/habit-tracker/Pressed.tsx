@@ -1,4 +1,5 @@
 import { View, ViewStyle } from 'react-native';
+import { useTheme } from '../../theme/ThemeProvider';
 
 interface PressedProps {
   children: React.ReactNode;
@@ -11,20 +12,22 @@ export default function Pressed({
   radius = 16,
   containerStyle,
 }: PressedProps) {
+  const { theme } = useTheme();
+
   return (
     <View
       style={[
         {
           borderRadius: radius,
-          backgroundColor: '#DADFE7',
+          backgroundColor: theme.colors.insetFill,
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.5)',
+          borderTopColor: theme.colors.shadowLight + '80',
           borderLeftWidth: 1,
-          borderLeftColor: 'rgba(255,255,255,0.35)',
+          borderLeftColor: theme.colors.shadowLight + '59',
           borderRightWidth: 1,
-          borderRightColor: 'rgba(179,187,201,0.25)',
+          borderRightColor: theme.colors.shadowDark + '40',
           borderBottomWidth: 1,
-          borderBottomColor: 'rgba(179,187,201,0.15)',
+          borderBottomColor: theme.colors.shadowDark + '26',
         },
         containerStyle,
       ]}

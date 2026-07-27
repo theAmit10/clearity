@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import { colors } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import WeekdayLabels from './WeekdayLabels';
 import NeumorphicPressable from './NeumorphicPressable';
 
@@ -70,6 +70,8 @@ export default function CalendarGrid({
   onToggleDay,
   circleSize,
 }: CalendarGridProps) {
+  const { theme } = useTheme();
+  const { colors } = theme;
   const todayKey = useMemo(() => toDateKey(new Date()), []);
   const cells = useMemo(() => buildGrid(year, month), [year, month]);
 
@@ -79,15 +81,15 @@ export default function CalendarGrid({
   const circleRadius = circleSize / 2;
 
   const pressedFill = {
-    backgroundColor: '#DADFE7',
+    backgroundColor: theme.colors.insetFill,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.5)',
+    borderTopColor: theme.colors.shadowLight + '80',
     borderLeftWidth: 1,
-    borderLeftColor: 'rgba(255,255,255,0.35)',
+    borderLeftColor: theme.colors.shadowLight + '59',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(179,187,201,0.25)',
+    borderRightColor: theme.colors.shadowDark + '40',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(179,187,201,0.15)',
+    borderBottomColor: theme.colors.shadowDark + '26',
   } as const;
 
   return (

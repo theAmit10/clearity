@@ -8,9 +8,10 @@ import { useHabitStore } from '../store/habitStore';
 import { Habit } from '../types/habit';
 import { getHabitIcon } from '../constants/habitIcons';
 import { Raised } from '../components/neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function ReorderHabitsScreen() {
+  const { theme } = useTheme();
   const allHabits = useHabitStore(s => s.habits);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
   const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
@@ -30,24 +31,24 @@ export default function ReorderHabitsScreen() {
               onPressIn={drag}
               onLongPress={drag}
             >
-              <Text style={styles.dragIcon}>⋮⋮</Text>
+              <Text style={[styles.dragIcon, { color: theme.colors.textMuted }]}>⋮⋮</Text>
             </Pressable>
             <Raised radius={16} distance={3} style={styles.iconBadge}>
               <Icon size={20} color={item.color} />
             </Raised>
-            <Text style={styles.name} numberOfLines={1}>
+            <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
               {item.name}
             </Text>
           </Raised>
         </ScaleDecorator>
       );
     },
-    [],
+    [theme],
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.helpText}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.helpText, { color: theme.colors.textMuted }]}>
         Hold the drag handle ⋮⋮ to reorder your habits
       </Text>
       <DraggableFlatList
@@ -64,12 +65,10 @@ export default function ReorderHabitsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: neumorphic.colors.background,
   },
   helpText: {
     fontSize: 13,
     fontWeight: '600',
-    color: neumorphic.colors.textMuted,
     textAlign: 'center',
     paddingVertical: 12,
     paddingHorizontal: 20,
@@ -97,7 +96,6 @@ const styles = StyleSheet.create({
   dragIcon: {
     fontSize: 18,
     fontWeight: '700',
-    color: neumorphic.colors.textMuted,
     letterSpacing: -2,
   },
   iconBadge: {
@@ -111,6 +109,5 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '700',
-    color: neumorphic.colors.textPrimary,
   },
 });

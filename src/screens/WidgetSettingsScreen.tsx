@@ -13,9 +13,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { WidgetModule } from '../native/WidgetModule';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function WidgetSettingsScreen({ navigation }: any) {
+  const { theme } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,9 +60,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={theme.colors.iosBlue} />
         </View>
       </SafeAreaView>
     );
@@ -70,25 +71,25 @@ export default function WidgetSettingsScreen({ navigation }: any) {
   const activeHabits = habits.filter(h => !h.archived);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
-          <Text style={styles.backArrow}>←</Text>
-          <Text style={styles.backText}>Settings</Text>
+          <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
+          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>Settings</Text>
         </Pressable>
 
-        <Text style={styles.title}>Widget</Text>
+        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>Widget</Text>
 
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
           Select which habits to display on your widget. You can select up to 3
           habits. The widget shows a weekly heatmap for the current week.
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SELECTED HABITS</Text>
-          <View style={styles.sectionBody}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>SELECTED HABITS</Text>
+          <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
             {activeHabits.length === 0 && (
-              <Text style={styles.emptyText}>
+              <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>
                 No active habits. Create some habits first!
               </Text>
             )}
@@ -97,7 +98,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
               return (
                 <View
                   key={habit.id}
-                  style={[styles.row, i > 0 && styles.rowBorder]}
+                  style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.iosSeparator }]}
                 >
                   <View style={styles.rowLeft}>
                     <View
@@ -107,8 +108,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                       ]}
                     />
                     <View>
-                      <Text style={styles.habitName}>{habit.name}</Text>
-                      <Text style={styles.habitMeta}>
+                      <Text style={[styles.habitName, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
+                      <Text style={[styles.habitMeta, { color: theme.colors.iosSecondaryLabel }]}>
                         {Object.keys(habit.completions).length} days tracked
                       </Text>
                     </View>
@@ -116,8 +117,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                   <Switch
                     value={isSelected}
                     onValueChange={() => toggleHabit(habit.id)}
-                    trackColor={{ false: '#E5E5EA', true: '#34C759' }}
-                    thumbColor="#FFF"
+                    trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosGreen }}
+                    thumbColor={theme.colors.surface}
                   />
                 </View>
               );
@@ -125,9 +126,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>How it works</Text>
-          <Text style={styles.infoText}>
+        <View style={[styles.infoBox, { backgroundColor: theme.colors.iosBlue + '1A' }]}>
+          <Text style={[styles.infoTitle, { color: theme.colors.iosLabel }]}>How it works</Text>
+          <Text style={[styles.infoText, { color: theme.colors.iosLabel + '99' }]}>
             After selecting habits, add the widget to your home screen:
             {'\n\n'}
             {Platform.OS === 'ios'
@@ -141,7 +142,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: neumorphic.colors.background },
+  container: { flex: 1 },
   backRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -149,11 +150,10 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 22,
-    color: '#007AFF',
     marginRight: 4,
     ...Platform.select({ android: { lineHeight: 22, textAlignVertical: 'center', includeFontPadding: false } }),
   },
-  backText: { fontSize: 17, color: '#007AFF' },
+  backText: { fontSize: 17 },
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -163,31 +163,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1C1C1E',
     marginBottom: 20,
   },
   description: {
     fontSize: 14,
-    color: '#8E8E93',
     lineHeight: 20,
     marginBottom: 24,
   },
   section: { marginBottom: 24 },
   sectionBody: {
-    backgroundColor: '#FFF',
     borderRadius: 14,
     overflow: 'hidden',
   },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#8E8E93',
     marginBottom: 8,
     textTransform: 'uppercase',
   },
   emptyText: {
     fontSize: 15,
-    color: '#8E8E93',
     padding: 16,
     textAlign: 'center',
   },
@@ -197,10 +192,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: 16,
-  },
-  rowBorder: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E5EA',
   },
   rowLeft: {
     flexDirection: 'row',
@@ -215,28 +206,23 @@ const styles = StyleSheet.create({
   },
   habitName: {
     fontSize: 16,
-    color: '#1C1C1E',
     fontWeight: '500',
   },
   habitMeta: {
     fontSize: 12,
-    color: '#8E8E93',
     marginTop: 1,
   },
   infoBox: {
-    backgroundColor: '#E8F0FE',
     borderRadius: 14,
     padding: 16,
   },
   infoTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1C1C1E',
     marginBottom: 6,
   },
   infoText: {
     fontSize: 14,
-    color: '#3C3C43',
     lineHeight: 20,
   },
 });

@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 import CalendarDaysIcon from 'react-native-heroicons/outline/CalendarDaysIcon';
 import ChevronLeftIcon from 'react-native-heroicons/outline/ChevronLeftIcon';
 import ChevronRightIcon from 'react-native-heroicons/outline/ChevronRightIcon';
-import { colors, radii, spacing, typography } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 import NeumorphicPressable from './NeumorphicPressable';
 
 interface FooterNavProps {
@@ -21,6 +21,8 @@ export default function FooterNav({
   onPrevMonth,
   onNextMonth,
 }: FooterNavProps) {
+  const { theme } = useTheme();
+  const { colors, radii, spacing, typography } = theme;
   const label = `${MONTH_NAMES[month]} ${year}`;
 
   return (

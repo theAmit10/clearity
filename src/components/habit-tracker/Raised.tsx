@@ -1,6 +1,6 @@
 import { View, ViewStyle } from 'react-native';
 import { Shadow } from 'react-native-shadow-2';
-import { colors } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 
 interface RaisedProps {
   children: React.ReactNode;
@@ -15,12 +15,15 @@ export default function Raised({
   radius = 16,
   distance = 6,
   containerStyle,
-  surfaceColor = colors.background,
+  surfaceColor: surfaceColorProp,
 }: RaisedProps) {
+  const { theme } = useTheme();
+  const surfaceColor = surfaceColorProp ?? theme.colors.background;
+
   return (
     <Shadow
       distance={distance}
-      startColor={colors.shadowDark + '55'}
+      startColor={theme.colors.shadowDark + '55'}
       offset={[distance * 0.5, distance * 0.5]}
       style={{ borderRadius: radius }}
     >
@@ -30,9 +33,9 @@ export default function Raised({
             borderRadius: radius,
             backgroundColor: surfaceColor,
             borderTopWidth: 1,
-            borderTopColor: 'rgba(255,255,255,0.8)',
+            borderTopColor: theme.colors.shadowLight + 'CC',
             borderLeftWidth: 1,
-            borderLeftColor: 'rgba(255,255,255,0.5)',
+            borderLeftColor: theme.colors.shadowLight + '80',
           },
           containerStyle,
         ]}

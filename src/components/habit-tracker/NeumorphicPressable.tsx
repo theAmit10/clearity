@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import Raised from './Raised';
-import { colors } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 
 interface NeumorphicPressableProps extends PressableProps {
   children: React.ReactNode;
@@ -19,27 +19,29 @@ interface NeumorphicPressableProps extends PressableProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const pressedBg: ViewStyle = {
-  backgroundColor: '#DADFE7',
-  borderTopWidth: 1,
-  borderTopColor: 'rgba(255,255,255,0.5)',
-  borderLeftWidth: 1,
-  borderLeftColor: 'rgba(255,255,255,0.35)',
-  borderRightWidth: 1,
-  borderRightColor: 'rgba(179,187,201,0.25)',
-  borderBottomWidth: 1,
-  borderBottomColor: 'rgba(179,187,201,0.15)',
-};
-
 export default function NeumorphicPressable({
   children,
   radius = 16,
   distance = 5,
-  surfaceColor = colors.background,
+  surfaceColor: surfaceColorProp,
   containerStyle,
   scaleTo = 0.96,
   ...rest
 }: NeumorphicPressableProps) {
+  const { theme } = useTheme();
+  const surfaceColor = surfaceColorProp ?? theme.colors.background;
+
+  const pressedBg: ViewStyle = {
+    backgroundColor: theme.colors.insetFill,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.shadowLight + '80',
+    borderLeftWidth: 1,
+    borderLeftColor: theme.colors.shadowLight + '59',
+    borderRightWidth: 1,
+    borderRightColor: theme.colors.shadowDark + '40',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.shadowDark + '26',
+  };
   const [isPressed, setIsPressed] = useState(false);
   const scale = useSharedValue(1);
 

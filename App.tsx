@@ -1,7 +1,8 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { useHabitStore } from './src/store/habitStore';
@@ -13,11 +14,12 @@ import {
 } from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
 
-export default function App() {
+function AppContent() {
   const init = useHabitStore(s => s.init);
   const loaded = useHabitStore(s => s.loaded);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
+  const { theme } = useTheme();
 
   useEffect(() => {
     installGlobalErrorHandler();
@@ -41,18 +43,24 @@ export default function App() {
 
   if (!loaded) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={[styles.loading, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.textMuted} />
       </View>
     );
   }
 
+  return <RootNavigator />;
+}
+
+export default function App() {
   return (
-    <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootNavigator />
-      </GestureHandlerRootView>
-    </ErrorBoundary>
+    <ThemeProvider>
+      <ErrorBoundary>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AppContent />
+        </GestureHandlerRootView>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 
@@ -61,6 +69,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F2F2F7',
   },
 });

@@ -8,7 +8,7 @@ import Animated, {
 import PencilIcon from 'react-native-heroicons/outline/PencilIcon';
 import TrashIcon from 'react-native-heroicons/outline/TrashIcon';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Props {
   onEdit: () => void;
@@ -24,6 +24,7 @@ function ActionButton({
   icon: React.ComponentType<{ size: number; color: string }>;
   onPress: () => void;
 }) {
+  const { theme } = useTheme();
   const scale = useSharedValue(1);
   const [pressed, setPressed] = useState(false);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -46,7 +47,7 @@ function ActionButton({
       }}
     >
       <Wrapper radius={16} style={styles.button}>
-        <Icon size={22} color={neumorphic.colors.textPrimary} />
+        <Icon size={22} color={theme.colors.textPrimary} />
       </Wrapper>
     </AnimatedPressable>
   );

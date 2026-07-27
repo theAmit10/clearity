@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, Platform } from 'react-native';
-import { neumorphic } from '../../theme/neumorphicTheme';
+import { useTheme } from '../../theme/ThemeProvider';
 
 /**
  * Neumorphic "soft UI" primitives — dependency-free.
@@ -45,8 +45,10 @@ export function Raised({
   radius = 16,
   distance = 6,
   style,
-  backgroundColor = neumorphic.colors.background,
+  backgroundColor: bgProp,
 }: RaisedProps) {
+  const { theme } = useTheme();
+  const backgroundColor = bgProp ?? theme.colors.background;
   const blur = distance * 2;
 
   return (
@@ -60,7 +62,7 @@ export function Raised({
               {
                 borderRadius: radius,
                 backgroundColor,
-                shadowColor: neumorphic.colors.shadowDark,
+                shadowColor: theme.colors.shadowDark,
                 shadowOffset: { width: distance, height: distance },
                 shadowOpacity: 0.5,
                 shadowRadius: blur,
@@ -74,7 +76,7 @@ export function Raised({
               {
                 borderRadius: radius,
                 backgroundColor,
-                shadowColor: neumorphic.colors.shadowLight,
+                shadowColor: theme.colors.shadowLight,
                 shadowOffset: { width: -distance, height: -distance },
                 shadowOpacity: 0.9,
                 shadowRadius: blur,
@@ -91,7 +93,7 @@ export function Raised({
               borderRadius: radius,
               backgroundColor,
               elevation: distance,
-              shadowColor: neumorphic.colors.shadowDark,
+              shadowColor: theme.colors.shadowDark,
             },
           ]}
         />
@@ -103,9 +105,9 @@ export function Raised({
             borderRadius: radius,
             backgroundColor,
             borderTopWidth: 1,
-            borderTopColor: 'rgba(255,255,255,0.6)',
+            borderTopColor: theme.colors.shadowLight + '99',
             borderLeftWidth: 1,
-            borderLeftColor: 'rgba(255,255,255,0.4)',
+            borderLeftColor: theme.colors.shadowLight + '66',
           },
           style,
         ]}
@@ -127,8 +129,11 @@ export function Inset({
   children,
   radius = 16,
   style,
-  backgroundColor = neumorphic.colors.insetFill,
+  backgroundColor: bgProp,
 }: InsetProps) {
+  const { theme } = useTheme();
+  const backgroundColor = bgProp ?? theme.colors.insetFill;
+
   return (
     <View
       style={[
@@ -136,13 +141,13 @@ export function Inset({
           borderRadius: radius,
           backgroundColor,
           borderTopWidth: 1.5,
-          borderTopColor: 'rgba(150,160,178,0.55)',
+          borderTopColor: theme.colors.insetBorderDark,
           borderLeftWidth: 1.5,
-          borderLeftColor: 'rgba(150,160,178,0.4)',
+          borderLeftColor: theme.colors.shadowDark + '66',
           borderBottomWidth: 1.5,
-          borderBottomColor: 'rgba(255,255,255,0.7)',
+          borderBottomColor: theme.colors.insetBorderLight,
           borderRightWidth: 1.5,
-          borderRightColor: 'rgba(255,255,255,0.55)',
+          borderRightColor: theme.colors.shadowLight + '8C',
         },
         style,
       ]}

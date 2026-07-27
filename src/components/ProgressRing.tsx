@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { useTheme } from '../theme/ThemeProvider';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function ProgressRing({ progress, size = 44, strokeWidth = 4, color }: Props) {
+  const { theme } = useTheme();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const animatedProgress = useSharedValue(0);
@@ -40,7 +42,7 @@ export default function ProgressRing({ progress, size = 44, strokeWidth = 4, col
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E5E5EA"
+          stroke={theme.colors.iosSeparator}
           strokeWidth={strokeWidth}
           fill="none"
         />

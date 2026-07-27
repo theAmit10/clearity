@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import { colors, typography } from './theme';
+import { useTheme } from '../../theme/ThemeProvider';
 
 interface WeekdayLabelsProps {
   circleSize: number;
@@ -8,6 +8,9 @@ interface WeekdayLabelsProps {
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function WeekdayLabels({ circleSize }: WeekdayLabelsProps) {
+  const { theme } = useTheme();
+  const { colors, typography } = theme;
+
   return (
     <View style={{ flexDirection: 'row' }}>
       {DAYS.map(d => (

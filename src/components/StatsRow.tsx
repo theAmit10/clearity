@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { HabitStats } from '../types/habit';
 import { Raised } from './neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Props {
   stats: HabitStats;
@@ -12,9 +12,11 @@ interface Props {
 function AnimatedNumber({
   value,
   suffix = '',
+  color,
 }: {
   value: number;
   suffix?: string;
+  color: string;
 }) {
   const [display, setDisplay] = useState(value);
   useEffect(() => {
@@ -36,7 +38,7 @@ function AnimatedNumber({
     return () => cancelAnimationFrame(frame);
   }, [value]);
   return (
-    <Text style={styles.statValue}>
+    <Text style={[styles.statValue, { color }]}>
       {display}
       {suffix}
     </Text>
@@ -44,28 +46,25 @@ function AnimatedNumber({
 }
 
 export default function StatsRow({ stats, goal }: Props) {
+  const { theme } = useTheme();
   return (
     <View style={styles.row}>
-      <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        {/* <Text style={styles.chipIcon}>🔥</Text> */}
-        <AnimatedNumber value={stats.currentStreak} suffix="d" />
-        <Text style={styles.chipLabel}>Streak</Text>
+      <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
+        <AnimatedNumber value={stats.currentStreak} suffix="d" color={theme.colors.textPrimary} />
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Streak</Text>
       </Raised>
-      <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        {/* <Text style={styles.chipIcon}>🏆</Text> */}
-        <AnimatedNumber value={stats.bestStreak} suffix="d" />
-        <Text style={styles.chipLabel}>Best</Text>
+      <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
+        <AnimatedNumber value={stats.bestStreak} suffix="d" color={theme.colors.textPrimary} />
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Best</Text>
       </Raised>
-      <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-        {/* <Text style={styles.chipIcon}>✅</Text> */}
-        <AnimatedNumber value={stats.completionRate30d} suffix="%" />
-        <Text style={styles.chipLabel}>30d</Text>
+      <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
+        <AnimatedNumber value={stats.completionRate30d} suffix="%" color={theme.colors.textPrimary} />
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>30d</Text>
       </Raised>
       {goal && (
-        <Raised radius={neumorphic.radii.pill} distance={5} style={styles.chip}>
-          {/* <Text style={styles.chipIcon}>🎯</Text> */}
-          <Text style={styles.statValue}>{goal}</Text>
-          <Text style={styles.chipLabel}>Goal</Text>
+        <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
+          <Text style={[styles.statValue, { color: theme.colors.textPrimary }]}>{goal}</Text>
+          <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Goal</Text>
         </Raised>
       )}
     </View>
@@ -91,11 +90,9 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: neumorphic.colors.textPrimary,
   },
   chipLabel: {
     fontSize: 12,
-    color: neumorphic.colors.textMuted,
     marginLeft: 2,
     fontWeight: '600',
   },

@@ -15,10 +15,11 @@ import ActionButtons from '../components/ActionButtons';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
 
 export default function HabitDetailScreen({ route, navigation }: any) {
+  const { theme } = useTheme();
   const { id } = route.params;
   const habit = useHabitStore(s => s.habits.find(h => h.id === id));
   const deleteHabit = useHabitStore(s => s.deleteHabit);
@@ -60,27 +61,26 @@ export default function HabitDetailScreen({ route, navigation }: any) {
   const Icon = getHabitIcon(habit.icon);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['bottom']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={cardStyle}>
           <Raised
-            radius={neumorphic.radii.card}
+            radius={theme.radii.card}
             distance={10}
             style={styles.card}
           >
-            {}
             <View style={styles.header}>
               <View style={styles.headerLeft}>
                 <Raised radius={18} distance={5} style={styles.iconBadge}>
                   <Icon size={26} color={habit.color} />
                 </Raised>
                 <View style={styles.headerText}>
-                  <Text style={styles.name}>{habit.name}</Text>
+                  <Text style={[styles.name, { color: theme.colors.textPrimary }]}>{habit.name}</Text>
                   {habit.description && (
-                    <Text style={styles.description}>{habit.description}</Text>
+                    <Text style={[styles.description, { color: theme.colors.textMuted }]}>{habit.description}</Text>
                   )}
                 </View>
               </View>
@@ -90,42 +90,20 @@ export default function HabitDetailScreen({ route, navigation }: any) {
                 style={styles.closeButton}
                 onPress={() => navigation.goBack()}
               >
-                <Text style={styles.closeText}>✕</Text>
+                <Text style={[styles.closeText, { color: theme.colors.textMuted }]}>✕</Text>
               </NeumorphicButton>
             </View>
 
-            {}
             <View style={styles.section}>
               <YearHeatmap habitId={habit.id} color={habit.color} />
             </View>
 
-            {}
             <View style={styles.section}>
               <StatsRow stats={stats} goal={habit.goal} />
-              {/* <View style={styles.actionRow}>
-                <ActionButtons
-                  onEdit={() =>
-                    navigation.navigate('AddEditHabit', { id: habit.id })
-                  }
-                  onSettings={confirmDelete}
-                />
-              </View> */}
             </View>
 
-            {}
-            {/* <View style={styles.actionRow}>
-              <ActionButtons
-                onEdit={() =>
-                  navigation.navigate('AddEditHabit', { id: habit.id })
-                }
-                onSettings={confirmDelete}
-              />
-            </View> */}
+            <View style={[styles.divider, { backgroundColor: theme.colors.shadowDark + '80' }]} />
 
-            {}
-            <View style={styles.divider} />
-
-            {}
             <View style={styles.section}>
               <MonthlyCalendar habitId={habit.id} color={habit.color} />
             </View>
@@ -148,7 +126,6 @@ export default function HabitDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: neumorphic.colors.background,
   },
   scrollContent: {
     padding: 16,
@@ -181,11 +158,9 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 26,
     fontWeight: '800',
-    color: neumorphic.colors.textPrimary,
   },
   description: {
     fontSize: 14,
-    color: neumorphic.colors.textMuted,
     marginTop: 2,
     fontWeight: '500',
   },
@@ -198,7 +173,6 @@ const styles = StyleSheet.create({
   },
   closeText: {
     fontSize: 14,
-    color: neumorphic.colors.textMuted,
     fontWeight: '700',
   },
   section: {
@@ -212,7 +186,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(179,187,201,0.5)',
     marginBottom: 16,
   },
 });

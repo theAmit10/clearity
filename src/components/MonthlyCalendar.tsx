@@ -17,7 +17,7 @@ import { toDateKey, isFuture } from '../services/dateUtils';
 import { useHabitStore } from '../store/habitStore';
 import { Raised } from './neumorphic/NeumorphicView';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Props {
   habitId: string;
@@ -76,14 +76,16 @@ function generateMonths(
 
 export default function MonthlyCalendar({
   habitId,
-  color = neumorphic.colors.accentFallback,
+  color: colorProp,
 }: Props) {
+  const { theme } = useTheme();
+  const { colors, radii } = theme;
+  const color = colorProp ?? colors.accent;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const completions = useHabitStore(s => {
     const h = s.habits.find(h => h.id === habitId);
     return h?.completions ?? {};
   });
-
   const today = new Date();
   const todayStr = toDateKey(today);
   const centerIndex = 24;
@@ -114,7 +116,7 @@ export default function MonthlyCalendar({
         textAlign: 'center' as const,
         fontSize: 12,
         fontWeight: '700' as const,
-        color: neumorphic.colors.textMuted,
+        color: colors.textMuted,
       },
       spacer: { width: cellSize, height: cellSize },
       wrapper: {
@@ -138,7 +140,7 @@ export default function MonthlyCalendar({
         justifyContent: 'center' as const,
       },
     }),
-    [cellSize, circleSize],
+    [cellSize, circleSize, colors, radii],
   );
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
@@ -190,7 +192,7 @@ export default function MonthlyCalendar({
                   <View key={dateKey} style={CS.wrapper}>
                     <View style={CS.hitArea}>
                       <View style={[CS.circle, styles.futureCircle]}>
-                        <Text style={[styles.dayText, styles.futureText]}>
+                        <Text style={[styles.dayText, styles.futureText, { color: colors.textMuted }]}>
                           {day}
                         </Text>
                       </View>
@@ -209,10 +211,10 @@ export default function MonthlyCalendar({
                     style={[
                       CS.circle,
                       isCompleted && { backgroundColor: `${color}26` },
-                      isToday && styles.todayRing,
+                      isToday && [styles.todayRing, { borderColor: colors.textPrimary }],
                     ]}
                   >
-                    <Text style={[styles.dayText, isCompleted && { color }]}>
+                    <Text style={[styles.dayText, { color: colors.textPrimary }, isCompleted && { color }]}>
                       {day}
                     </Text>
                   </NeumorphicButton>
@@ -253,7 +255,7 @@ export default function MonthlyCalendar({
   }, [containerWidth > 0]);
 
   return (
-    <Raised radius={neumorphic.radii.panel} distance={7} style={styles.card}>
+    <Raised radius={radii.panel} distance={7} style={styles.card}>
       <View onLayout={onLayout} style={styles.calendarBody}>
         {containerWidth > 0 && (
           <FlatList
@@ -278,17 +280,17 @@ export default function MonthlyCalendar({
 
         <View style={styles.bottomNav}>
           <Raised
-            radius={neumorphic.radii.pill}
+            radius={radii.pill}
             distance={5}
             style={styles.monthPicker}
           >
             <Pressable style={styles.monthPickerHit}>
-              <Text style={styles.monthPickerText}>📅 {monthLabel}</Text>
+              <Text style={[styles.monthPickerText, { color: colors.textPrimary }]}>📅 {monthLabel}</Text>
             </Pressable>
           </Raised>
           <View style={styles.navButtons}>
             <NeumorphicButton
-              radius={neumorphic.radii.iconBtn}
+              radius={radii.iconBtn}
               distance={5}
               style={styles.navButton}
               onPress={() => {
@@ -304,10 +306,10 @@ export default function MonthlyCalendar({
                   });
               }}
             >
-              <Text style={styles.navButtonText}>‹</Text>
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>‹</Text>
             </NeumorphicButton>
             <NeumorphicButton
-              radius={neumorphic.radii.iconBtn}
+              radius={radii.iconBtn}
               distance={5}
               style={styles.navButton}
               onPress={() => {
@@ -323,7 +325,7 @@ export default function MonthlyCalendar({
                   });
               }}
             >
-              <Text style={styles.navButtonText}>›</Text>
+              <Text style={[styles.navButtonText, { color: colors.textPrimary }]}>›</Text>
             </NeumorphicButton>
           </View>
         </View>
@@ -353,18 +355,15 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 15,
     fontWeight: '700',
-    color: neumorphic.colors.textPrimary,
   },
   futureCircle: {
     backgroundColor: 'transparent',
   },
   futureText: {
-    color: neumorphic.colors.textMuted,
     opacity: 0.5,
   },
   todayRing: {
     borderWidth: 2,
-    borderColor: neumorphic.colors.textPrimary,
   },
   missedDot: {
     position: 'absolute',
@@ -398,7 +397,6 @@ const styles = StyleSheet.create({
   monthPickerText: {
     fontSize: 14,
     fontWeight: '700',
-    color: neumorphic.colors.textPrimary,
   },
   navButtons: {
     flexDirection: 'row',
@@ -413,7 +411,6 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: neumorphic.colors.textPrimary,
   },
 });
 

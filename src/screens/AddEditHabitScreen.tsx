@@ -16,7 +16,7 @@ import { logEvent } from '../services/logger';
 import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 // const COLORS = [
 //   '#FF5A5F',
@@ -76,6 +76,7 @@ const COLORS = [
 const GOAL_PRESETS = ['Daily', 'Weekly', 'Monthly'];
 
 export default function AddEditHabitScreen({ route, navigation }: any) {
+  const { theme } = useTheme();
   const editId = route.params?.id;
   const existing = useHabitStore(s => s.habits.find(h => h.id === editId));
   const addHabit = useHabitStore(s => s.addHabit);
@@ -130,29 +131,29 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
             {existing ? 'Edit Habit' : 'New Habit'}
           </Text>
 
-          <Text style={styles.label}>Name</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Name</Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={name}
               onChangeText={setName}
               placeholder="e.g. Drink water"
-              placeholderTextColor={neumorphic.colors.textMuted}
-              style={styles.input}
+              placeholderTextColor={theme.colors.textMuted}
+              style={[styles.input, { color: theme.colors.textPrimary }]}
             />
           </Inset>
 
-          <Text style={styles.label}>Description</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Description</Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={description}
               onChangeText={setDescription}
               placeholder="e.g. 8 glasses per day"
-              placeholderTextColor={neumorphic.colors.textMuted}
-              style={[styles.input, styles.multiline]}
+              placeholderTextColor={theme.colors.textMuted}
+              style={[styles.input, styles.multiline, { color: theme.colors.textPrimary }]}
               multiline
               numberOfLines={2}
             />
@@ -191,7 +192,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             })}
           </View> */}
 
-          <Text style={styles.label}>Icon</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Icon</Text>
           <View style={styles.row}>
             {HABIT_ICONS.map(({ key, Icon }) => {
               const selected = icon === key;
@@ -209,14 +210,14 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                 >
                   <Icon
                     size={22}
-                    color={selected ? color : neumorphic.colors.textMuted}
+                    color={selected ? color : theme.colors.textMuted}
                   />
                 </NeumorphicButton>
               );
             })}
           </View>
 
-          <Text style={styles.label}>Color</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Color</Text>
           <View style={styles.row}>
             {COLORS.map(c => {
               const selected = color === c;
@@ -228,7 +229,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     backgroundColor={c}
                     style={[
                       styles.colorOption,
-                      selected && styles.colorOptionSelected,
+                      selected && { borderWidth: 3, borderColor: theme.colors.textPrimary },
                     ]}
                   />
                 </Pressable>
@@ -240,14 +241,14 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             radius={16}
             distance={6}
             disabled={!canSave}
-            backgroundColor={canSave ? color : neumorphic.colors.insetFill}
+            backgroundColor={canSave ? color : theme.colors.insetFill}
             style={styles.saveButton}
             onPress={handleSave}
           >
             <Text
               style={[
                 styles.saveButtonText,
-                !canSave && styles.saveButtonTextDisabled,
+                !canSave && { color: theme.colors.textMuted },
               ]}
             >
               {existing ? 'Save Changes' : 'Create Habit'}
@@ -260,19 +261,17 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: neumorphic.colors.background },
+  container: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: neumorphic.colors.textPrimary,
     marginBottom: 24,
     letterSpacing: -0.2,
   },
   label: {
     fontSize: 13,
     fontWeight: '700',
-    color: neumorphic.colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
     marginBottom: 10,
@@ -286,7 +285,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     fontWeight: '600',
-    color: neumorphic.colors.textPrimary,
   },
   multiline: { minHeight: 64, textAlignVertical: 'top' },
   goalPresetRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
@@ -299,7 +297,6 @@ const styles = StyleSheet.create({
   goalPresetText: {
     fontSize: 13,
     fontWeight: '700',
-    color: neumorphic.colors.textMuted,
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 },
   iconOption: {
@@ -311,10 +308,6 @@ const styles = StyleSheet.create({
   colorOption: {
     width: 40,
     height: 40,
-  },
-  colorOptionSelected: {
-    borderWidth: 3,
-    borderColor: neumorphic.colors.textPrimary,
   },
   saveButton: {
     marginTop: 2,
@@ -328,7 +321,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButtonTextDisabled: {
-    color: neumorphic.colors.textMuted,
   },
 });
 

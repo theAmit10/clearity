@@ -28,8 +28,10 @@ import {
   IOS_APP_STORE_ID,
   ANDROID_PACKAGE_NAME,
 } from '../constants/appInfo';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function SettingsScreen({ navigation }: any) {
+  const { theme, themeName, setTheme, availableThemes } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
   const mergeHabits = useHabitStore(s => s.mergeHabits);
@@ -107,8 +109,6 @@ export default function SettingsScreen({ navigation }: any) {
 
   const handleSendFeedback = () => {
     const subject = encodeURIComponent('App Feedback');
-    // Blank lines at the top so the person's own message starts above the
-    // footer, not mixed into it.
     const footer = [
       '',
       '',
@@ -157,13 +157,6 @@ export default function SettingsScreen({ navigation }: any) {
           text: 'Reset',
           style: 'destructive',
           onPress: async () => {
-            // Update the in-memory store FIRST so the UI reflects the
-            // reset immediately, then clear persisted storage separately
-            // with its own error handling. Previously this awaited
-            // clearAll() first with no try/catch — if that promise
-            // rejected for any reason, the failure was swallowed silently
-            // and replaceAllHabits([]) never ran, which is exactly what
-            // "the button doesn't do anything" looks like from outside.
             replaceAllHabits([]);
             try {
               await clearAll();
@@ -181,13 +174,61 @@ export default function SettingsScreen({ navigation }: any) {
     );
   };
 
+  function Section({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) {
+    return (
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{title}</Text>
+        <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>{children}</View>
+      </View>
+    );
+  }
+
+  function Row({
+    label,
+    onPress,
+    disabled,
+    destructive,
+  }: {
+    label: string;
+    onPress: () => void;
+    disabled?: boolean;
+    destructive?: boolean;
+  }) {
+    return (
+      <TouchableHighlight
+        onPress={onPress}
+        disabled={disabled}
+        underlayColor={theme.colors.iosSeparator}
+        activeOpacity={1}
+        style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}
+      >
+        <Text
+          style={[
+            styles.rowLabel,
+            { color: theme.colors.iosBlue },
+            destructive && { color: theme.colors.iosRed },
+            disabled && styles.rowLabelDisabled,
+          ]}
+        >
+          {label}
+        </Text>
+      </TouchableHighlight>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>Settings</Text>
 
         <Section title="Habits">
-          <Text style={styles.description}>
+          <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
             Reorder your habits by long-pressing them on the home screen, or
             use the dedicated reorder screen below.
           </Text>
@@ -208,7 +249,7 @@ export default function SettingsScreen({ navigation }: any) {
         </Section>
 
         <Section title="Widget">
-          <Text style={styles.description}>
+          <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
             Select habits to display on your iOS home screen widget with a
             weekly heatmap.
           </Text>
@@ -219,7 +260,7 @@ export default function SettingsScreen({ navigation }: any) {
         </Section>
 
         <Section title="Notifications & Reminders">
-          <Text style={styles.description}>
+          <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
             Set daily reminders for each habit and configure admin-level
             scheduled notifications.
           </Text>
@@ -227,6 +268,19 @@ export default function SettingsScreen({ navigation }: any) {
             label="Notification settings"
             onPress={() => navigation.navigate('NotificationSettings')}
           />
+        </Section>
+
+        <Section title="Theme">
+          {availableThemes.map(t => {
+            const active = themeName === t.name;
+            return (
+              <Row
+                key={t.name}
+                label={`${active ? '✓ ' : '   '}${t.label}`}
+                onPress={() => setTheme(t.name)}
+              />
+            );
+          })}
         </Section>
 
         <Section title="Community & Feedback">
@@ -260,77 +314,26 @@ export default function SettingsScreen({ navigation }: any) {
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionBody}>{children}</View>
-    </View>
-  );
-}
-
-function Row({
-  label,
-  onPress,
-  disabled,
-  destructive,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  destructive?: boolean;
-}) {
-  return (
-    <TouchableHighlight
-      onPress={onPress}
-      disabled={disabled}
-      underlayColor="#E5E5EA"
-      activeOpacity={1}
-      style={styles.row}
-    >
-      <Text
-        style={[
-          styles.rowLabel,
-          destructive && styles.rowLabelDestructive,
-          disabled && styles.rowLabelDisabled,
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableHighlight>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F2F7' },
+  container: { flex: 1 },
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1C1C1E',
     marginBottom: 20,
   },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#8E8E93',
     marginBottom: 8,
     textTransform: 'uppercase',
   },
   sectionBody: {
-    backgroundColor: '#FFF',
     borderRadius: 14,
     overflow: 'hidden',
   },
   description: {
     fontSize: 13,
-    color: '#8E8E93',
     marginBottom: 10,
     lineHeight: 18,
     paddingLeft: 5,
@@ -340,10 +343,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E5EA',
   },
-  rowLabel: { fontSize: 16, color: '#007AFF' },
-  rowLabelDestructive: { color: '#FF3B30' },
+  rowLabel: { fontSize: 16 },
   rowLabelDisabled: { opacity: 0.4 },
 });
 

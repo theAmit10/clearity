@@ -10,7 +10,7 @@ import {
 import { toDateKey, isFuture, addDays } from '../services/dateUtils';
 import { useHabitStore } from '../store/habitStore';
 import { Inset } from './neumorphic/NeumorphicView';
-import { neumorphic } from '../theme/neumorphicTheme';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Props {
   habitId: string;
@@ -43,18 +43,8 @@ function weekMonthLabels(
   weeks: Date[][],
 ): { label: string; col: number; key: string }[] {
   const names = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ];
   const labels: { label: string; col: number; key: string }[] = [];
   let lastMonth = -1;
@@ -73,6 +63,8 @@ function weekMonthLabels(
 }
 
 export default function YearHeatmap({ habitId, color }: Props) {
+  const { theme } = useTheme();
+  const { colors, radii } = theme;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const completions = useHabitStore(s => {
     const h = s.habits.find(h => h.id === habitId);
@@ -109,15 +101,13 @@ export default function YearHeatmap({ habitId, color }: Props) {
   const totalWidth = weeks.length * SIDE;
 
   return (
-    // Sunken "tray" — the whole grid reads as pressed into the card,
-    // with each completed day looking like a little lit-up pixel inside it.
-    <Inset radius={neumorphic.radii.panel} style={styles.container}>
+    <Inset radius={radii.panel} style={styles.container}>
       <View style={{ flexDirection: 'row' }}>
         <View style={styles.weekdayCol}>
           {WEEKDAYS.map((day, i) => (
             <Text
               key={i}
-              style={[styles.weekdayLabel, { height: SIDE, lineHeight: SIDE }]}
+              style={[styles.weekdayLabel, { height: SIDE, lineHeight: SIDE, color: colors.textMuted }]}
             >
               {day}
             </Text>
@@ -137,7 +127,7 @@ export default function YearHeatmap({ habitId, color }: Props) {
               {monthLabels.map(({ label, col, key }) => (
                 <Text
                   key={key}
-                  style={[styles.monthLabel, { left: col * SIDE }]}
+                  style={[styles.monthLabel, { left: col * SIDE, color: colors.textMuted }]}
                 >
                   {label}
                 </Text>
@@ -171,10 +161,10 @@ export default function YearHeatmap({ habitId, color }: Props) {
                     const cellBg = !daysInYear
                       ? 'transparent'
                       : future
-                      ? neumorphic.colors.background
+                      ? colors.background
                       : done
                       ? color
-                      : neumorphic.colors.insetFill;
+                      : colors.insetFill;
 
                     return (
                       <View key={key} style={[styles.cell, { top: di * SIDE }]}>
@@ -190,11 +180,20 @@ export default function YearHeatmap({ habitId, color }: Props) {
                                 borderRadius: 2,
                                 backgroundColor: cellBg,
                               },
-                              daysInYear &&
-                                !future &&
-                                !done &&
-                                styles.cellEmpty,
-                              daysInYear && !future && done && styles.cellDone,
+                              daysInYear && !future && !done && {
+                                borderTopWidth: 1,
+                                borderTopColor: colors.shadowDark + '80',
+                                borderLeftWidth: 1,
+                                borderLeftColor: colors.shadowDark + '66',
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.shadowLight + '99',
+                                borderRightWidth: 1,
+                                borderRightColor: colors.shadowLight + '73',
+                              },
+                              daysInYear && !future && done && {
+                                borderWidth: 1,
+                                borderColor: 'rgba(0,0,0,0.14)',
+                              },
                             ]}
                           />
                         </Pressable>
@@ -219,7 +218,6 @@ const styles = StyleSheet.create({
   monthLabel: {
     position: 'absolute',
     fontSize: 10,
-    color: neumorphic.colors.textMuted,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.3,
@@ -230,7 +228,6 @@ const styles = StyleSheet.create({
   },
   weekdayLabel: {
     fontSize: 9,
-    color: neumorphic.colors.textMuted,
     fontWeight: '700',
     textAlign: 'right',
     paddingRight: 4,
@@ -238,23 +235,5 @@ const styles = StyleSheet.create({
   cell: {
     position: 'absolute',
     left: 1,
-  },
-  // Empty (not-yet-done) cell: faint carved-in border so it reads as a
-  // tiny divot in the tray rather than a flat gray square.
-  cellEmpty: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(179,187,201,0.5)',
-    borderLeftWidth: 1,
-    borderLeftColor: 'rgba(179,187,201,0.4)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.6)',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(255,255,255,0.45)',
-  },
-  // Done cell: thin dark edge so the filled color looks pressed in,
-  // not just painted on top.
-  cellDone: {
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.14)',
   },
 });
