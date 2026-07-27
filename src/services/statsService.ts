@@ -212,34 +212,14 @@ export function computeStats(habits: Habit[]): StatsData {
 
   const monthCompletionRate = overallTotal > 0 ? Math.round((monthCompleted / overallTotal) * 100) : 0;
   const weekCompletionRate = active.length * 7 > 0 ? Math.round((weekCompleted / (active.length * 7)) * 100) : 0;
-  const overallRate = totalDaysTracked * active.length > 0
-    ? Math.round((totalCheckIns / (totalDaysTracked * active.length)) * 100)
-    : 0;
-
-  let allCurrentStreaks = active.map(h => computeCurrentStreak(h));
-  let allBestStreaks = active.map(h => computeBestStreak(h));
-
-  const overall: OverallStats = {
-    totalHabits: active.length,
-    totalCheckIns,
-    currentStreak: Math.max(...allCurrentStreaks, 0),
-    bestStreak: Math.max(...allBestStreaks, 0),
-    overallCompletionRate: overallRate,
-    weekCompletionRate,
-    monthCompletionRate,
-    perfectDays,
-    totalDaysTracked,
-  };
 
   const habitStats: HabitDetailStats[] = active.map(h => {
     const dates = Object.keys(h.completions).filter(k => h.completions[k]);
     const sortedDates = dates.slice().sort();
-
     let weekComp = 0;
     let monthComp = 0;
     for (const key of last7Keys) { if (h.completions[key]) weekComp++; }
     for (const key of last30Keys) { if (h.completions[key]) monthComp++; }
-
     const lastCompleted = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
     const createdDate = new Date(h.createdAt);
     createdDate.setHours(0, 0, 0, 0);
@@ -254,26 +234,32 @@ export function computeStats(habits: Habit[]): StatsData {
     const avgPerWeek = Math.round((totalCompletions / totalDays) * 7);
     const trend = getHabitTrend(h);
     const completionRateAll = Math.round((totalCompletions / totalDays) * 100);
-
     return {
-      id: h.id,
-      name: h.name,
-      icon: h.icon,
-      color: h.color,
+      id: h.id, name: h.name, icon: h.icon, color: h.color,
       currentStreak: computeCurrentStreak(h),
       bestStreak: computeBestStreak(h),
       completionRateWeek: Math.round((weekComp / 7) * 100),
       completionRateMonth: Math.round((monthComp / 30) * 100),
-      completionRateAll,
-      totalCompletions,
-      totalMisses,
-      avgPerWeek,
-      lastCompleted,
-      habitAge: totalDays,
-      trend,
-      goal: h.goal,
+      completionRateAll, totalCompletions, totalMisses, avgPerWeek,
+      lastCompleted, habitAge: totalDays, trend, goal: h.goal,
     };
   });
+
+  const overallCompletionRate = habitStats.length > 0
+    ? Math.round(habitStats.reduce((sum, h) => sum + h.completionRateAll, 0) / habitStats.length)
+    : 0;
+
+  const overall: OverallStats = {
+    totalHabits: active.length,
+    totalCheckIns,
+    currentStreak: Math.max(...habitStats.map(h => h.currentStreak), 0),
+    bestStreak: Math.max(...habitStats.map(h => h.bestStreak), 0),
+    overallCompletionRate,
+    weekCompletionRate,
+    monthCompletionRate,
+    perfectDays,
+    totalDaysTracked,
+  };
 
   const weeklyTrend: WeeklyDataPoint[] = (() => {
     const points: WeeklyDataPoint[] = [];

@@ -10,7 +10,7 @@
  *   totalCheckIns        – sum of all completion entries across all active habits
  *   currentStreak        – highest active consecutive-day streak of any habit
  *   bestStreak           – highest ever streak across all habits
- *   overallCompletionRate – totalCheckIns / (daysTracked × activeCount) × 100
+ *   overallCompletionRate – average of each habit's completionRateAll (bounded 0–100)
  *   weekCompletionRate   – completions in last 7d / (activeCount × 7) × 100
  *   monthCompletionRate  – completions in last 30d / (activeCount × 30) × 100
  *   perfectDays          – days in last 30 where every active habit was done
@@ -111,7 +111,7 @@ export default function AnalyticsScreen({ navigation }: any) {
 
   const chartWidth = screenWidth - 64;
   const weeklyChartHeight = 180;
-  const weeklyMargins = { left: 36, right: 8, top: 12, bottom: 28 };
+  const weeklyMargins = { left: 36, right: 8, top: 12, bottom: 44 };
   const weeklyInnerWidth = chartWidth - weeklyMargins.left - weeklyMargins.right;
   const weeklyBarWidth = Math.max(4, weeklyInnerWidth / stats.weeklyTrend.length - 4);
 
@@ -240,7 +240,7 @@ export default function AnalyticsScreen({ navigation }: any) {
               size={100}
               strokeWidth={10}
               color={cs.accent}
-              label="Completion"
+              label="Avg Consistency"
               cs={cs}
               entered={entered['summary']}
             />
@@ -431,35 +431,46 @@ function CircularRing({
     strokeDashoffset: circumference * (1 - progress.value * (rate / 100)),
   }));
 
+  const half = size / 2;
+
   return (
-    <View style={{ alignItems: 'center', justifyContent: 'center', width: size + 16, height: size + 36 }}>
-      <Svg width={size} height={size}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={cs.backgroundDeep}
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        <AnimatedCircle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={circumference}
-          animatedProps={animatedProps}
-          strokeLinecap="round"
-          rotation="-90"
-          origin={`${size / 2}, ${size / 2}`}
-        />
-      </Svg>
-      <Text style={{ fontSize: 18, fontWeight: '800', color: cs.textPrimary, position: 'absolute', top: size / 2 - 28 }}>
-        {rate}%
-      </Text>
-      <Text style={{ fontSize: 10, color: cs.textMuted, fontWeight: '600', marginTop: 4 }}>{label}</Text>
+    <View style={{ alignItems: 'center', width: size + 16 }}>
+      <View style={{ width: size, height: size }}>
+        <Svg width={size} height={size}>
+          <Circle
+            cx={half}
+            cy={half}
+            r={radius}
+            stroke={cs.backgroundDeep}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          <AnimatedCircle
+            cx={half}
+            cy={half}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={circumference}
+            animatedProps={animatedProps}
+            strokeLinecap="round"
+            rotation="-90"
+            origin={`${half}, ${half}`}
+          />
+          <SvgText
+            x={half}
+            y={half + 6}
+            textAnchor="middle"
+            fill={cs.textPrimary}
+            fontSize={20}
+            fontWeight="800"
+          >
+            {rate}%
+          </SvgText>
+        </Svg>
+      </View>
+      <Text style={{ fontSize: 10, color: cs.textMuted, fontWeight: '600', marginTop: 6 }}>{label}</Text>
     </View>
   );
 }
@@ -577,6 +588,12 @@ function SummaryCard({
   );
 }
 
+function barGradient(rate: number, cs: any): string {
+  if (rate >= 70) return 'greenBarGrad';
+  if (rate >= 40) return 'amberBarGrad';
+  return 'redBarGrad';
+}
+
 /* ─── Weekly Overview ─── */
 function WeeklyChart({
   data,
@@ -616,9 +633,17 @@ function WeeklyChart({
       </Text>
       <Svg width={chartWidth} height={chartHeight}>
         <Defs>
-          <LinearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+          <LinearGradient id="greenBarGrad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={cs.iosGreen} stopOpacity="1" />
+            <Stop offset="1" stopColor={cs.iosGreen} stopOpacity="0.35" />
+          </LinearGradient>
+          <LinearGradient id="amberBarGrad" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={cs.accent} stopOpacity="1" />
             <Stop offset="1" stopColor={cs.accent} stopOpacity="0.3" />
+          </LinearGradient>
+          <LinearGradient id="redBarGrad" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={cs.iosRed} stopOpacity="1" />
+            <Stop offset="1" stopColor={cs.iosRed} stopOpacity="0.3" />
           </LinearGradient>
         </Defs>
         <G x={margins.left} y={0}>
@@ -636,7 +661,6 @@ function WeeklyChart({
             const x = i * (innerWidth / data.length) + 2;
             const y = chartHeight - margins.bottom - targetHeight;
             const w = barWidth;
-            const barColor = point.rate >= 70 ? cs.iosGreen : point.rate >= 40 ? cs.accent : cs.iosRed;
             return (
               <AnimatedBar
                 key={point.weekStart}
@@ -646,17 +670,18 @@ function WeeklyChart({
                 targetHeight={targetHeight}
                 progress={progress}
                 rx={4}
-                color={barColor}
+                gradientId={barGradient(point.rate, cs)}
               />
             );
           })}
           {data.map((point, i) => {
             const x = i * (innerWidth / data.length) + 2 + barWidth / 2;
+            const yPos = i % 2 === 0 ? chartHeight - 6 : chartHeight - 20;
             return (
               <SvgText
                 key={'lb-' + point.weekStart}
                 x={x}
-                y={chartHeight - 4}
+                y={yPos}
                 fill={cs.textMuted}
                 fontSize={8}
                 textAnchor="middle"
@@ -675,9 +700,9 @@ function WeeklyChart({
 }
 
 function AnimatedBar({
-  x, y, width, targetHeight, progress, rx, color,
+  x, y, width, targetHeight, progress, rx, gradientId,
 }: {
-  x: number; y: number; width: number; targetHeight: number; progress: SharedValue<number>; rx: number; color: string;
+  x: number; y: number; width: number; targetHeight: number; progress: SharedValue<number>; rx: number; gradientId: string;
 }) {
   const animatedProps = useAnimatedProps(() => ({
     height: targetHeight * progress.value,
@@ -692,7 +717,7 @@ function AnimatedBar({
       height={0}
       rx={rx}
       ry={rx}
-      fill={color}
+      fill={`url(#${gradientId})`}
       animatedProps={animatedProps}
     />
   );
@@ -736,11 +761,25 @@ function WeekdayChart({
         Which weekdays you're most likely to follow through.
       </Text>
       <Svg width={chartWidth} height={chartHeight}>
+        <Defs>
+          <LinearGradient id="wdGreenGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={cs.iosGreen} stopOpacity="1" />
+            <Stop offset="1" stopColor={cs.iosGreen} stopOpacity="0.4" />
+          </LinearGradient>
+          <LinearGradient id="wdAmberGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={cs.accent} stopOpacity="1" />
+            <Stop offset="1" stopColor={cs.accent} stopOpacity="0.35" />
+          </LinearGradient>
+          <LinearGradient id="wdRedGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={cs.iosRed} stopOpacity="1" />
+            <Stop offset="1" stopColor={cs.iosRed} stopOpacity="0.3" />
+          </LinearGradient>
+        </Defs>
         <G x={margins.left} y={margins.top}>
           {sorted.map((item, i) => {
             const y = i * (barHeight + gap);
             const targetWidth = Math.max(2, (item.rate / 100) * innerWidth);
-            const barColor = item.rate >= 70 ? cs.iosGreen : item.rate >= 40 ? cs.accent : cs.iosRed;
+            const gId = item.rate >= 70 ? 'wdGreenGrad' : item.rate >= 40 ? 'wdAmberGrad' : 'wdRedGrad';
             return (
               <G key={item.day}>
                 <SvgText x={-8} y={y + barHeight - 2} fill={cs.textMuted} fontSize={11} textAnchor="end">
@@ -753,7 +792,7 @@ function WeekdayChart({
                   targetWidth={targetWidth}
                   height={barHeight}
                   progress={progress}
-                  color={barColor}
+                  gradientId={gId}
                 />
               </G>
             );
@@ -772,9 +811,9 @@ function WeekdayChart({
 }
 
 function AnimatedBarWidth({
-  x, y, height, targetWidth, progress, color,
+  x, y, height, targetWidth, progress, gradientId,
 }: {
-  x: number; y: number; height: number; targetWidth: number; progress: SharedValue<number>; color: string;
+  x: number; y: number; height: number; targetWidth: number; progress: SharedValue<number>; gradientId: string;
 }) {
   const animatedProps = useAnimatedProps(() => ({
     width: targetWidth * progress.value,
@@ -788,7 +827,7 @@ function AnimatedBarWidth({
       height={height}
       rx={7}
       ry={7}
-      fill={color}
+      fill={`url(#${gradientId})`}
       animatedProps={animatedProps}
     />
   );
@@ -854,14 +893,7 @@ function HabitPerformanceRow({
             </View>
           </View>
           <View style={[styles.progressBarOuter, { backgroundColor: cs.backgroundDeep }]}>
-            <Animated.View
-              style={[
-                styles.progressBarInner,
-                { backgroundColor: cs.accent },
-              ]}
-            >
-              <AnimatedBarFill progress={progress} rate={habit.completionRateAll} color={cs.accent} />
-            </Animated.View>
+            <GradientProgressBar progress={progress} rate={habit.completionRateAll} accent={cs.accent} />
           </View>
           <View style={styles.habitRowBottom}>
             <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
@@ -877,11 +909,60 @@ function HabitPerformanceRow({
   );
 }
 
-function AnimatedBarFill({ progress, rate, color }: { progress: SharedValue<number>; rate: number; color: string }) {
-  const animStyle = useAnimatedStyle(() => ({
-    width: (rate * progress.value) + '%' as any,
+function GradientProgressBar({ progress, rate, accent }: { progress: SharedValue<number>; rate: number; accent: string }) {
+  const animProps = useAnimatedProps(() => ({
+    width: (rate * progress.value) + '%',
   }));
-  return <Animated.View style={[animStyle, { height: 6, borderRadius: 3, backgroundColor: color }]} />;
+  return (
+    <View style={{ width: '100%', height: 6, borderRadius: 3, overflow: 'hidden' }}>
+      <Svg width="100%" height={6}>
+        <Defs>
+          <LinearGradient id="progGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={accent} stopOpacity="1" />
+            <Stop offset="1" stopColor={accent} stopOpacity="0.35" />
+          </LinearGradient>
+        </Defs>
+        <AnimatedRect
+          x={0}
+          y={0}
+          width={0}
+          height={6}
+          rx={3}
+          ry={3}
+          fill="url(#progGrad)"
+          animatedProps={animProps as any}
+        />
+      </Svg>
+    </View>
+  );
+}
+
+function GradientJourneyBar({ progress, rate, accent }: { progress: SharedValue<number>; rate: number; accent: string }) {
+  const animProps = useAnimatedProps(() => ({
+    width: (rate * progress.value) + '%',
+  }));
+  return (
+    <View style={{ width: '100%', height: 8, borderRadius: 4, overflow: 'hidden' }}>
+      <Svg width="100%" height={8}>
+        <Defs>
+          <LinearGradient id="journeyGrad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor={accent} stopOpacity="1" />
+            <Stop offset="1" stopColor={accent} stopOpacity="0.3" />
+          </LinearGradient>
+        </Defs>
+        <AnimatedRect
+          x={0}
+          y={0}
+          width={0}
+          height={8}
+          rx={4}
+          ry={4}
+          fill="url(#journeyGrad)"
+          animatedProps={animProps as any}
+        />
+      </Svg>
+    </View>
+  );
 }
 
 /* ─── Streak Section ─── */
@@ -982,18 +1063,9 @@ function HabitJourneyCard({
             </Text>
           </View>
 
-          {/* Timeline bar: completed (accent) + missed (muted) */}
+          {/* Timeline bar: gradient fill for completed portion */}
           <View style={[styles.journeyBar, { backgroundColor: cs.backgroundDeep }]}>
-            <Animated.View
-              style={[
-                styles.journeyBarFill,
-                {
-                  backgroundColor: cs.accent,
-                  width: completedPct + '%' as any,
-                  opacity: progress,
-                },
-              ]}
-            />
+            <GradientJourneyBar progress={progress} rate={completedPct} accent={cs.accent} />
           </View>
 
           <View style={styles.journeyBottom}>
