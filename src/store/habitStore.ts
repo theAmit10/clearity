@@ -449,14 +449,6 @@ export function isDayCompleted(habit: Habit, dateKey: string): boolean {
   return computeEffectiveDateSet(habit).has(dateKey);
 }
 
-export function isDayMissed(habit: Habit, dateKey: string): boolean {
-  return !!habit.missedNotes?.[dateKey];
-}
-
-function shouldCountAsCompleted(habit: Habit, dateKey: string): boolean {
-  return !!habit.completions[dateKey];
-}
-
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -466,98 +458,41 @@ function getWeekStart(date: Date): Date {
   return d;
 }
 
-function getCompletionsInWeek(habit: Habit, weekStart: Date): number {
-  let count = 0;
-  for (let i = 0; i < 7; i++) {
-    if (habit.completions[toDateKey(addDays(weekStart, i))]) count++;
-  }
-  return count;
-}
-
-function weekMeetsTarget(habit: Habit, weekStart: Date): boolean {
-  if (habit.frequency !== 'n_times_per_week') return false;
-  const target = habit.frequencyValue ?? 3;
-  return getCompletionsInWeek(habit, weekStart) >= target;
-}
-
-function monthMeetsTarget(habit: Habit, year: number, month: number): boolean {
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
-  const target = habit.frequencyValue ?? 1;
-  return countCompletionsInRange(habit, monthStart, monthEnd) >= target;
-}
-
 export function computeStats(habit: Habit): HabitStats {
-  const dates = Object.keys(habit.completions).filter(k => habit.completions[k]);
-  const totalCompletions = dates.reduce((sum, k) => sum + (habit.completions[k] || 0), 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   let currentStreak = 0;
-  let cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-
-  if (habit.frequency === 'daily' || !habit.frequency) {
-    if (!shouldCountAsCompleted(habit, toDateKey(cursor))) {
-      cursor = addDays(cursor, -1);
-    }
-    while (shouldCountAsCompleted(habit, toDateKey(cursor))) {
-      currentStreak++;
-      cursor = addDays(cursor, -1);
-    }
-  } else if (habit.frequency === 'n_times_per_week') {
-    let weekStart = getWeekStart(cursor);
-    if (!weekMeetsTarget(habit, weekStart)) {
-      weekStart = addDays(weekStart, -7);
-    }
-    while (weekMeetsTarget(habit, weekStart)) {
-      currentStreak++;
-      weekStart = addDays(weekStart, -7);
-    }
-  } else if (habit.frequency === 'n_times_per_month') {
-    let cy = cursor.getFullYear();
-    let cm = cursor.getMonth();
-    if (!monthMeetsTarget(habit, cy, cm)) {
-      cm -= 1;
-      if (cm < 0) { cm = 11; cy -= 1; }
-    }
-    while (monthMeetsTarget(habit, cy, cm)) {
-      currentStreak++;
-      cm -= 1;
-      if (cm < 0) { cm = 11; cy -= 1; }
-    }
-  } else if (habit.frequency === 'n_times_in_m_days') {
-    const target = habit.frequencyValue ?? 1;
-    const windowSize = habit.frequencyWindow ?? 7;
-    const windowStart = addDays(cursor, -windowSize);
-    let sum = 0;
-    const check = new Date(windowStart);
-    while (check <= cursor) {
-      sum += (habit.completions[toDateKey(check)] || 0);
-      check.setDate(check.getDate() + 1);
-    }
-    currentStreak = sum >= target ? sum : 0;
+  let cursor = new Date(today);
+  if (!habit.completions[toDateKey(cursor)]) {
+    cursor = addDays(cursor, -1);
+  }
+  while (habit.completions[toDateKey(cursor)]) {
+    currentStreak++;
+    cursor = addDays(cursor, -1);
   }
 
-  const sorted = dates.slice().sort();
+  const dates = Object.keys(habit.completions).filter(k => habit.completions[k]).sort();
   let bestStreak = 0;
   let running = 0;
-  let prevDate: Date | null = null;
-  for (const key of sorted) {
-    const d = new Date(key + 'T00:00:00');
-    if (prevDate && toDateKey(addDays(prevDate, 1)) === key) {
+  let prev: string | null = null;
+  for (const key of dates) {
+    if (prev && toDateKey(addDays(new Date(prev + 'T00:00:00'), 1)) === key) {
       running++;
     } else {
       running = 1;
     }
     bestStreak = Math.max(bestStreak, running);
-    prevDate = d;
+    prev = key;
   }
 
+  const totalCompletions = dates.reduce((sum, k) => sum + (habit.completions[k] || 0), 0);
+
   let completedLast30 = 0;
-  let d = new Date();
-  d.setHours(0, 0, 0, 0);
+  const d = new Date(today);
   for (let i = 0; i < 30; i++) {
-    if (shouldCountAsCompleted(habit, toDateKey(d))) completedLast30++;
-    d = addDays(d, -1);
+    if (habit.completions[toDateKey(d)]) completedLast30++;
+    d.setDate(d.getDate() - 1);
   }
   const completionRate30d = Math.round((completedLast30 / 30) * 100);
 

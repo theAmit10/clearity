@@ -34,9 +34,9 @@ const COLORS = [
 
 const FREQUENCY_OPTIONS: { key: FrequencyType; label: string }[] = [
   { key: 'daily', label: 'Daily' },
-  { key: 'n_times_per_week', label: 'X times / week' },
-  { key: 'n_times_per_month', label: 'X times / month' },
-  { key: 'n_times_in_m_days', label: 'X times in Y days' },
+  { key: 'n_times_per_week', label: 'Weekly' },
+  { key: 'n_times_per_month', label: 'Monthly' },
+  { key: 'n_times_in_m_days', label: 'Custom' },
 ];
 
 export default function AddEditHabitScreen({ route, navigation }: any) {
@@ -326,7 +326,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     styles.catPill,
                     selected && { backgroundColor: `${color}26` },
                   ]}
-                  onPress={() => setCategory(cat.key)}
+                  onPress={() => setCategory(prev => prev === cat.key ? 'none' : cat.key)}
                 >
                   <CatIcon size={20} color={selected ? color : theme.colors.textMuted} />
                   <Text
