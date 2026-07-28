@@ -12,6 +12,7 @@ import { todayKey } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
+import Svg, { Path } from 'react-native-svg';
 
 interface Props {
   habit: Habit;
@@ -30,7 +31,9 @@ export default function HabitCard({
 }: Props) {
   const { theme } = useTheme();
   const stats = computeStats(habit);
-  const doneToday = !!habit.completions[todayKey()];
+  const count = habit.completions[todayKey()] || 0;
+  const target = habit.frequency === 'n_times_in_m_days' ? (habit.frequencyValue ?? 1) : 1;
+  const doneToday = count >= target;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -64,10 +67,20 @@ export default function HabitCard({
               {habit.name}
             </Text>
             <View style={styles.streakRow}>
-              {/* <Text style={styles.flame}>🔥</Text> */}
               <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
                 {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
                 Streak
+              </Text>
+              <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}>
+                {habit.frequency === 'every_n_days'
+                  ? `Every ${habit.frequencyValue ?? 3} days`
+                  : habit.frequency === 'n_times_per_week'
+                  ? `${habit.frequencyValue ?? 3}x / week`
+                  : habit.frequency === 'n_times_per_month'
+                  ? `${habit.frequencyValue ?? 1}x / month`
+                  : habit.frequency === 'n_times_in_m_days'
+                  ? `${habit.frequencyValue ?? 1}x / ${habit.frequencyWindow ?? 7} days`
+                  : 'Daily'}
               </Text>
             </View>
           </View>
@@ -92,6 +105,47 @@ export default function HabitCard({
                 >
                   <Text style={[styles.checkMarkDone, { color: '#FFFFFF' }]}>✓</Text>
                 </Inset>
+              ) : habit.frequency === 'n_times_in_m_days' ? (
+                <Raised
+                  radius={20}
+                  distance={4}
+                  style={[
+                    styles.checkCircle,
+                    styles.checkCircleEmpty,
+                    { borderColor: habit.color, backgroundColor: theme.colors.background },
+                  ]}
+                >
+                  <View style={{ position: 'absolute', top: 2.5, left: 2.5, width: 35, height: 35 }}>
+                    <Svg width={35} height={35} viewBox="0 0 35 35">
+                      {Array.from({ length: target }, (_, i) => {
+                        const strokeW = 3;
+                        const r = (35 - strokeW - 4) / 2;
+                        const angleStep = (2 * Math.PI) / target;
+                        const gapAngle = 0.15;
+                        const segAngle = angleStep - gapAngle;
+                        const a1 = i * angleStep - Math.PI / 2 + gapAngle / 2;
+                        const a2 = a1 + segAngle;
+                        const x1 = 17.5 + r * Math.cos(a1);
+                        const y1 = 17.5 + r * Math.sin(a1);
+                        const x2 = 17.5 + r * Math.cos(a2);
+                        const y2 = 17.5 + r * Math.sin(a2);
+                        const largeArc = segAngle > Math.PI ? 1 : 0;
+                        const d = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
+                        const filled = i < count;
+                        return (
+                          <Path
+                            key={i}
+                            d={d}
+                            stroke={filled ? habit.color : `${habit.color}26`}
+                            strokeWidth={strokeW}
+                            strokeLinecap="butt"
+                            fill="none"
+                          />
+                        );
+                      })}
+                    </Svg>
+                  </View>
+                </Raised>
               ) : (
                 <Raised
                   radius={20}
@@ -110,6 +164,9 @@ export default function HabitCard({
         <HeatmapGrid
           completions={habit.completions}
           color={habit.color}
+          frequency={habit.frequency}
+          frequencyValue={habit.frequencyValue}
+          frequencyWindow={habit.frequencyWindow}
           weeks={14}
           cellSize={10}
           gap={2}
@@ -163,12 +220,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  freqLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 8,
+    opacity: 0.6,
+  },
   checkCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   checkCircleEmpty: {
     borderWidth: 2.5,

@@ -3,15 +3,16 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { toDateKey, isFuture, addDays } from '../services/dateUtils';
 import { Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import { computeEffectiveDateSet } from '../store/habitStore';
 
 interface Props {
-  completions: Record<string, boolean>;
+  completions: Record<string, number>;
   color: string;
   cellSize?: number;
   gap?: number;
-  /** Kept only for backwards compatibility with older call sites — this
-   * now always renders the full current year (scrollable), the same as
-   * YearHeatmap, so a fixed week count no longer applies. */
+  frequency?: 'daily' | 'every_n_days' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
+  frequencyValue?: number;
+  frequencyWindow?: number;
   weeks?: number;
 }
 
@@ -37,6 +38,9 @@ export default function HeatmapGrid({
   color,
   cellSize = 10,
   gap = 2,
+  frequency,
+  frequencyValue,
+  frequencyWindow,
 }: Props) {
   const { theme } = useTheme();
   const { colors, radii } = theme;
@@ -44,6 +48,16 @@ export default function HeatmapGrid({
   const year = new Date().getFullYear();
   const weeksData = useMemo(() => yearWeeks(year), [year]);
   const scrollRef = useRef<ScrollView>(null);
+
+  const effectiveSet = useMemo(() => {
+    if (!frequency || frequency === 'daily' || frequency === 'every_n_days') return null;
+    return computeEffectiveDateSet({
+      completions,
+      frequency: frequency as any,
+      frequencyValue,
+      frequencyWindow,
+    } as any);
+  }, [completions, frequency, frequencyValue, frequencyWindow]);
 
   const todayWeekIndex = useMemo(() => {
     const today = new Date();
@@ -93,7 +107,11 @@ export default function HeatmapGrid({
                 const key = toDateKey(day);
                 const future = isFuture(day);
                 const daysInYear = day.getFullYear() === year;
-                const done = !!completions[key];
+                const done = effectiveSet ? effectiveSet.has(key) : !!completions[key];
+                const raw = completions[key] || 0;
+                const partial = frequency === 'n_times_in_m_days' && !done && raw > 0
+                  ? Math.min(1, raw / (frequencyValue || 1))
+                  : 0;
 
                 const cellBg = !daysInYear
                   ? 'transparent'
@@ -101,6 +119,8 @@ export default function HeatmapGrid({
                   ? colors.background
                   : done
                   ? color
+                  : partial > 0
+                  ? `${color}${Math.round(partial * 255).toString(16).padStart(2, '0')}`
                   : colors.insetFill;
 
                 return (
@@ -151,134 +171,3 @@ const styles = StyleSheet.create({
     left: 0,
   },
 });
-
-// import React, { useMemo } from 'react';
-// import { View, StyleSheet } from 'react-native';
-// import { toDateKey, isFuture, addDays } from '../services/dateUtils';
-// import { Inset } from './neumorphic/NeumorphicView';
-// import { neumorphic } from '../theme/neumorphicTheme';
-
-// interface Props {
-//   completions: Record<string, boolean>;
-//   color: string;
-//   weeks?: number;
-//   cellSize?: number;
-//   gap?: number;
-// }
-
-// /**
-//  * Compact read-only heatmap used inside HabitCard on the home list.
-//  * Same visual language as the big YearHeatmap on the detail screen —
-//  * a sunken tray with faintly-bordered empty cells and pressed-in filled
-//  * cells — just condensed to the last N weeks with no month/day labels,
-//  * so it stays legible at list-item size instead of disappearing into
-//  * the card background.
-//  */
-// export default function HeatmapGrid({
-//   completions,
-//   color,
-//   weeks = 14,
-//   cellSize = 10,
-//   gap = 2,
-// }: Props) {
-//   const side = cellSize + gap;
-
-//   const columns = useMemo(() => {
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-//     // Align to the start (Sunday) of the current week, then walk back
-//     // `weeks - 1` more weeks so the grid ends on the current week.
-//     const currentWeekStart = addDays(today, -today.getDay());
-//     const gridStart = addDays(currentWeekStart, -(weeks - 1) * 7);
-
-//     const cols: Date[][] = [];
-//     for (let w = 0; w < weeks; w++) {
-//       const weekStart = addDays(gridStart, w * 7);
-//       const col: Date[] = [];
-//       for (let d = 0; d < 7; d++) {
-//         col.push(addDays(weekStart, d));
-//       }
-//       cols.push(col);
-//     }
-//     return cols;
-//   }, [weeks]);
-
-//   const gridWidth = weeks * side;
-//   const gridHeight = 7 * side;
-
-//   return (
-//     <Inset
-//       radius={neumorphic.radii.panel}
-//       style={[styles.tray, { width: gridWidth + 16 }]}
-//     >
-//       <View style={{ width: gridWidth, height: gridHeight }}>
-//         {columns.map((col, ci) => (
-//           <View
-//             key={ci}
-//             style={{
-//               position: 'absolute',
-//               left: ci * side,
-//               top: 0,
-//               width: side,
-//               height: gridHeight,
-//             }}
-//           >
-//             {col.map((day, di) => {
-//               const key = toDateKey(day);
-//               const future = isFuture(day);
-//               const done = !!completions[key];
-
-//               return (
-//                 <View
-//                   key={key}
-//                   style={[
-//                     styles.cell,
-//                     {
-//                       top: di * side,
-//                       width: cellSize,
-//                       height: cellSize,
-//                       backgroundColor: future
-//                         ? 'transparent'
-//                         : done
-//                         ? color
-//                         : neumorphic.colors.insetFill,
-//                     },
-//                     !future && !done && styles.cellEmpty,
-//                     !future && done && styles.cellDone,
-//                   ]}
-//                 />
-//               );
-//             })}
-//           </View>
-//         ))}
-//       </View>
-//     </Inset>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   tray: {
-//     padding: 8,
-//     alignSelf: 'flex-start',
-//     overflow: 'hidden',
-//   },
-//   cell: {
-//     position: 'absolute',
-//     left: 0,
-//     borderRadius: 2,
-//   },
-//   cellEmpty: {
-//     borderTopWidth: 1,
-//     borderTopColor: 'rgba(179,187,201,0.5)',
-//     borderLeftWidth: 1,
-//     borderLeftColor: 'rgba(179,187,201,0.4)',
-//     borderBottomWidth: 1,
-//     borderBottomColor: 'rgba(255,255,255,0.6)',
-//     borderRightWidth: 1,
-//     borderRightColor: 'rgba(255,255,255,0.45)',
-//   },
-//   cellDone: {
-//     borderWidth: 1,
-//     borderColor: 'rgba(0,0,0,0.14)',
-//   },
-// });

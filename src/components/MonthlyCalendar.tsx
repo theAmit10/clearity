@@ -12,13 +12,19 @@ import {
   StyleSheet,
   FlatList,
   LayoutChangeEvent,
+  Modal,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import { toDateKey, isFuture } from '../services/dateUtils';
-import { useHabitStore } from '../store/habitStore';
-import { Raised } from './neumorphic/NeumorphicView';
+import { toDateKey, isFuture, addDays } from '../services/dateUtils';
+import { useHabitStore, computeEffectiveDateSet } from '../store/habitStore';
+import { Raised, Inset } from './neumorphic/NeumorphicView';
 import CalendarIcon from './CalendarIcon';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
+import Svg, { Path } from 'react-native-svg';
 
 interface Props {
   habitId: string;
@@ -83,10 +89,20 @@ export default function MonthlyCalendar({
   const { colors, radii } = theme;
   const color = colorProp ?? colors.accent;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
-  const completions = useHabitStore(s => {
-    const h = s.habits.find(h => h.id === habitId);
-    return h?.completions ?? {};
-  });
+  const addMissedNote = useHabitStore(s => s.addMissedNote);
+  const removeMissedNote = useHabitStore(s => s.removeMissedNote);
+  const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
+  const completions = habit?.completions ?? {};
+  const missedNotes = habit?.missedNotes ?? {};
+
+  const [missedModal, setMissedModal] = useState<{ dateKey: string } | null>(null);
+  const [missedNoteText, setMissedNoteText] = useState('');
+
+  const effectiveSet = useMemo(() => {
+    if (!habit || !habit.frequency || habit.frequency === 'daily' || habit.frequency === 'every_n_days') return null;
+    return computeEffectiveDateSet(habit);
+  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow]);
+
   const today = new Date();
   const todayStr = toDateKey(today);
   const centerIndex = 24;
@@ -139,6 +155,8 @@ export default function MonthlyCalendar({
         borderRadius: circleSize / 2,
         alignItems: 'center' as const,
         justifyContent: 'center' as const,
+        position: 'relative' as const,
+        overflow: 'hidden' as const,
       },
     }),
     [cellSize, circleSize, colors, radii],
@@ -159,6 +177,18 @@ export default function MonthlyCalendar({
       if (page) setVisibleMonth({ year: page.year, month: page.month });
     },
     [containerWidth, months],
+  );
+
+  const handleLongPress = useCallback(
+    (dateKey: string) => {
+      if (missedNotes[dateKey]) {
+        setMissedNoteText(missedNotes[dateKey]);
+      } else {
+        setMissedNoteText('');
+      }
+      setMissedModal({ dateKey });
+    },
+    [missedNotes],
   );
 
   const renderMonth = useCallback(
@@ -183,11 +213,14 @@ export default function MonthlyCalendar({
               const dateKey = toDateKey(date);
               const isToday = dateKey === todayStr;
               const isFutureDay = isFuture(date);
-              const isCompleted = !!completions[dateKey];
-              const isMissed = !isFutureDay && !isCompleted && !isToday;
+              const isCompleted = effectiveSet ? effectiveSet.has(dateKey) : !!completions[dateKey];
+              const hasPartial = !!completions[dateKey];
+              const hasMissedNote = !!missedNotes[dateKey];
+              const isMissed = !isFutureDay && !isCompleted && !isToday && !hasPartial;
+              const isMulti = habit?.frequency === 'n_times_in_m_days';
+              const multiCount = completions[dateKey] || 0;
+              const multiTarget = habit?.frequencyValue ?? 1;
 
-              // Future days aren't interactive yet, so they stay flush
-              // with the page instead of looking pressable.
               if (isFutureDay) {
                 return (
                   <View key={dateKey} style={CS.wrapper}>
@@ -206,6 +239,8 @@ export default function MonthlyCalendar({
                 <View key={dateKey} style={CS.wrapper}>
                   <NeumorphicButton
                     onPress={() => toggleCompletion(habitId, dateKey)}
+                    onLongPress={() => handleLongPress(dateKey)}
+                    delayLongPress={400}
                     forcePressed={isCompleted}
                     radius={circleSize / 2}
                     distance={4}
@@ -215,15 +250,69 @@ export default function MonthlyCalendar({
                       isToday && [styles.todayRing, { borderColor: colors.textPrimary }],
                     ]}
                   >
+                    {isMulti && !isCompleted && multiTarget > 0 && (
+                      <View style={{ position: 'absolute', top: 0, left: 0, width: circleSize, height: circleSize }}>
+                        <Svg width={circleSize} height={circleSize} viewBox={`0 0 ${circleSize} ${circleSize}`}>
+                          {Array.from({ length: multiTarget }, (_, i) => {
+                            const cx = circleSize / 2;
+                            const cy = circleSize / 2;
+                            const strokeW = 3;
+                            const r = (circleSize - strokeW - 4) / 2;
+                            const angleStep = (2 * Math.PI) / multiTarget;
+                            const gapAngle = 0.15;
+                            const segAngle = angleStep - gapAngle;
+                            const a1 = i * angleStep - Math.PI / 2 + gapAngle / 2;
+                            const a2 = a1 + segAngle;
+                            const x1 = cx + r * Math.cos(a1);
+                            const y1 = cy + r * Math.sin(a1);
+                            const x2 = cx + r * Math.cos(a2);
+                            const y2 = cy + r * Math.sin(a2);
+                            const largeArc = segAngle > Math.PI ? 1 : 0;
+                            const d = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
+                            const filled = i < multiCount;
+                            return (
+                              <Path
+                                key={i}
+                                d={d}
+                                stroke={filled ? color : `${color}26`}
+                                strokeWidth={strokeW}
+                                strokeLinecap="butt"
+                                fill="none"
+                              />
+                            );
+                          })}
+                        </Svg>
+                      </View>
+                    )}
                     <Text style={[styles.dayText, { color: colors.textPrimary }, isCompleted && { color }]}>
                       {day}
                     </Text>
+                    {isMulti && (
+                      <>
+                        {hasMissedNote && (
+                          <View style={[styles.missedNoteDot, { backgroundColor: color }]} />
+                        )}
+                        {isCompleted && !hasMissedNote && (
+                          <Text style={{ position: 'absolute', bottom: 4, fontSize: 8, color, fontWeight: '800' }}>
+                            ✓
+                          </Text>
+                        )}
+                      </>
+                    )}
                   </NeumorphicButton>
-                  {isMissed && <View style={styles.missedDot} />}
-                  {isCompleted && (
-                    <View
-                      style={[styles.doneDot, { backgroundColor: color }]}
-                    />
+                  {isMulti ? null : (
+                    <>
+                      {!isCompleted && isMissed && <View style={styles.missedDot} />}
+                      {hasMissedNote && (
+                        <View style={[styles.missedNoteDot, { backgroundColor: color }]} />
+                      )}
+                      {isCompleted && !hasMissedNote && (
+                        <View style={[styles.doneDot, { backgroundColor: color }]} />
+                      )}
+                      {!isCompleted && hasPartial && (
+                        <View style={[styles.partialDot, { backgroundColor: color }]} />
+                      )}
+                    </>
                   )}
                 </View>
               );
@@ -235,9 +324,12 @@ export default function MonthlyCalendar({
     [
       containerWidth,
       CS,
+      effectiveSet,
       completions,
+      missedNotes,
       habitId,
       toggleCompletion,
+      handleLongPress,
       todayStr,
       color,
       circleSize,
@@ -334,6 +426,82 @@ export default function MonthlyCalendar({
           </View>
         </View>
       </View>
+
+      <Modal
+        visible={!!missedModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMissedModal(null)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setMissedModal(null)}>
+            <Pressable onPress={() => {}}>
+              <Raised radius={16} distance={8} style={styles.modalCard}>
+                <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                  {missedNotes[missedModal?.dateKey ?? ''] ? 'Edit missed note' : 'Mark as missed'}
+                </Text>
+                <Text style={[styles.modalDate, { color: colors.textMuted }]}>
+                  {missedModal?.dateKey}
+                </Text>
+                <Inset radius={10} style={styles.modalInset}>
+                  <TextInput
+                    style={[styles.modalInput, { color: colors.textPrimary }]}
+                    value={missedNoteText}
+                    onChangeText={setMissedNoteText}
+                    placeholder="Explain why you missed it…"
+                    placeholderTextColor={colors.textMuted}
+                    multiline
+                    autoFocus
+                  />
+                </Inset>
+                <View style={styles.modalActions}>
+                  {missedNotes[missedModal?.dateKey ?? ''] && (
+                    <NeumorphicButton
+                      radius={12}
+                      distance={4}
+                      style={styles.modalDeleteBtn}
+                      onPress={() => {
+                        if (missedModal) {
+                          removeMissedNote(habitId, missedModal.dateKey);
+                          setMissedModal(null);
+                        }
+                      }}
+                    >
+                      <Text style={[styles.modalDeleteText, { color: '#FF3B30' }]}>Remove</Text>
+                    </NeumorphicButton>
+                  )}
+                  <NeumorphicButton
+                    radius={12}
+                    distance={4}
+                    style={[styles.modalCancelBtn]}
+                    onPress={() => setMissedModal(null)}
+                  >
+                    <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
+                  </NeumorphicButton>
+                  <NeumorphicButton
+                    radius={12}
+                    distance={4}
+                    backgroundColor={color}
+                    onPress={() => {
+                      if (missedModal && missedNoteText.trim()) {
+                        addMissedNote(habitId, missedModal.dateKey, missedNoteText.trim());
+                        setMissedModal(null);
+                      } else if (missedModal && !missedNoteText.trim()) {
+                        Alert.alert('Please enter an explanation');
+                      }
+                    }}
+                  >
+                    <Text style={[styles.modalSaveText, { color: '#FFFFFF' }]}>Save</Text>
+                  </NeumorphicButton>
+                </View>
+              </Raised>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
     </Raised>
   );
 }
@@ -383,6 +551,79 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  partialDot: {
+    position: 'absolute',
+    bottom: 4,
+    width: 4,
+    height: 4,
+    borderRadius: 1,
+    opacity: 0.4,
+  },
+  missedNoteDot: {
+    position: 'absolute',
+    bottom: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    opacity: 0.7,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalCard: {
+    width: 300,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  modalDate: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 14,
+  },
+  modalInset: {
+    marginBottom: 14,
+    padding: 4,
+  },
+  modalInput: {
+    fontSize: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 4,
+  },
+  modalDeleteBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  modalDeleteText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modalCancelBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modalSaveText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   bottomNav: {
     flexDirection: 'row',

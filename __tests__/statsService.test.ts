@@ -50,7 +50,7 @@ function daysAgo(n: number): string {
 function completeRange(habit: Habit, startDaysAgo: number, endDaysAgo: number): Habit {
   const c = { ...habit.completions };
   for (let i = startDaysAgo; i <= endDaysAgo; i++) {
-    c[daysAgo(i)] = true;
+    c[daysAgo(i)] = 1;
   }
   return { ...habit, completions: c };
 }
@@ -59,7 +59,7 @@ function completeRange(habit: Habit, startDaysAgo: number, endDaysAgo: number): 
 function completeOn(habit: Habit, ...daysAgoOffsets: number[]): Habit {
   const c = { ...habit.completions };
   for (const offset of daysAgoOffsets) {
-    c[daysAgo(offset)] = true;
+    c[daysAgo(offset)] = 1;
   }
   return { ...habit, completions: c };
 }

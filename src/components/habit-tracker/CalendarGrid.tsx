@@ -7,7 +7,7 @@ import NeumorphicPressable from './NeumorphicPressable';
 interface CalendarGridProps {
   year: number;
   month: number;
-  completions: Record<string, boolean>;
+  completions: Record<string, number>;
   onToggleDay: (dateKey: string) => void;
   circleSize: number;
 }

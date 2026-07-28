@@ -5,6 +5,8 @@ import { Raised, Inset } from './NeumorphicView';
 interface Props {
   children: React.ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
+  delayLongPress?: number;
   disabled?: boolean;
   radius?: number;
   distance?: number;
@@ -19,6 +21,8 @@ interface Props {
 export function NeumorphicButton({
   children,
   onPress,
+  onLongPress,
+  delayLongPress,
   disabled,
   radius = 16,
   distance = 6,
@@ -33,6 +37,8 @@ export function NeumorphicButton({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={delayLongPress}
       disabled={disabled}
       onPressIn={() => setTouching(true)}
       onPressOut={() => setTouching(false)}

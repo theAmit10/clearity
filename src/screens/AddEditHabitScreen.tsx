@@ -17,63 +17,25 @@ import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
-
-// const COLORS = [
-//   '#FF5A5F',
-//   '#FF9500',
-//   '#FFCC00',
-//   '#4CD964',
-//   '#34C759',
-//   '#00C7BE',
-//   '#32ADE6',
-//   '#007AFF',
-//   '#5856D6',
-//   '#AF52DE',
-//   '#FF2D55',
-//   '#A2845E',
-//   '#8E8E93',
-//   '#1C1C1E',
-// ];
+import type { FrequencyType } from '../types/habit';
 
 const COLORS = [
-  // Reds / oranges
-  '#FF3B30',
-  '#FF5A5F',
-  '#FF6B35',
-  '#FF9500',
-  // Yellows / greens
-  '#FFCC00',
-  '#FFD60A',
-  '#4CD964',
-  '#34C759',
-  '#30D158',
-  // Teals / blues
-  '#00C7BE',
-  '#00E5A0',
-  '#32ADE6',
-  '#64D2FF',
-  '#007AFF',
-  '#0A84FF',
-  // Indigos / purples
-  '#5856D6',
-  '#5E5CE6',
-  '#AF52DE',
-  '#BF5AF2',
-  // Pinks / rose
-  '#FF2D55',
-  '#FF375F',
-  // Earth tones
-  '#A2845E',
-  '#C2703D',
-  '#556B2F',
-  '#2E7D32',
-  // Neutrals
-  '#8E8E93',
-  '#6E6E73',
-  '#1C1C1E',
+  '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
+  '#FFCC00', '#FFD60A', '#4CD964', '#34C759', '#30D158',
+  '#00C7BE', '#00E5A0', '#32ADE6', '#64D2FF', '#007AFF', '#0A84FF',
+  '#5856D6', '#5E5CE6', '#AF52DE', '#BF5AF2',
+  '#FF2D55', '#FF375F',
+  '#A2845E', '#C2703D', '#556B2F', '#2E7D32',
+  '#8E8E93', '#6E6E73', '#1C1C1E',
 ];
 
-const GOAL_PRESETS = ['Daily', 'Weekly', 'Monthly'];
+const FREQUENCY_OPTIONS: { key: FrequencyType; label: string }[] = [
+  { key: 'daily', label: 'Daily' },
+  { key: 'every_n_days', label: 'Every N days' },
+  { key: 'n_times_per_week', label: 'X times / week' },
+  { key: 'n_times_per_month', label: 'X times / month' },
+  { key: 'n_times_in_m_days', label: 'X times in Y days' },
+];
 
 export default function AddEditHabitScreen({ route, navigation }: any) {
   const { theme } = useTheme();
@@ -90,23 +52,38 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
   const [color, setColor] = useState(existing?.color ?? COLORS[0]);
   const [goal, setGoal] = useState(existing?.goal ?? '');
+  const [frequency, setFrequency] = useState<FrequencyType>(existing?.frequency ?? 'daily');
+  const [frequencyValue, setFrequencyValue] = useState(existing?.frequencyValue?.toString() ?? '');
+  const [frequencyWindow, setFrequencyWindow] = useState(existing?.frequencyWindow?.toString() ?? '');
 
-  const canSave = name.trim().length > 0;
+  const freqV = parseInt(frequencyValue, 10);
+  const freqW = parseInt(frequencyWindow, 10);
+  const timesValid = frequency !== 'n_times_in_m_days' || (freqV >= 1 && freqV <= 12);
+  const windowValid = frequency !== 'n_times_in_m_days' || (freqW >= 1 && freqW <= 30);
+  const canSave = name.trim().length > 0 && timesValid && windowValid;
 
   const handleSave = async () => {
     if (!canSave) return;
-    const trimmed = {
+    const payload: any = {
       name: name.trim(),
       description: description.trim() || undefined,
       icon,
       color,
       goal: goal.trim() || undefined,
+      frequency,
+      frequencyValue: frequency === 'daily' ? undefined
+        : frequency === 'n_times_in_m_days'
+        ? Math.min(12, Math.max(1, parseInt(frequencyValue, 10) || 1))
+        : parseInt(frequencyValue, 10) || undefined,
+      frequencyWindow: frequency === 'n_times_in_m_days'
+        ? Math.min(30, Math.max(1, parseInt(frequencyWindow, 10) || 1))
+        : undefined,
     };
     if (existing) {
-      await updateHabit(existing.id, trimmed);
+      await updateHabit(existing.id, payload);
     } else {
       const isFirstHabit = habits.length === 0;
-      await addHabit({ ...trimmed, frequency: '' });
+      await addHabit(payload);
       if (isFirstHabit && !reviewPromptShown) {
         await markReviewPromptShown();
         logEvent('info', 'In-app review requested');
@@ -135,7 +112,9 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             {existing ? 'Edit Habit' : 'New Habit'}
           </Text>
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Name</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Name
+          </Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={name}
@@ -146,14 +125,20 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             />
           </Inset>
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Description</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Description
+          </Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={description}
               onChangeText={setDescription}
               placeholder="e.g. 8 glasses per day"
               placeholderTextColor={theme.colors.textMuted}
-              style={[styles.input, styles.multiline, { color: theme.colors.textPrimary }]}
+              style={[
+                styles.input,
+                styles.multiline,
+                { color: theme.colors.textPrimary },
+              ]}
               multiline
               numberOfLines={2}
             />
@@ -169,30 +154,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               style={styles.input}
             />
           </Inset> */}
-          {/* <View style={styles.goalPresetRow}>
-            {GOAL_PRESETS.map(preset => {
-              const selected = goal === preset;
-              return (
-                <NeumorphicButton
-                  key={preset}
-                  radius={12}
-                  distance={4}
-                  forcePressed={selected}
-                  style={[
-                    styles.goalPresetPill,
-                    selected && { backgroundColor: `${color}26` },
-                  ]}
-                  onPress={() => setGoal(preset)}
-                >
-                  <Text style={[styles.goalPresetText, selected && { color }]}>
-                    {preset}
-                  </Text>
-                </NeumorphicButton>
-              );
-            })}
-          </View> */}
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Icon</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Icon
+          </Text>
           <View style={styles.row}>
             {HABIT_ICONS.map(({ key, Icon }) => {
               const selected = icon === key;
@@ -217,7 +182,9 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             })}
           </View>
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>Color</Text>
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Color
+          </Text>
           <View style={styles.row}>
             {COLORS.map(c => {
               const selected = color === c;
@@ -229,13 +196,126 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     backgroundColor={c}
                     style={[
                       styles.colorOption,
-                      selected && { borderWidth: 3, borderColor: theme.colors.textPrimary },
+                      selected && {
+                        borderWidth: 3,
+                        borderColor: theme.colors.textPrimary,
+                      },
                     ]}
                   />
                 </Pressable>
               );
             })}
           </View>
+
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Frequency
+          </Text>
+          <View style={styles.freqRow}>
+            {FREQUENCY_OPTIONS.map(opt => {
+              const selected = frequency === opt.key;
+              return (
+                <NeumorphicButton
+                  key={opt.key}
+                  radius={12}
+                  distance={4}
+                  forcePressed={selected}
+                  style={[
+                    styles.freqPill,
+                    selected && { backgroundColor: `${color}26` },
+                  ]}
+                  onPress={() => setFrequency(opt.key)}
+                >
+                  <Text
+                    style={[
+                      styles.freqPillText,
+                      { color: selected ? color : theme.colors.textMuted },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </NeumorphicButton>
+              );
+            })}
+          </View>
+
+          {frequency === 'every_n_days' && (
+            <View style={styles.freqInputRow}>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>Every</Text>
+              <Inset radius={10} style={styles.freqInset}>
+                <TextInput
+                  style={[styles.freqInput, { color: theme.colors.textPrimary }]}
+                  value={frequencyValue}
+                  onChangeText={setFrequencyValue}
+                  keyboardType="number-pad"
+                  placeholder="3"
+                  placeholderTextColor={theme.colors.textMuted}
+                />
+              </Inset>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>days</Text>
+            </View>
+          )}
+
+          {frequency === 'n_times_per_week' && (
+            <View style={styles.freqInputRow}>
+              <Inset radius={10} style={styles.freqInset}>
+                <TextInput
+                  style={[styles.freqInput, { color: theme.colors.textPrimary }]}
+                  value={frequencyValue}
+                  onChangeText={setFrequencyValue}
+                  keyboardType="number-pad"
+                  placeholder="3"
+                  placeholderTextColor={theme.colors.textMuted}
+                />
+              </Inset>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times per week</Text>
+            </View>
+          )}
+
+          {frequency === 'n_times_per_month' && (
+            <View style={styles.freqInputRow}>
+              <Inset radius={10} style={styles.freqInset}>
+                <TextInput
+                  style={[styles.freqInput, { color: theme.colors.textPrimary }]}
+                  value={frequencyValue}
+                  onChangeText={setFrequencyValue}
+                  keyboardType="number-pad"
+                  placeholder="4"
+                  placeholderTextColor={theme.colors.textMuted}
+                />
+              </Inset>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times per month</Text>
+            </View>
+          )}
+
+          {frequency === 'n_times_in_m_days' && (
+            <>
+              <View style={styles.freqInputRow}>
+                <Inset radius={10} style={styles.freqInset}>
+                  <TextInput
+                    style={[styles.freqInput, { color: theme.colors.textPrimary }]}
+                    value={frequencyValue}
+                    onChangeText={setFrequencyValue}
+                    keyboardType="number-pad"
+                    placeholder="3"
+                    placeholderTextColor={theme.colors.textMuted}
+                  />
+                </Inset>
+                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times every</Text>
+                <Inset radius={10} style={styles.freqInset}>
+                  <TextInput
+                    style={[styles.freqInput, { color: theme.colors.textPrimary }]}
+                    value={frequencyWindow}
+                    onChangeText={setFrequencyWindow}
+                    keyboardType="number-pad"
+                    placeholder="7"
+                    placeholderTextColor={theme.colors.textMuted}
+                  />
+                </Inset>
+                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>days</Text>
+              </View>
+              <Text style={[styles.freqHint, { color: theme.colors.textMuted }]}>Max 12 times in 30 days</Text>
+            </>
+          )}
 
           <NeumorphicButton
             radius={16}
@@ -287,16 +367,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   multiline: { minHeight: 64, textAlignVertical: 'top' },
-  goalPresetRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  goalPresetPill: {
-    paddingHorizontal: 16,
+  freqRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
+  freqPill: {
+    paddingHorizontal: 14,
     paddingVertical: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  goalPresetText: {
-    fontSize: 13,
+  freqPillText: {
+    fontSize: 12,
     fontWeight: '700',
+  },
+  freqInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, marginBottom: 2 },
+  freqInputLabel: { fontSize: 14, fontWeight: '600' },
+  freqInset: { width: 64, paddingVertical: 2 },
+  freqInput: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 },
   iconOption: {
@@ -320,7 +410,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 16,
   },
-  saveButtonTextDisabled: {
+  saveButtonTextDisabled: {},
+  freqHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+    marginBottom: 8,
   },
 });
 

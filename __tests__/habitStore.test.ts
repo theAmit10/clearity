@@ -81,6 +81,6 @@ describe('habitStore', () => {
     });
     const id = useHabitStore.getState().habits[0].id;
     await useHabitStore.getState().toggleCompletion(id, '2026-07-13');
-    expect(useHabitStore.getState().habits[0].completions['2026-07-13']).toBe(true);
+    expect(useHabitStore.getState().habits[0].completions['2026-07-13']).toBe(1);
   });
 });

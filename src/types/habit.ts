@@ -1,4 +1,4 @@
-export type Frequency = 'daily' | 'weekly' | 'custom' | '';
+export type FrequencyType = 'daily' | 'every_n_days' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
 
 export interface Habit {
   id: string;
@@ -6,19 +6,21 @@ export interface Habit {
   description?: string;
   icon: string;
   color: string;
-  frequency: Frequency;
-  targetDaysPerWeek?: number;
+  frequency: FrequencyType;
+  frequencyValue?: number;
+  frequencyWindow?: number;
   goal?: string;
   createdAt: string;
   archived: boolean;
-  completions: Record<string, boolean>;
+  completions: Record<string, number>;
+  missedNotes?: Record<string, string>;
 }
 
 export interface HabitStats {
   currentStreak: number;
   bestStreak: number;
   totalCompletions: number;
-  completionRate30d: number; // 0-100
+  completionRate30d: number;
 }
 
 export interface ExportPayload {
@@ -34,5 +36,5 @@ export interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  meta?: string; // stringified extra context (stack trace, etc.)
+  meta?: string;
 }

@@ -6,7 +6,7 @@ export interface WidgetHabitData {
   id: string;
   name: string;
   color: string;
-  completions: Record<string, boolean>;
+  completions: Record<string, number>;
 }
 
 export interface WidgetDataPayload {
@@ -64,13 +64,13 @@ export const WidgetModule = {
   },
 
   buildPayload: (
-    habits: { id: string; name: string; color: string; completions: Record<string, boolean> }[],
+    habits: { id: string; name: string; color: string; completions: Record<string, number> }[],
   ): WidgetDataPayload => {
     const { weekStart, weekEnd } = getWeekRange();
     const todayKey = getTodayKey();
 
     const filtered = habits.map(h => {
-      const weekCompletions: Record<string, boolean> = {};
+      const weekCompletions: Record<string, number> = {};
       for (const dateKey of Object.keys(h.completions)) {
         if (dateKey >= weekStart && dateKey <= weekEnd) {
           weekCompletions[dateKey] = h.completions[dateKey];

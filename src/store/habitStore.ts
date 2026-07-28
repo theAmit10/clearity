@@ -19,6 +19,8 @@ interface HabitState {
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
   toggleCompletion: (id: string, dateKey?: string) => Promise<void>;
+  addMissedNote: (id: string, dateKey: string, note: string) => Promise<void>;
+  removeMissedNote: (id: string, dateKey: string) => Promise<void>;
   replaceAllHabits: (habits: Habit[]) => Promise<void>;
   mergeHabits: (incoming: Habit[]) => Promise<void>;
   markReviewPromptShown: () => Promise<void>;
@@ -76,8 +78,21 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         habitNotifs = [];
       }
 
+      const migrated = (stored ?? []).map(h => ({
+        ...h,
+        completions: Object.fromEntries(
+          Object.entries((h as any).completions || {}).map(([k, v]: [string, any]) => [k, v === true ? 1 : (v || 0)])
+        ),
+        missedNotes: (h as any).missedNotes ?? {},
+        frequency: (h as any).frequency === 'weekly' || (h as any).frequency === 'custom' || (h as any).frequency === ''
+          ? ('daily' as const)
+          : h.frequency,
+        frequencyValue: (h as any).frequencyValue,
+        frequencyWindow: (h as any).frequencyWindow,
+      }));
+
       set({
-        habits: stored ?? [],
+        habits: migrated,
         loaded: true,
         reviewPromptShown: reviewShown,
         habitNotifications: habitNotifs,
@@ -107,6 +122,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       createdAt: new Date().toISOString(),
       archived: false,
       completions: {},
+      missedNotes: {},
     };
     const habits = [...get().habits, habit];
     set({ habits });
@@ -137,15 +153,58 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.map(h => {
       if (h.id !== id) return h;
       const completions = { ...h.completions };
-      if (completions[key]) {
-        delete completions[key];
+      const missedNotes = { ...(h.missedNotes ?? {}) };
+      const current = completions[key] || 0;
+
+      if (h.frequency === 'n_times_in_m_days') {
+        const target = h.frequencyValue ?? 1;
+        if (current >= target) {
+          delete completions[key];
+        } else {
+          completions[key] = current + 1;
+        }
       } else {
-        completions[key] = true;
+        if (current > 0) {
+          delete completions[key];
+        } else {
+          completions[key] = 1;
+        }
       }
-      return { ...h, completions };
+
+      delete missedNotes[key];
+      return { ...h, completions, missedNotes };
     });
     const wasChecked = !get().habits.find(h => h.id === id)?.completions[key];
     trackEvent(wasChecked ? 'habit_uncompleted' : 'habit_completed');
+    set({ habits });
+    persist(habits);
+    updateWidget(habits);
+  },
+
+  addMissedNote: async (id, dateKey, note) => {
+    const habits = get().habits.map(h => {
+      if (h.id !== id) return h;
+      return {
+        ...h,
+        completions: { ...h.completions, [dateKey]: 1 },
+        missedNotes: { ...(h.missedNotes ?? {}), [dateKey]: note },
+      };
+    });
+    set({ habits });
+    persist(habits);
+    updateWidget(habits);
+    logEvent('info', 'Missed note added', { habitId: id, date: dateKey });
+  },
+
+  removeMissedNote: async (id, dateKey) => {
+    const habits = get().habits.map(h => {
+      if (h.id !== id) return h;
+      const completions = { ...h.completions };
+      const missedNotes = { ...(h.missedNotes ?? {}) };
+      delete completions[dateKey];
+      delete missedNotes[dateKey];
+      return { ...h, completions, missedNotes };
+    });
     set({ habits });
     persist(habits);
     updateWidget(habits);
@@ -281,25 +340,183 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 }));
 
-// Pure function so it's easily unit-testable / reusable in UI.
+function countCompletionsInRange(habit: Habit, start: Date, end: Date): number {
+  let count = 0;
+  const cursor = new Date(start);
+  while (cursor <= end) {
+    if (habit.completions[toDateKey(cursor)]) count++;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+}
+
+const effectiveSetCache = new WeakMap<Habit, Set<string>>();
+
+export function computeEffectiveDateSet(habit: Habit): Set<string> {
+  const cached = effectiveSetCache.get(habit);
+  if (cached) return cached;
+
+  const set = new Set<string>();
+  const dates = Object.keys(habit.completions).filter(k => habit.completions[k]).sort();
+
+  if (habit.frequency === 'n_times_in_m_days') {
+    const target = habit.frequencyValue ?? 1;
+    const windowSize = habit.frequencyWindow ?? 7;
+    for (let i = 0; i < dates.length; i++) {
+      const startKey = dates[i];
+      const start = new Date(startKey + 'T00:00:00');
+      const end = addDays(start, windowSize - 1);
+      let count = 0;
+      for (let j = i; j < dates.length; j++) {
+        const d = new Date(dates[j] + 'T00:00:00');
+        if (d > end) break;
+        count += (habit.completions[dates[j]] || 0);
+      }
+      if (count >= target) {
+        let cursor = new Date(start);
+        while (cursor <= end) {
+          set.add(toDateKey(cursor));
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      }
+    }
+    effectiveSetCache.set(habit, set);
+    return set;
+  }
+
+  for (const k of dates) set.add(k);
+
+  if (habit.frequency === 'n_times_per_week') {
+    const target = habit.frequencyValue ?? 3;
+    const seen = new Set<string>();
+    for (const k of dates) {
+      const d = new Date(k + 'T00:00:00');
+      const ws = getWeekStart(d);
+      const key = toDateKey(ws);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const count = countCompletionsInRange(habit, ws, addDays(ws, 6));
+      if (count >= target) {
+        for (let i = 0; i < 7; i++) set.add(toDateKey(addDays(ws, i)));
+      }
+    }
+  } else if (habit.frequency === 'n_times_per_month') {
+    const target = habit.frequencyValue ?? 1;
+    const seen = new Set<string>();
+    for (const k of dates) {
+      const d = new Date(k + 'T00:00:00');
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+      const count = countCompletionsInRange(habit, monthStart, monthEnd);
+      if (count >= target) {
+        let cursor = new Date(monthStart);
+        while (cursor <= monthEnd) {
+          set.add(toDateKey(cursor));
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      }
+    }
+  }
+
+  effectiveSetCache.set(habit, set);
+  return set;
+}
+
+export function isDayCompleted(habit: Habit, dateKey: string): boolean {
+  return computeEffectiveDateSet(habit).has(dateKey);
+}
+
+export function isDayMissed(habit: Habit, dateKey: string): boolean {
+  return !!habit.missedNotes?.[dateKey];
+}
+
+function shouldCountAsCompleted(habit: Habit, dateKey: string): boolean {
+  return !!habit.completions[dateKey];
+}
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getCompletionsInWeek(habit: Habit, weekStart: Date): number {
+  let count = 0;
+  for (let i = 0; i < 7; i++) {
+    if (habit.completions[toDateKey(addDays(weekStart, i))]) count++;
+  }
+  return count;
+}
+
+function weekMeetsTarget(habit: Habit, weekStart: Date): boolean {
+  if (habit.frequency !== 'n_times_per_week') return false;
+  const target = habit.frequencyValue ?? 3;
+  return getCompletionsInWeek(habit, weekStart) >= target;
+}
+
+function monthMeetsTarget(habit: Habit, year: number, month: number): boolean {
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+  const target = habit.frequencyValue ?? 1;
+  return countCompletionsInRange(habit, monthStart, monthEnd) >= target;
+}
+
 export function computeStats(habit: Habit): HabitStats {
   const dates = Object.keys(habit.completions).filter(k => habit.completions[k]);
-  const totalCompletions = dates.length;
+  const totalCompletions = dates.reduce((sum, k) => sum + (habit.completions[k] || 0), 0);
 
-  // current streak: walk backwards from today while completed
   let currentStreak = 0;
   let cursor = new Date();
   cursor.setHours(0, 0, 0, 0);
-  // allow today to be incomplete without breaking a streak that ended yesterday
-  if (!habit.completions[toDateKey(cursor)]) {
-    cursor = addDays(cursor, -1);
-  }
-  while (habit.completions[toDateKey(cursor)]) {
-    currentStreak++;
-    cursor = addDays(cursor, -1);
+
+  if (habit.frequency === 'daily' || !habit.frequency || habit.frequency === 'every_n_days') {
+    if (!shouldCountAsCompleted(habit, toDateKey(cursor))) {
+      cursor = addDays(cursor, -1);
+    }
+    while (shouldCountAsCompleted(habit, toDateKey(cursor))) {
+      currentStreak++;
+      cursor = addDays(cursor, -1);
+    }
+  } else if (habit.frequency === 'n_times_per_week') {
+    let weekStart = getWeekStart(cursor);
+    if (!weekMeetsTarget(habit, weekStart)) {
+      weekStart = addDays(weekStart, -7);
+    }
+    while (weekMeetsTarget(habit, weekStart)) {
+      currentStreak++;
+      weekStart = addDays(weekStart, -7);
+    }
+  } else if (habit.frequency === 'n_times_per_month') {
+    let cy = cursor.getFullYear();
+    let cm = cursor.getMonth();
+    if (!monthMeetsTarget(habit, cy, cm)) {
+      cm -= 1;
+      if (cm < 0) { cm = 11; cy -= 1; }
+    }
+    while (monthMeetsTarget(habit, cy, cm)) {
+      currentStreak++;
+      cm -= 1;
+      if (cm < 0) { cm = 11; cy -= 1; }
+    }
+  } else if (habit.frequency === 'n_times_in_m_days') {
+    const target = habit.frequencyValue ?? 1;
+    const windowSize = habit.frequencyWindow ?? 7;
+    const windowStart = addDays(cursor, -windowSize);
+    let sum = 0;
+    const check = new Date(windowStart);
+    while (check <= cursor) {
+      sum += (habit.completions[toDateKey(check)] || 0);
+      check.setDate(check.getDate() + 1);
+    }
+    currentStreak = sum >= target ? sum : 0;
   }
 
-  // best streak: scan all completion dates sorted
   const sorted = dates.slice().sort();
   let bestStreak = 0;
   let running = 0;
@@ -315,12 +532,11 @@ export function computeStats(habit: Habit): HabitStats {
     prevDate = d;
   }
 
-  // 30 day completion rate
   let completedLast30 = 0;
   let d = new Date();
   d.setHours(0, 0, 0, 0);
   for (let i = 0; i < 30; i++) {
-    if (habit.completions[toDateKey(d)]) completedLast30++;
+    if (shouldCountAsCompleted(habit, toDateKey(d))) completedLast30++;
     d = addDays(d, -1);
   }
   const completionRate30d = Math.round((completedLast30 / 30) * 100);

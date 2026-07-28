@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { toDateKey, isFuture, addDays } from '../services/dateUtils';
 import { useHabitStore } from '../store/habitStore';
+import { computeEffectiveDateSet } from '../store/habitStore';
 import { Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -66,10 +67,13 @@ export default function YearHeatmap({ habitId, color }: Props) {
   const { theme } = useTheme();
   const { colors, radii } = theme;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
-  const completions = useHabitStore(s => {
-    const h = s.habits.find(h => h.id === habitId);
-    return h?.completions ?? {};
-  });
+  const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
+  const completions = habit?.completions ?? {};
+
+  const effectiveSet = useMemo(() => {
+    if (!habit || !habit.frequency || habit.frequency === 'daily' || habit.frequency === 'every_n_days') return null;
+    return computeEffectiveDateSet(habit);
+  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow]);
 
   const year = new Date().getFullYear();
   const weeks = useMemo(() => yearWeeks(year), [year]);
@@ -156,7 +160,11 @@ export default function YearHeatmap({ habitId, color }: Props) {
                     const key = toDateKey(day);
                     const future = isFuture(day);
                     const daysInYear = day.getFullYear() === year;
-                    const done = !!completions[key];
+                    const done = effectiveSet ? effectiveSet.has(key) : !!completions[key];
+                    const raw = completions[key] || 0;
+                    const partial = habit?.frequency === 'n_times_in_m_days' && !done && raw > 0
+                      ? Math.min(1, raw / (habit?.frequencyValue ?? 1))
+                      : 0;
 
                     const cellBg = !daysInYear
                       ? 'transparent'
@@ -164,6 +172,8 @@ export default function YearHeatmap({ habitId, color }: Props) {
                       ? colors.background
                       : done
                       ? color
+                      : partial > 0
+                      ? `${color}${Math.round(partial * 255).toString(16).padStart(2, '0')}`
                       : colors.insetFill;
 
                     return (

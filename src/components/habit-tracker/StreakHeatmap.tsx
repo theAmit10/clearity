@@ -6,7 +6,7 @@ import Pressed from './Pressed';
 type CellState = 'empty' | 'faint' | 'filled';
 
 interface StreakHeatmapProps {
-  completions: Record<string, boolean>;
+  completions: Record<string, number>;
 }
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -21,7 +21,7 @@ function toDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function buildHeatmapData(completions: Record<string, boolean>) {
+function buildHeatmapData(completions: Record<string, number>) {
   const now = new Date();
   return [5, 4, 3, 2, 1, 0].map(i => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
