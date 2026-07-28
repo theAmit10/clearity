@@ -1,4 +1,5 @@
 export interface HabitNotificationConfig {
+  id: string;
   habitId: string;
   enabled: boolean;
   title: string;
@@ -17,6 +18,6 @@ export interface AdminNotificationConfig {
 }
 
 export interface NotificationStoreData {
-  habitNotifications: Record<string, HabitNotificationConfig>;
+  habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
 }

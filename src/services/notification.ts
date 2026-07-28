@@ -32,13 +32,13 @@ export function onBackgroundEvent(callback: (event: any) => void) {
   });
 }
 
-export async function cancelHabitNotification(habitId: string) {
-  await notifee.cancelNotification(`habit-${habitId}`);
+export async function cancelHabitNotification(id: string) {
+  await notifee.cancelNotification(`habit-${id}`);
 }
 
 export async function scheduleHabitNotification(config: HabitNotificationConfig) {
-  const id = `habit-${config.habitId}`;
-  await notifee.cancelNotification(id);
+  const notifId = `habit-${config.id}`;
+  await notifee.cancelNotification(notifId);
   if (!config.enabled) return;
 
   const now = new Date();
@@ -50,7 +50,7 @@ export async function scheduleHabitNotification(config: HabitNotificationConfig)
 
   await notifee.createTriggerNotification(
     {
-      id,
+      id: notifId,
       title: config.title,
       body: config.body,
       android: { channelId: CHANNEL_ID },

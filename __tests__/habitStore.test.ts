@@ -45,7 +45,7 @@ beforeEach(() => {
     habits: [],
     loaded: false,
     reviewPromptShown: false,
-    habitNotifications: {},
+    habitNotifications: [],
     adminNotifications: [],
   });
 });
@@ -56,7 +56,7 @@ describe('habitStore', () => {
     expect(state.habits).toEqual([]);
     expect(state.loaded).toBe(false);
     expect(state.reviewPromptShown).toBe(false);
-    expect(state.habitNotifications).toEqual({});
+    expect(state.habitNotifications).toEqual([]);
     expect(state.adminNotifications).toEqual([]);
   });
 

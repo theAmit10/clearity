@@ -14,14 +14,20 @@ import { useHabitStore } from '../store/habitStore';
 import { getHabitIcon } from '../constants/habitIcons';
 import { useTheme } from '../theme/ThemeProvider';
 
-const NOTIF_COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA'];
+const NOTIF_COLORS = [
+  '#007AFF',
+  '#34C759',
+  '#FF9500',
+  '#FF3B30',
+  '#AF52DE',
+  '#5AC8FA',
+];
 const REVEAL_TAPS = 15;
 
 export default function NotificationSettingsScreen({ navigation }: any) {
   const { theme } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
-  const removeHabitNotification = useHabitStore(s => s.removeHabitNotification);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
 
   const [adminRevealed, setAdminRevealed] = useState(false);
@@ -49,57 +55,106 @@ export default function NotificationSettingsScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
-          <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
-          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>Settings</Text>
+          <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>
+            ←
+          </Text>
+          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>
+            Settings
+          </Text>
         </Pressable>
 
-        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>Notifications</Text>
+        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>
+          Notifications
+        </Text>
 
         <View style={styles.section}>
           <Pressable onPress={handleSecretTap}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>PER-HABIT REMINDERS</Text>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.iosSecondaryLabel },
+              ]}
+            >
+              PER-HABIT REMINDERS
+            </Text>
           </Pressable>
-          <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+          <View
+            style={[
+              styles.sectionBody,
+              { backgroundColor: theme.colors.surface },
+            ]}
+          >
             {habits.length === 0 && (
-              <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>No habits yet. Create one first.</Text>
+              <Text
+                style={[
+                  styles.emptyText,
+                  { color: theme.colors.iosSecondaryLabel },
+                ]}
+              >
+                No habits yet. Create one first.
+              </Text>
             )}
             {habits.map((h, i) => {
-              const notif = habitNotifications[h.id];
-              const enabled = notif?.enabled ?? false;
-              const label = enabled
-                ? `${String(notif!.hour).padStart(2, '0')}:${String(notif!.minute).padStart(2, '0')}`
-                : 'Off';
+              const notifs = habitNotifications.filter(n => n.habitId === h.id);
+              const enabledCount = notifs.filter(n => n.enabled).length;
+              const label = notifs.length === 0
+                ? 'No reminders'
+                : `${enabledCount}/${notifs.length} active`;
               const IconComp = getHabitIcon(h.icon);
 
               return (
                 <Pressable
                   key={h.id}
-                  style={[styles.habitRow, i > 0 && [styles.habitRowBorder, { borderTopColor: theme.colors.iosSeparator }]]}
-                  onPress={() => navigation.navigate('HabitNotificationConfig', { habitId: h.id })}
+                  style={[
+                    styles.habitRow,
+                    i > 0 && [
+                      styles.habitRowBorder,
+                      { borderTopColor: theme.colors.iosSeparator },
+                    ],
+                  ]}
+                  onPress={() =>
+                    navigation.navigate('HabitNotificationConfig', {
+                      habitId: h.id,
+                    })
+                  }
                 >
                   <View style={styles.habitLeft}>
-                    <View style={[styles.colorDot, { backgroundColor: h.color || NOTIF_COLORS[i % NOTIF_COLORS.length] }]}>
+                    <View
+                      style={[
+                        styles.colorDot,
+                        {
+                          backgroundColor:
+                            h.color || NOTIF_COLORS[i % NOTIF_COLORS.length],
+                        },
+                      ]}
+                    >
                       <IconComp size={12} color={theme.colors.shadowLight} />
                     </View>
                     <View>
-                      <Text style={[styles.habitName, { color: theme.colors.iosLabel }]}>{h.name}</Text>
-                      <Text style={[styles.notifStatus, { color: theme.colors.iosSecondaryLabel }]}>{label}</Text>
+                      <Text
+                        style={[
+                          styles.habitName,
+                          { color: theme.colors.iosLabel },
+                        ]}
+                      >
+                        {h.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.notifStatus,
+                          { color: theme.colors.iosSecondaryLabel },
+                        ]}
+                      >
+                        {label}
+                      </Text>
                     </View>
                   </View>
-                  <Switch
-                    value={enabled}
-                    onValueChange={val => {
-                      if (val) {
-                        navigation.navigate('HabitNotificationConfig', { habitId: h.id });
-                      } else {
-                        removeHabitNotification(h.id);
-                      }
-                    }}
-                    trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosGreen }}
-                  />
+                  <Text style={[styles.chevron, { color: theme.colors.iosGray }]}>›</Text>
                 </Pressable>
               );
             })}
@@ -109,23 +164,62 @@ export default function NotificationSettingsScreen({ navigation }: any) {
         {adminRevealed && (
           <Animated.View style={{ opacity: opacityAnim }}>
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>DAILY REMINDERS (ADMIN)</Text>
-              <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { color: theme.colors.iosSecondaryLabel },
+                ]}
+              >
+                DAILY REMINDERS (ADMIN)
+              </Text>
+              <View
+                style={[
+                  styles.sectionBody,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
                 {adminNotifications.map((n, i) => {
                   const label = n.enabled
-                    ? `${String(n.hour).padStart(2, '0')}:${String(n.minute).padStart(2, '0')}`
+                    ? `${String(n.hour).padStart(2, '0')}:${String(
+                        n.minute,
+                      ).padStart(2, '0')}`
                     : 'Off';
 
                   return (
                     <View
                       key={n.id}
-                      style={[styles.habitRow, i > 0 && [styles.habitRowBorder, { borderTopColor: theme.colors.iosSeparator }]]}
+                      style={[
+                        styles.habitRow,
+                        i > 0 && [
+                          styles.habitRowBorder,
+                          { borderTopColor: theme.colors.iosSeparator },
+                        ],
+                      ]}
                     >
                       <View style={styles.habitLeft}>
-                        <View style={[styles.colorDot, { backgroundColor: theme.colors.iosSecondaryLabel }]} />
+                        <View
+                          style={[
+                            styles.colorDot,
+                            { backgroundColor: theme.colors.iosSecondaryLabel },
+                          ]}
+                        />
                         <View>
-                          <Text style={[styles.habitName, { color: theme.colors.iosLabel }]}>{n.title}</Text>
-                          <Text style={[styles.notifStatus, { color: theme.colors.iosSecondaryLabel }]}>{label}</Text>
+                          <Text
+                            style={[
+                              styles.habitName,
+                              { color: theme.colors.iosLabel },
+                            ]}
+                          >
+                            {n.title}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.notifStatus,
+                              { color: theme.colors.iosSecondaryLabel },
+                            ]}
+                          >
+                            {label}
+                          </Text>
                         </View>
                       </View>
                       <Switch
@@ -134,26 +228,39 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                           const store = useHabitStore.getState();
                           store.updateAdminNotification(n.id, { enabled: val });
                         }}
-                        trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosGreen }}
+                        trackColor={{
+                          false: theme.colors.iosSeparator,
+                          true: theme.colors.iosGreen,
+                        }}
                       />
                     </View>
                   );
                 })}
               </View>
               <Pressable
-                style={[styles.adminButton, { backgroundColor: theme.colors.surface }]}
+                style={[
+                  styles.adminButton,
+                  { backgroundColor: theme.colors.surface },
+                ]}
                 onPress={() => navigation.navigate('AdminNotification')}
               >
-                <Text style={[styles.adminButtonText, { color: theme.colors.iosBlue }]}>Edit Admin Notifications</Text>
+                <Text
+                  style={[
+                    styles.adminButtonText,
+                    { color: theme.colors.iosBlue },
+                  ]}
+                >
+                  Edit Admin Notifications
+                </Text>
               </Pressable>
             </View>
           </Animated.View>
         )}
-        {!adminRevealed && tapCount > 0 && (
+        {/* {!adminRevealed && tapCount > 0 && (
           <Text style={[styles.secretHint, { color: theme.colors.iosGray }]}>
             {REVEAL_TAPS - tapCount} more tap{REVEAL_TAPS - tapCount !== 1 ? 's' : ''}
           </Text>
-        )}
+        )} */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -162,7 +269,17 @@ export default function NotificationSettingsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   backRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  backArrow: { fontSize: 22, marginRight: 4, ...Platform.select({ android: { lineHeight: 22, textAlignVertical: 'center', includeFontPadding: false } }) },
+  backArrow: {
+    fontSize: 22,
+    marginRight: 4,
+    ...Platform.select({
+      android: {
+        lineHeight: 22,
+        textAlignVertical: 'center',
+        includeFontPadding: false,
+      },
+    }),
+  },
   backText: { fontSize: 17 },
   title: {
     fontSize: 32,
@@ -196,9 +313,17 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   habitLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  colorDot: { width: 28, height: 28, borderRadius: 14, marginRight: 12, alignItems: 'center', justifyContent: 'center' },
+  colorDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   habitName: { fontSize: 16 },
   notifStatus: { fontSize: 13, marginTop: 2 },
+  chevron: { fontSize: 22, fontWeight: '300', paddingLeft: 12 },
   adminButton: {
     marginTop: 12,
     paddingVertical: 14,

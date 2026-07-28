@@ -33,7 +33,7 @@ function AppContent() {
       try {
         await setupChannel();
         await requestPermission();
-        const habitConfigs = Object.values(habitNotifications);
+        const habitConfigs = habitNotifications;
         await rescheduleAll(habitConfigs, adminNotifications);
       } catch (err) {
         // notification setup is non-critical

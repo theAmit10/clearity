@@ -12,7 +12,7 @@ interface HabitState {
   habits: Habit[];
   loaded: boolean;
   reviewPromptShown: boolean;
-  habitNotifications: Record<string, HabitNotificationConfig>;
+  habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
   init: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
@@ -23,8 +23,9 @@ interface HabitState {
   mergeHabits: (incoming: Habit[]) => Promise<void>;
   markReviewPromptShown: () => Promise<void>;
   reorderHabits: (reordered: Habit[]) => Promise<void>;
-  setHabitNotification: (habitId: string, config: Partial<HabitNotificationConfig>) => Promise<void>;
-  removeHabitNotification: (habitId: string) => Promise<void>;
+  addHabitNotification: (habitId: string, config: { title: string; body: string; hour: number; minute: number }) => Promise<void>;
+  updateHabitNotification: (id: string, patch: Partial<HabitNotificationConfig>) => Promise<void>;
+  removeHabitNotification: (id: string) => Promise<void>;
   addAdminNotification: (config: AdminNotificationConfig) => Promise<void>;
   updateAdminNotification: (id: string, patch: Partial<AdminNotificationConfig>) => Promise<void>;
   removeAdminNotification: (id: string) => Promise<void>;
@@ -45,7 +46,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   loaded: false,
   reviewPromptShown: false,
-  habitNotifications: {},
+  habitNotifications: [],
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
 
   init: async () => {
@@ -55,13 +56,38 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         loadReviewState(),
         loadNotificationData<NotificationStoreData>(),
       ]);
+
+      const raw = notifData?.habitNotifications;
+      let habitNotifs: HabitNotificationConfig[];
+      if (Array.isArray(raw)) {
+        habitNotifs = raw;
+      } else if (raw && typeof raw === 'object') {
+        const oldMap = raw as Record<string, { habitId: string; enabled: boolean; title: string; body: string; hour: number; minute: number }>;
+        habitNotifs = Object.values(oldMap).map(n => ({
+          habitId: n.habitId,
+          enabled: n.enabled,
+          title: n.title,
+          body: n.body ?? '',
+          hour: n.hour,
+          minute: n.minute,
+          id: `notif-${n.habitId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        }));
+      } else {
+        habitNotifs = [];
+      }
+
       set({
         habits: stored ?? [],
         loaded: true,
         reviewPromptShown: reviewShown,
-        habitNotifications: notifData?.habitNotifications ?? {},
+        habitNotifications: habitNotifs,
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
       });
+
+      if (!Array.isArray(raw)) {
+        saveNotificationData({ habitNotifications: habitNotifs, adminNotifications: get().adminNotifications });
+      }
+
       trackEvent('app_opened', { habit_count: stored?.length ?? 0 });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
       const h = stored ?? [];
@@ -171,36 +197,49 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     logEvent('info', 'Habits reordered');
   },
 
-  setHabitNotification: async (habitId, partial) => {
-    const existing = get().habitNotifications[habitId];
+  addHabitNotification: async (habitId, data) => {
     const config: HabitNotificationConfig = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       habitId,
-      enabled: partial.enabled ?? existing?.enabled ?? true,
-      title: partial.title ?? existing?.title ?? 'Habit reminder',
-      body: partial.body ?? existing?.body ?? '',
-      hour: partial.hour ?? existing?.hour ?? 9,
-      minute: partial.minute ?? existing?.minute ?? 0,
+      enabled: true,
+      title: data.title,
+      body: data.body,
+      hour: data.hour,
+      minute: data.minute,
     };
-    const habitNotifications = { ...get().habitNotifications, [habitId]: config };
+    const habitNotifications = [...get().habitNotifications, config];
     set({ habitNotifications });
     await saveNotificationData({
       habitNotifications,
       adminNotifications: get().adminNotifications,
     });
     await scheduleHabitNotification(config);
-    logEvent('info', 'Habit notification set', { habitId, time: `${config.hour}:${config.minute}` });
+    logEvent('info', 'Habit notification added', { habitId, id: config.id });
   },
 
-  removeHabitNotification: async habitId => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [habitId]: _, ...habitNotifications } = get().habitNotifications;
+  updateHabitNotification: async (id, patch) => {
+    const habitNotifications = get().habitNotifications.map(n =>
+      n.id === id ? { ...n, ...patch } : n,
+    );
     set({ habitNotifications });
     await saveNotificationData({
       habitNotifications,
       adminNotifications: get().adminNotifications,
     });
-    await cancelHabitNotification(habitId);
-    logEvent('info', 'Habit notification removed', { habitId });
+    const updated = habitNotifications.find(n => n.id === id);
+    if (updated) await scheduleHabitNotification(updated);
+    logEvent('info', 'Habit notification updated', { id });
+  },
+
+  removeHabitNotification: async id => {
+    const habitNotifications = get().habitNotifications.filter(n => n.id !== id);
+    set({ habitNotifications });
+    await saveNotificationData({
+      habitNotifications,
+      adminNotifications: get().adminNotifications,
+    });
+    await cancelHabitNotification(id);
+    logEvent('info', 'Habit notification removed', { id });
   },
 
   addAdminNotification: async config => {
