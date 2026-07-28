@@ -29,6 +29,7 @@ function makeHabit(overrides: Partial<Habit> = {}): Habit {
     icon: '💪',
     color: '#FF5733',
     frequency: 'daily',
+    category: 'none',
     createdAt: '2026-07-01T00:00:00.000Z',
     archived: false,
     completions: {},

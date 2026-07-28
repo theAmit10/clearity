@@ -1,4 +1,4 @@
-export type FrequencyType = 'daily' | 'every_n_days' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
+export type FrequencyType = 'daily' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
 
 export interface Habit {
   id: string;
@@ -10,10 +10,18 @@ export interface Habit {
   frequencyValue?: number;
   frequencyWindow?: number;
   goal?: string;
+  category: string;
   createdAt: string;
   archived: boolean;
   completions: Record<string, number>;
   missedNotes?: Record<string, string>;
+}
+
+export interface HabitCategory {
+  key: string;
+  name: string;
+  icon: string;
+  isCustom: boolean;
 }
 
 export interface HabitStats {

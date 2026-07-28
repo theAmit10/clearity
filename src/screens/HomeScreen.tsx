@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator,
 } from 'react-native-draggable-flatlist';
@@ -20,7 +20,21 @@ export default function HomeScreen({ navigation }: any) {
   const allHabits = useHabitStore(s => s.habits);
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
-  const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
+  const activeHabits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categorySet = useMemo(() => {
+    const cats = new Set<string>();
+    activeHabits.forEach(h => { if (h.category && h.category !== 'none') cats.add(h.category); });
+    return ['all', ...cats];
+  }, [activeHabits]);
+
+  const habits = useMemo(
+    () => selectedCategory === 'all'
+      ? activeHabits
+      : activeHabits.filter(h => h.category === selectedCategory),
+    [activeHabits, selectedCategory],
+  );
 
   const renderItem = useCallback(
     ({
@@ -69,11 +83,52 @@ export default function HomeScreen({ navigation }: any) {
         </NeumorphicButton>
       </View>
 
+      {categorySet.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.catFilterRow}
+          style={{ maxHeight: 40 }}
+        >
+          {categorySet.map(cat => {
+            const selected = selectedCategory === cat;
+            return (
+              <NeumorphicButton
+                key={cat}
+                radius={14}
+                distance={4}
+                forcePressed={selected}
+                style={[
+                  styles.catFilterPill,
+                  selected && { backgroundColor: `${theme.colors.textPrimary}15` },
+                ]}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <Text
+                  style={[
+                    styles.catFilterText,
+                    {
+                      color: selected
+                        ? theme.colors.textPrimary
+                        : theme.colors.textMuted,
+                    },
+                  ]}
+                >
+                  {cat === 'all' ? 'All' : cat}
+                </Text>
+              </NeumorphicButton>
+            );
+          })}
+        </ScrollView>
+      )}
+
       {habits.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
             <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
-              No habits yet.{'\n'}Tap + to add your first one.
+              {selectedCategory === 'all'
+                ? 'No habits yet.\nTap + to add your first one.'
+                : 'No habits in this category.'}
             </Text>
           </Raised>
         </View>
@@ -139,103 +194,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  catFilterRow: {
+    paddingHorizontal: 20,
+    gap: 8,
+    paddingVertical: 8,
+  },
+  catFilterPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catFilterText: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
 });
-
-// import React, { useMemo } from 'react';
-// import {
-//   View,
-//   Text,
-//   FlatList,
-//   Pressable,
-//   StyleSheet,
-//   SafeAreaView,
-// } from 'react-native';
-// import { useHabitStore } from '../store/habitStore';
-// import HabitCard from '../components/HabitCard';
-
-// export default function HomeScreen({ navigation }: any) {
-//   // IMPORTANT: select the raw array (stable reference) from the store, then
-//   // derive the filtered list with useMemo. Never return a freshly-created
-//   // array/object directly from a Zustand selector — a new reference on every
-//   // call makes React think the store changed on every render, which causes
-//   // an infinite render loop ("Maximum update depth exceeded").
-//   const allHabits = useHabitStore(s => s.habits);
-//   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
-//   const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <View style={styles.headerRow}>
-//         <Text style={styles.title}>Habits</Text>
-//         <Pressable
-//           onPress={() => navigation.navigate('AddEditHabit')}
-//           style={styles.addButton}
-//         >
-//           <Text style={styles.addButtonText}>+</Text>
-//         </Pressable>
-//       </View>
-
-//       {habits.length === 0 ? (
-//         <View style={styles.empty}>
-//           <Text style={styles.emptyText}>
-//             No habits yet.{'\n'}Tap + to add your first one.
-//           </Text>
-//         </View>
-//       ) : (
-//         <FlatList
-//           data={habits}
-//           keyExtractor={h => h.id}
-//           contentContainerStyle={{ paddingVertical: 8 }}
-//           renderItem={({ item }) => (
-//             <HabitCard
-//               habit={item}
-//               onToggleToday={() => toggleCompletion(item.id)}
-//               onPress={() =>
-//                 navigation.navigate('HabitDetail', { id: item.id })
-//               }
-//             />
-//           )}
-//         />
-//       )}
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: '#F2F2F7' },
-//   headerRow: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//     paddingHorizontal: 20,
-//     paddingTop: 12,
-//     paddingBottom: 4,
-//   },
-//   title: { fontSize: 32, fontWeight: '700', color: '#1C1C1E' },
-//   addButton: {
-//     width: 36,
-//     height: 36,
-//     borderRadius: 18,
-//     backgroundColor: '#007AFF',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   addButtonText: {
-//     color: '#FFF',
-//     fontSize: 22,
-//     fontWeight: '600',
-//     marginTop: -2,
-//   },
-//   empty: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     paddingHorizontal: 40,
-//   },
-//   emptyText: {
-//     color: '#8E8E93',
-//     fontSize: 16,
-//     textAlign: 'center',
-//     lineHeight: 22,
-//   },
-// });

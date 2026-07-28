@@ -33,6 +33,7 @@ const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
   icon: '💪',
   color: '#FF5733',
   frequency: 'daily',
+  category: 'none',
   createdAt: '2026-01-01T00:00:00.000Z',
   archived: false,
   completions: {},
@@ -47,6 +48,7 @@ beforeEach(() => {
     reviewPromptShown: false,
     habitNotifications: [],
     adminNotifications: [],
+    customCategories: [],
   });
 });
 
@@ -66,6 +68,7 @@ describe('habitStore', () => {
       icon: '💪',
       color: '#FF5733',
       frequency: 'daily',
+      category: 'none',
     });
     const { habits } = useHabitStore.getState();
     expect(habits).toHaveLength(1);
@@ -78,6 +81,7 @@ describe('habitStore', () => {
       icon: '💪',
       color: '#FF5733',
       frequency: 'daily',
+      category: 'none',
     });
     const id = useHabitStore.getState().habits[0].id;
     await useHabitStore.getState().toggleCompletion(id, '2026-07-13');

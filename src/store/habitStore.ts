@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Habit, HabitStats } from '../types/habit';
+import { Habit, HabitStats, HabitCategory } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
 import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData } from '../services/storage';
 import { logEvent } from '../services/logger';
@@ -14,6 +14,7 @@ interface HabitState {
   reviewPromptShown: boolean;
   habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
+  customCategories: HabitCategory[];
   init: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
@@ -31,6 +32,8 @@ interface HabitState {
   addAdminNotification: (config: AdminNotificationConfig) => Promise<void>;
   updateAdminNotification: (id: string, patch: Partial<AdminNotificationConfig>) => Promise<void>;
   removeAdminNotification: (id: string) => Promise<void>;
+  addCustomCategory: (cat: HabitCategory) => void;
+  removeCustomCategory: (key: string) => void;
 }
 
 function persist(habits: Habit[]) {
@@ -50,6 +53,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   reviewPromptShown: false,
   habitNotifications: [],
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
+  customCategories: [],
 
   init: async () => {
     try {
@@ -84,7 +88,8 @@ export const useHabitStore = create<HabitState>((set, get) => ({
           Object.entries((h as any).completions || {}).map(([k, v]: [string, any]) => [k, v === true ? 1 : (v || 0)])
         ),
         missedNotes: (h as any).missedNotes ?? {},
-        frequency: (h as any).frequency === 'weekly' || (h as any).frequency === 'custom' || (h as any).frequency === ''
+        category: (h as any).category || 'none',
+        frequency: (h as any).frequency === 'weekly' || (h as any).frequency === 'custom' || (h as any).frequency === '' || (h as any).frequency === 'every_n_days'
           ? ('daily' as const)
           : h.frequency,
         frequencyValue: (h as any).frequencyValue,
@@ -335,8 +340,23 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       habitNotifications: get().habitNotifications,
       adminNotifications,
     });
-    await cancelAdminNotification(id);
+    await     cancelAdminNotification(id);
     logEvent('info', 'Admin notification removed', { id });
+  },
+
+  addCustomCategory: cat => {
+    const existing = get().customCategories;
+    if (existing.find(c => c.key === cat.key)) return;
+    set({ customCategories: [...existing, cat] });
+  },
+
+  removeCustomCategory: key => {
+    set({
+      customCategories: get().customCategories.filter(c => c.key !== key),
+      habits: get().habits.map(h =>
+        h.category === key ? { ...h, category: 'none' } : h
+      ),
+    });
   },
 }));
 
@@ -475,7 +495,7 @@ export function computeStats(habit: Habit): HabitStats {
   let cursor = new Date();
   cursor.setHours(0, 0, 0, 0);
 
-  if (habit.frequency === 'daily' || !habit.frequency || habit.frequency === 'every_n_days') {
+  if (habit.frequency === 'daily' || !habit.frequency) {
     if (!shouldCountAsCompleted(habit, toDateKey(cursor))) {
       cursor = addDays(cursor, -1);
     }

@@ -8,12 +8,15 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import { logEvent } from '../services/logger';
-import { HABIT_ICONS } from '../constants/habitIcons';
+import { HABIT_ICONS, getHabitIcon } from '../constants/habitIcons';
+import { BUILT_IN_CATEGORIES } from '../constants/habitCategories';
+import type { HabitCategory } from '../types/habit';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -31,7 +34,6 @@ const COLORS = [
 
 const FREQUENCY_OPTIONS: { key: FrequencyType; label: string }[] = [
   { key: 'daily', label: 'Daily' },
-  { key: 'every_n_days', label: 'Every N days' },
   { key: 'n_times_per_week', label: 'X times / week' },
   { key: 'n_times_per_month', label: 'X times / month' },
   { key: 'n_times_in_m_days', label: 'X times in Y days' },
@@ -46,6 +48,8 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const reviewPromptShown = useHabitStore(s => s.reviewPromptShown);
   const markReviewPromptShown = useHabitStore(s => s.markReviewPromptShown);
+  const customCategories = useHabitStore(s => s.customCategories);
+  const addCustomCategory = useHabitStore(s => s.addCustomCategory);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -55,6 +59,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [frequency, setFrequency] = useState<FrequencyType>(existing?.frequency ?? 'daily');
   const [frequencyValue, setFrequencyValue] = useState(existing?.frequencyValue?.toString() ?? '');
   const [frequencyWindow, setFrequencyWindow] = useState(existing?.frequencyWindow?.toString() ?? '');
+  const [category, setCategory] = useState(existing?.category || 'none');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState(HABIT_ICONS[0].key);
 
   const freqV = parseInt(frequencyValue, 10);
   const freqW = parseInt(frequencyWindow, 10);
@@ -70,6 +78,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
       icon,
       color,
       goal: goal.trim() || undefined,
+      category,
       frequency,
       frequencyValue: frequency === 'daily' ? undefined
         : frequency === 'n_times_in_m_days'
@@ -238,23 +247,6 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             })}
           </View>
 
-          {frequency === 'every_n_days' && (
-            <View style={styles.freqInputRow}>
-              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>Every</Text>
-              <Inset radius={10} style={styles.freqInset}>
-                <TextInput
-                  style={[styles.freqInput, { color: theme.colors.textPrimary }]}
-                  value={frequencyValue}
-                  onChangeText={setFrequencyValue}
-                  keyboardType="number-pad"
-                  placeholder="3"
-                  placeholderTextColor={theme.colors.textMuted}
-                />
-              </Inset>
-              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>days</Text>
-            </View>
-          )}
-
           {frequency === 'n_times_per_week' && (
             <View style={styles.freqInputRow}>
               <Inset radius={10} style={styles.freqInset}>
@@ -317,6 +309,53 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             </>
           )}
 
+          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
+            Category
+          </Text>
+          <View style={styles.row}>
+            {[...BUILT_IN_CATEGORIES.filter(c => c.key !== 'none'), ...customCategories].map(cat => {
+              const selected = category === cat.key;
+              const CatIcon = getHabitIcon(cat.icon);
+              return (
+                <NeumorphicButton
+                  key={cat.key}
+                  radius={14}
+                  distance={4}
+                  forcePressed={selected}
+                  style={[
+                    styles.catPill,
+                    selected && { backgroundColor: `${color}26` },
+                  ]}
+                  onPress={() => setCategory(cat.key)}
+                >
+                  <CatIcon size={20} color={selected ? color : theme.colors.textMuted} />
+                  <Text
+                    style={[
+                      styles.catPillText,
+                      { color: selected ? color : theme.colors.textMuted },
+                    ]}
+                  >
+                    {cat.name}
+                  </Text>
+                </NeumorphicButton>
+              );
+            })}
+            <NeumorphicButton
+              radius={14}
+              distance={4}
+              style={styles.catPill}
+              onPress={() => {
+                setNewCatName('');
+                setNewCatIcon(HABIT_ICONS[0].key);
+                setShowCategoryModal(true);
+              }}
+            >
+              <Text style={[styles.catPillText, { color: theme.colors.textMuted }]}>
+                + Create
+              </Text>
+            </NeumorphicButton>
+          </View>
+
           <NeumorphicButton
             radius={16}
             distance={6}
@@ -335,6 +374,90 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             </Text>
           </NeumorphicButton>
         </ScrollView>
+
+        <Modal
+          visible={showCategoryModal}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowCategoryModal(false)}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: theme.colors.background }]}>
+            <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
+              New Category
+            </Text>
+
+            <Text style={[styles.label, { color: theme.colors.textMuted }]}>Name</Text>
+            <Inset radius={14} style={styles.inputWrap}>
+              <TextInput
+                value={newCatName}
+                onChangeText={setNewCatName}
+                placeholder="e.g. Reading"
+                placeholderTextColor={theme.colors.textMuted}
+                style={[styles.input, { color: theme.colors.textPrimary }]}
+                autoFocus
+              />
+            </Inset>
+
+            <Text style={[styles.label, { color: theme.colors.textMuted }]}>Icon</Text>
+            <View style={styles.row}>
+              {HABIT_ICONS.map(({ key, Icon }) => {
+                const selected = newCatIcon === key;
+                return (
+                  <NeumorphicButton
+                    key={key}
+                    radius={14}
+                    distance={4}
+                    forcePressed={selected}
+                    style={[
+                      styles.iconOption,
+                      selected && { backgroundColor: `${color}26` },
+                    ]}
+                    onPress={() => setNewCatIcon(key)}
+                  >
+                    <Icon size={22} color={selected ? color : theme.colors.textMuted} />
+                  </NeumorphicButton>
+                );
+              })}
+            </View>
+
+            <View style={styles.modalActions}>
+              <NeumorphicButton
+                radius={16}
+                distance={6}
+                style={[styles.modalButton, { backgroundColor: theme.colors.insetFill }]}
+                onPress={() => setShowCategoryModal(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.colors.textMuted }]}>
+                  Cancel
+                </Text>
+              </NeumorphicButton>
+              <NeumorphicButton
+                radius={16}
+                distance={6}
+                disabled={!newCatName.trim()}
+                backgroundColor={newCatName.trim() ? color : theme.colors.insetFill}
+                style={styles.modalButton}
+                onPress={() => {
+                  if (!newCatName.trim()) return;
+                  const key = newCatName.trim().toLowerCase().replace(/\s+/g, '-');
+                  const cat: HabitCategory = {
+                    key,
+                    name: newCatName.trim(),
+                    icon: newCatIcon,
+                    isCustom: true,
+                  };
+                  addCustomCategory(cat);
+                  setCategory(key);
+                  setShowCategoryModal(false);
+                }}
+              >
+                <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
+                  Create
+                </Text>
+              </NeumorphicButton>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -417,164 +540,42 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 8,
   },
+  catPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  catPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 60,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    justifyContent: 'flex-end',
+  },
+  modalButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtonText: {
+    fontWeight: '800',
+    fontSize: 14,
+  },
 });
-
-// import React, { useState } from 'react';
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   Pressable,
-//   StyleSheet,
-//   ScrollView,
-//   KeyboardAvoidingView,
-//   Platform,
-// } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import { useHabitStore } from '../store/habitStore';
-
-// const ICONS = ['💪', '📚', '💧', '🧘', '🏃', '🥗', '😴', '✍️', '🎯', '🚭', '💰', '🎸'];
-// const COLORS = ['#FF5A5F', '#4CAF50', '#FF9500', '#007AFF', '#AF52DE', '#5AC8FA', '#FFCC00'];
-
-// export default function AddEditHabitScreen({ route, navigation }: any) {
-//   const editId = route.params?.id;
-//   const existing = useHabitStore(s => s.habits.find(h => h.id === editId));
-//   const addHabit = useHabitStore(s => s.addHabit);
-//   const updateHabit = useHabitStore(s => s.updateHabit);
-
-//   const [name, setName] = useState(existing?.name ?? '');
-//   const [description, setDescription] = useState(existing?.description ?? '');
-//   const [icon, setIcon] = useState(existing?.icon ?? ICONS[0]);
-//   const [color, setColor] = useState(existing?.color ?? COLORS[0]);
-//   const [goal, setGoal] = useState(existing?.goal ?? '');
-
-//   const canSave = name.trim().length > 0;
-
-//   const handleSave = async () => {
-//     if (!canSave) return;
-//     const trimmed = {
-//       name: name.trim(),
-//       description: description.trim() || undefined,
-//       icon,
-//       color,
-//       goal: goal.trim() || undefined,
-//     };
-//     if (existing) {
-//       await updateHabit(existing.id, trimmed);
-//     } else {
-//       await addHabit({ ...trimmed, frequency: 'daily' });
-//     }
-//     navigation.goBack();
-//   };
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-//         <ScrollView contentContainerStyle={{ padding: 20 }}>
-//           <Text style={styles.title}>{existing ? 'Edit Habit' : 'New Habit'}</Text>
-
-//           <Text style={styles.label}>Name</Text>
-//           <TextInput
-//             value={name}
-//             onChangeText={setName}
-//             placeholder="e.g. Drink water"
-//             placeholderTextColor="#C7C7CC"
-//             style={styles.input}
-//           />
-
-//           <Text style={styles.label}>Description</Text>
-//           <TextInput
-//             value={description}
-//             onChangeText={setDescription}
-//             placeholder="e.g. 8 glasses per day"
-//             placeholderTextColor="#C7C7CC"
-//             style={[styles.input, styles.multiline]}
-//             multiline
-//             numberOfLines={2}
-//           />
-
-//           <Text style={styles.label}>Goal</Text>
-//           <TextInput
-//             value={goal}
-//             onChangeText={setGoal}
-//             placeholder="e.g. Daily"
-//             placeholderTextColor="#C7C7CC"
-//             style={styles.input}
-//           />
-
-//           <Text style={styles.label}>Icon</Text>
-//           <View style={styles.row}>
-//             {ICONS.map(i => (
-//               <Pressable
-//                 key={i}
-//                 onPress={() => setIcon(i)}
-//                 style={[styles.iconOption, icon === i && styles.iconOptionSelected]}>
-//                 <Text style={{ fontSize: 22 }}>{i}</Text>
-//               </Pressable>
-//             ))}
-//           </View>
-
-//           <Text style={styles.label}>Color</Text>
-//           <View style={styles.row}>
-//             {COLORS.map(c => (
-//               <Pressable
-//                 key={c}
-//                 onPress={() => setColor(c)}
-//                 style={[
-//                   styles.colorOption,
-//                   { backgroundColor: c },
-//                   color === c && styles.colorOptionSelected,
-//                 ]}
-//               />
-//             ))}
-//           </View>
-
-//           <Pressable
-//             style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-//             disabled={!canSave}
-//             onPress={handleSave}>
-//             <Text style={styles.saveButtonText}>{existing ? 'Save Changes' : 'Create Habit'}</Text>
-//           </Pressable>
-//         </ScrollView>
-//       </KeyboardAvoidingView>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: '#F2F2F7' },
-//   title: { fontSize: 26, fontWeight: '700', color: '#1C1C1E', marginBottom: 24 },
-//   label: { fontSize: 14, fontWeight: '600', color: '#8E8E93', marginBottom: 8, marginTop: 20 },
-//   input: {
-//     backgroundColor: '#FFF',
-//     borderRadius: 12,
-//     paddingHorizontal: 16,
-//     paddingVertical: 14,
-//     fontSize: 16,
-//     color: '#1C1C1E',
-//   },
-//   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-//   iconOption: {
-//     width: 44,
-//     height: 44,
-//     borderRadius: 12,
-//     backgroundColor: '#FFF',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     borderWidth: 2,
-//     borderColor: 'transparent',
-//   },
-//   iconOptionSelected: { borderColor: '#007AFF' },
-//   colorOption: { width: 36, height: 36, borderRadius: 18, borderWidth: 3, borderColor: 'transparent' },
-//   colorOptionSelected: { borderColor: '#1C1C1E' },
-//   saveButton: {
-//     marginTop: 32,
-//     backgroundColor: '#007AFF',
-//     borderRadius: 12,
-//     paddingVertical: 16,
-//     alignItems: 'center',
-//   },
-//   saveButtonDisabled: { backgroundColor: '#C7C7CC' },
-//   saveButtonText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
-//   multiline: { minHeight: 60, textAlignVertical: 'top' },
-// });

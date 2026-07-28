@@ -10,7 +10,7 @@ interface Props {
   color: string;
   cellSize?: number;
   gap?: number;
-  frequency?: 'daily' | 'every_n_days' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
+  frequency?: 'daily' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
   frequencyValue?: number;
   frequencyWindow?: number;
   weeks?: number;
@@ -50,7 +50,7 @@ export default function HeatmapGrid({
   const scrollRef = useRef<ScrollView>(null);
 
   const effectiveSet = useMemo(() => {
-    if (!frequency || frequency === 'daily' || frequency === 'every_n_days') return null;
+    if (!frequency || frequency === 'daily') return null;
     return computeEffectiveDateSet({
       completions,
       frequency: frequency as any,

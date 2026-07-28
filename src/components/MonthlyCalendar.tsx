@@ -99,7 +99,7 @@ export default function MonthlyCalendar({
   const [missedNoteText, setMissedNoteText] = useState('');
 
   const effectiveSet = useMemo(() => {
-    if (!habit || !habit.frequency || habit.frequency === 'daily' || habit.frequency === 'every_n_days') return null;
+    if (!habit || !habit.frequency || habit.frequency === 'daily') return null;
     return computeEffectiveDateSet(habit);
   }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow]);
 

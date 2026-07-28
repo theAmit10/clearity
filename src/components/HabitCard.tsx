@@ -63,18 +63,25 @@ export default function HabitCard({
           </Raised>
 
           <View style={styles.headerText}>
-            <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
-              {habit.name}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+                {habit.name}
+              </Text>
+              {habit.category && habit.category !== 'none' && (
+                <View style={[styles.catBadge, { backgroundColor: `${habit.color}1A` }]}>
+                  <Text style={[styles.catBadgeText, { color: habit.color }]}>
+                    {habit.category}
+                  </Text>
+                </View>
+              )}
+            </View>
             <View style={styles.streakRow}>
               <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
                 {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
                 Streak
               </Text>
-              <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}>
-                {habit.frequency === 'every_n_days'
-                  ? `Every ${habit.frequencyValue ?? 3} days`
-                  : habit.frequency === 'n_times_per_week'
+              <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}              >
+                {habit.frequency === 'n_times_per_week'
                   ? `${habit.frequencyValue ?? 3}x / week`
                   : habit.frequency === 'n_times_per_month'
                   ? `${habit.frequencyValue ?? 1}x / month`
@@ -202,10 +209,26 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginRight: 10,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   name: {
     fontSize: 17,
     fontWeight: '800',
     letterSpacing: -0.2,
+    flexShrink: 1,
+  },
+  catBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  catBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'capitalize',
   },
   streakRow: {
     flexDirection: 'row',
