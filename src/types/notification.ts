@@ -2,6 +2,7 @@ export interface HabitNotificationConfig {
   habitId: string;
   enabled: boolean;
   title: string;
+  body: string;
   hour: number;
   minute: number;
 }

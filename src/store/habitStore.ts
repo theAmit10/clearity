@@ -177,6 +177,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       habitId,
       enabled: partial.enabled ?? existing?.enabled ?? true,
       title: partial.title ?? existing?.title ?? 'Habit reminder',
+      body: partial.body ?? existing?.body ?? '',
       hour: partial.hour ?? existing?.hour ?? 9,
       minute: partial.minute ?? existing?.minute ?? 0,
     };

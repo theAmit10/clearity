@@ -52,7 +52,7 @@ export async function scheduleHabitNotification(config: HabitNotificationConfig)
     {
       id,
       title: config.title,
-      body: 'Time to work on your habit!',
+      body: config.body,
       android: { channelId: CHANNEL_ID },
     },
     {

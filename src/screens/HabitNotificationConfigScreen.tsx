@@ -6,14 +6,13 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
-  Alert,
   Animated,
   Dimensions,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
-import { getHabitIcon, HABIT_ICONS } from '../constants/habitIcons';
+import { getHabitIcon } from '../constants/habitIcons';
 import { useTheme } from '../theme/ThemeProvider';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -74,9 +73,13 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   const IconComponent = getHabitIcon(habit?.icon);
 
   const [title, setTitle] = useState(existing?.title ?? habit?.name ?? 'Habit reminder');
+  const [description, setDescription] = useState(existing?.body ?? '');
   const [hour, setHour] = useState(existing?.hour ?? 9);
   const [minute, setMinute] = useState(existing?.minute ?? 0);
   const [enabled, setEnabled] = useState(existing?.enabled ?? true);
+  const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+  const [titleTouched, setTitleTouched] = useState(false);
+  const [descriptionTouched, setDescriptionTouched] = useState(false);
 
   const hourScrollRef = useRef<ScrollView>(null);
   const minuteScrollRef = useRef<ScrollView>(null);
@@ -118,18 +121,32 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   if (!habit) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
-        <Text style={[styles.errorText, { color: theme.colors.iosRed }]}>Habit not found</Text>
+        <Text style={[styles.notFoundText, { color: theme.colors.iosRed }]}>Habit not found</Text>
       </SafeAreaView>
     );
   }
 
-  const handleSave = async () => {
+  const validate = () => {
+    const errs: { title?: string; description?: string } = {};
     if (!title.trim()) {
-      Alert.alert('Validation', 'Please enter a notification title.');
-      return;
+      errs.title = 'Title is required';
+    } else if (title.trim().length > 50) {
+      errs.title = 'Title must be 50 characters or fewer';
     }
+    if (description.trim().length > 120) {
+      errs.description = 'Description must be 120 characters or fewer';
+    }
+    setErrors(errs);
+    setTitleTouched(true);
+    setDescriptionTouched(true);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validate()) return;
     await setHabitNotification(habitId, {
       title: title.trim(),
+      body: description.trim(),
       hour,
       minute,
       enabled,
@@ -166,11 +183,39 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
             <TextInput
               style={[styles.input, { color: theme.colors.iosLabel }]}
               value={title}
-              onChangeText={setTitle}
+              onChangeText={t => { setTitle(t); setTitleTouched(true); }}
+              onBlur={() => setTitleTouched(true)}
               placeholder="e.g. Time for your habit!"
               placeholderTextColor={theme.colors.iosGray}
+              maxLength={50}
             />
           </View>
+          {titleTouched && errors.title ? (
+            <Text style={[styles.errorText, { color: theme.colors.iosRed }]}>{errors.title}</Text>
+          ) : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>NOTIFICATION DESCRIPTION</Text>
+          <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+            <TextInput
+              style={[styles.input, { color: theme.colors.iosLabel, minHeight: 60 }]}
+              value={description}
+              onChangeText={t => { setDescription(t); setDescriptionTouched(true); }}
+              onBlur={() => setDescriptionTouched(true)}
+              placeholder="e.g. Don't forget to stretch today!"
+              placeholderTextColor={theme.colors.iosGray}
+              multiline
+              maxLength={120}
+              textAlignVertical="top"
+            />
+          </View>
+          {descriptionTouched && errors.description ? (
+            <Text style={[styles.errorText, { color: theme.colors.iosRed }]}>{errors.description}</Text>
+          ) : null}
+          <Text style={[styles.charCount, { color: theme.colors.iosGray }]}>
+            {description.length}/120
+          </Text>
         </View>
 
         <View style={styles.section}>
@@ -283,7 +328,7 @@ const styles = StyleSheet.create({
   headerTextCol: { flex: 1 },
   title: { fontSize: 24, fontWeight: '700' },
   subtitle: { fontSize: 14, marginTop: 2 },
-  errorText: { fontSize: 16, textAlign: 'center', marginTop: 40 },
+  notFoundText: { fontSize: 16, textAlign: 'center', marginTop: 40 },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 13,
@@ -294,6 +339,17 @@ const styles = StyleSheet.create({
   sectionBody: {
     borderRadius: 14,
     overflow: 'hidden',
+  },
+  errorText: {
+    fontSize: 13,
+    marginTop: 6,
+    marginLeft: 4,
+  },
+  charCount: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'right',
+    marginRight: 4,
   },
   input: {
     fontSize: 16,
