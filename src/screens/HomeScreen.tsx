@@ -48,26 +48,30 @@ export default function HomeScreen({ navigation }: any) {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: theme.colors.textPrimary }]}>Habitic</Text>
+        <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
+          Habitic
+        </Text>
         <NeumorphicButton
           radius={18}
           distance={5}
           style={styles.addButton}
           onPress={() => navigation.navigate('AddEditHabit')}
         >
-          <Text style={[styles.addButtonText, { color: theme.colors.textPrimary }]}>+</Text>
+          <Text
+            style={[styles.addButtonText, { color: theme.colors.textPrimary }]}
+          >
+            +
+          </Text>
         </NeumorphicButton>
       </View>
 
       {habits.length === 0 ? (
         <View style={styles.emptyWrap}>
-          <Raised
-            radius={theme.radii.panel}
-            distance={7}
-            style={styles.empty}
-          >
+          <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
             <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
               No habits yet.{'\n'}Tap + to add your first one.
             </Text>
@@ -115,6 +119,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingVertical: 8,
+    marginBottom: 30,
     gap: 14,
   },
   emptyWrap: {
