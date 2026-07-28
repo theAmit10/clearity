@@ -16,6 +16,7 @@ import {
 import { toDateKey, isFuture } from '../services/dateUtils';
 import { useHabitStore } from '../store/habitStore';
 import { Raised } from './neumorphic/NeumorphicView';
+import CalendarIcon from './CalendarIcon';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -285,7 +286,10 @@ export default function MonthlyCalendar({
             style={styles.monthPicker}
           >
             <Pressable style={styles.monthPickerHit}>
-              <Text style={[styles.monthPickerText, { color: colors.textPrimary }]}>📅 {monthLabel}</Text>
+              <View style={styles.monthPickerRow}>
+                <CalendarIcon size={14} />
+                <Text style={[styles.monthPickerText, { color: colors.textPrimary }]}>{monthLabel}</Text>
+              </View>
             </Pressable>
           </Raised>
           <View style={styles.navButtons}>
@@ -397,6 +401,11 @@ const styles = StyleSheet.create({
   monthPickerText: {
     fontSize: 14,
     fontWeight: '700',
+  },
+  monthPickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   navButtons: {
     flexDirection: 'row',
