@@ -100,6 +100,7 @@ import {
 } from '../services/statsService';
 import { getHabitIcon } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
+import FlameStreak from '../components/FlameStreak';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -1087,11 +1088,13 @@ function HabitPerformanceRow({
                   {habit.name}
                 </Text>
                 <View style={styles.habitMetaRow}>
-                  <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
-                    {habit.currentStreak > 0
-                      ? `🔥 ${habit.currentStreak}d`
-                      : 'No streak'}
-                  </Text>
+                  {habit.currentStreak > 0 ? (
+                    <FlameStreak streak={habit.currentStreak} />
+                  ) : (
+                    <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
+                      No streak
+                    </Text>
+                  )}
                   <View style={[styles.trendTag, { backgroundColor: trendBg }]}>
                     <TrendArrow trend={habit.trend} colors={cs} />
                   </View>
