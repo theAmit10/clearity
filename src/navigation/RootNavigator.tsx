@@ -80,20 +80,12 @@ function SettingsStack() {
       <Stack.Screen
         name="General"
         component={GeneralScreen}
-        options={{
-          ...headerOpts,
-          title: 'General',
-          headerBackTitle: 'Back',
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ReorderHabits"
         component={ReorderHabitsScreen}
-        options={{
-          ...headerOpts,
-          title: 'Reorder Habits',
-          headerBackTitle: 'Back',
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="NotificationSettings"

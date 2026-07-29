@@ -9,8 +9,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { useTheme } from '../theme/ThemeProvider';
+import ScreenHeader from '../components/ScreenHeader';
 
-export default function GeneralScreen() {
+export default function GeneralScreen({ navigation }: any) {
   const { theme } = useTheme();
   const showCategories = useHabitStore(s => s.showCategories);
   const setShowCategories = useHabitStore(s => s.setShowCategories);
@@ -18,7 +19,7 @@ export default function GeneralScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>General</Text>
+        <ScreenHeader navigation={navigation} title="General" />
 
         <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
@@ -45,11 +46,6 @@ export default function GeneralScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 20,
-  },
   sectionBody: {
     borderRadius: 14,
     overflow: 'hidden',

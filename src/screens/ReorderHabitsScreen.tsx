@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DraggableFlatList, {
   ScaleDecorator,
   RenderItemParams,
@@ -9,8 +10,9 @@ import { Habit } from '../types/habit';
 import { getHabitIcon } from '../constants/habitIcons';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import ScreenHeader from '../components/ScreenHeader';
 
-export default function ReorderHabitsScreen() {
+export default function ReorderHabitsScreen({ navigation }: any) {
   const { theme } = useTheme();
   const allHabits = useHabitStore(s => s.habits);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
@@ -47,7 +49,10 @@ export default function ReorderHabitsScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.headerWrap}>
+        <ScreenHeader navigation={navigation} title="Reorder Habits" />
+      </View>
       <Text style={[styles.helpText, { color: theme.colors.textMuted }]}>
         Hold the drag handle ⋮⋮ to reorder your habits
       </Text>
@@ -58,13 +63,17 @@ export default function ReorderHabitsScreen() {
         onDragEnd={({ data }) => reorderHabits(data)}
         contentContainerStyle={styles.list}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
   helpText: {
     fontSize: 13,
