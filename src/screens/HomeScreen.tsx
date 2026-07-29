@@ -9,6 +9,12 @@ import HabitCard from '../components/HabitCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
+import {
+  BUILT_IN_CATEGORIES,
+  getCategoryName,
+  getCategoryIcon,
+} from '../constants/habitCategories';
+import { getHabitIcon } from '../constants/habitIcons';
 
 export default function HomeScreen({ navigation }: any) {
   const { theme } = useTheme();
@@ -20,6 +26,7 @@ export default function HomeScreen({ navigation }: any) {
   const allHabits = useHabitStore(s => s.habits);
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
+  const showCategories = useHabitStore(s => s.showCategories);
   const activeHabits = useMemo(
     () => allHabits.filter(h => !h.archived),
     [allHabits],
@@ -27,12 +34,12 @@ export default function HomeScreen({ navigation }: any) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categorySet = useMemo(() => {
-    const cats = new Set<string>();
-    activeHabits.forEach(h => {
-      if (h.category && h.category !== 'none') cats.add(h.category);
+    const keys = new Set<string>();
+    BUILT_IN_CATEGORIES.forEach(c => {
+      if (c.key !== 'none') keys.add(c.key);
     });
-    return ['all', ...cats];
-  }, [activeHabits]);
+    return ['all', ...keys];
+  }, []);
 
   const habits = useMemo(
     () =>
@@ -89,76 +96,96 @@ export default function HomeScreen({ navigation }: any) {
         </NeumorphicButton>
       </View>
 
-      {categorySet.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.catFilterRow}
-          style={{
-            height: 60,
-            maxHeight: 60,
-            minHeight: 60,
-          }}
-        >
-          {categorySet.map(cat => {
-            const selected = selectedCategory === cat;
-            return (
-              <NeumorphicButton
-                key={cat}
-                radius={14}
-                distance={4}
-                forcePressed={selected}
-                style={[
-                  styles.catFilterPill,
-                  selected && {
-                    backgroundColor: `${theme.colors.textPrimary}15`,
-                  },
-                ]}
-                onPress={() => setSelectedCategory(cat)}
-              >
-                <Text
+      <View style={styles.body}>
+        {showCategories && categorySet.length > 1 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.catFilterRow}
+            style={styles.catFilterScroll}
+          >
+            {categorySet.map(cat => {
+              const selected = selectedCategory === cat;
+              const isAll = cat === 'all';
+              const IconComp = isAll
+                ? null
+                : getHabitIcon(getCategoryIcon(cat));
+              const label = isAll ? 'All' : getCategoryName(cat);
+              return (
+                <NeumorphicButton
+                  key={cat}
+                  radius={14}
+                  distance={4}
+                  forcePressed={selected}
                   style={[
-                    styles.catFilterText,
-                    {
-                      color: selected
-                        ? theme.colors.textPrimary
-                        : theme.colors.textMuted,
+                    styles.catFilterPill,
+                    selected && {
+                      backgroundColor: `${theme.colors.textPrimary}15`,
                     },
                   ]}
+                  onPress={() => setSelectedCategory(cat)}
                 >
-                  {cat === 'all' ? 'All' : cat}
-                </Text>
-              </NeumorphicButton>
-            );
-          })}
-        </ScrollView>
-      )}
+                  {IconComp && (
+                    <IconComp
+                      size={16}
+                      color={
+                        selected
+                          ? theme.colors.textPrimary
+                          : theme.colors.textMuted
+                      }
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.catFilterText,
+                      {
+                        color: selected
+                          ? theme.colors.textPrimary
+                          : theme.colors.textMuted,
+                      },
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </NeumorphicButton>
+              );
+            })}
+          </ScrollView>
+        )}
 
-      {habits.length === 0 ? (
-        <View style={styles.emptyWrap}>
-          <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
-            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
-              {selectedCategory === 'all'
-                ? 'No habits yet.\nTap + to add your first one.'
-                : 'No habits in this category.'}
-            </Text>
-          </Raised>
-        </View>
-      ) : (
-        <DraggableFlatList
-          data={habits}
-          keyExtractor={h => h.id}
-          contentContainerStyle={styles.listContent}
-          renderItem={renderItem}
-          onDragEnd={({ data }) => reorderHabits(data)}
-        />
-      )}
+        {habits.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Raised
+              radius={theme.radii.panel}
+              distance={7}
+              style={styles.empty}
+            >
+              <Text
+                style={[styles.emptyText, { color: theme.colors.textMuted }]}
+              >
+                {selectedCategory === 'all'
+                  ? 'No habits yet.\nTap + to add your first one.'
+                  : 'No habits in this category.'}
+              </Text>
+            </Raised>
+          </View>
+        ) : (
+          <DraggableFlatList
+            data={habits}
+            keyExtractor={h => h.id}
+            contentContainerStyle={styles.listContent}
+            renderItem={renderItem}
+            onDragEnd={({ data }) => reorderHabits(data)}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  body: { flex: 1 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -207,21 +234,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  catFilterScroll: {
+    height: 48,
+    minHeight: 48,
+    maxHeight: 48,
+  },
   catFilterRow: {
     paddingHorizontal: 20,
     gap: 8,
     paddingVertical: 8,
-    marginBottom: 10,
   },
   catFilterPill: {
     paddingHorizontal: 14,
     paddingVertical: 7,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
   },
   catFilterText: {
     fontSize: 13,
     fontWeight: '700',
-    textTransform: 'capitalize',
   },
 });

@@ -11,6 +11,7 @@ import HomeScreen from '../screens/HomeScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import GeneralScreen from '../screens/GeneralScreen';
 import ReorderHabitsScreen from '../screens/ReorderHabitsScreen';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
 import HabitNotificationConfigScreen from '../screens/HabitNotificationConfigScreen';
@@ -76,6 +77,15 @@ function SettingsStack() {
       }}
     >
       <Stack.Screen name="SettingsMain" component={SettingsScreen} />
+      <Stack.Screen
+        name="General"
+        component={GeneralScreen}
+        options={{
+          ...headerOpts,
+          title: 'General',
+          headerBackTitle: 'Back',
+        }}
+      />
       <Stack.Screen
         name="ReorderHabits"
         component={ReorderHabitsScreen}

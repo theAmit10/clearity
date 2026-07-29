@@ -243,6 +243,16 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
+        <Section title="General">
+          <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
+            Customize the home screen layout and default behavior.
+          </Text>
+          <Row
+            label="General settings"
+            onPress={() => navigation.navigate('General')}
+          />
+        </Section>
+
         <Section title="Notifications & Reminders">
           <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
             Set daily reminders for each habit and configure admin-level

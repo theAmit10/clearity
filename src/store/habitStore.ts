@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Habit, HabitStats, HabitCategory } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
-import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData } from '../services/storage';
+import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings } from '../services/storage';
 import { logEvent } from '../services/logger';
 import { trackEvent } from '../services/analytics';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
@@ -15,6 +15,7 @@ interface HabitState {
   habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
   customCategories: HabitCategory[];
+  showCategories: boolean;
   init: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
@@ -34,6 +35,7 @@ interface HabitState {
   removeAdminNotification: (id: string) => Promise<void>;
   addCustomCategory: (cat: HabitCategory) => void;
   removeCustomCategory: (key: string) => void;
+  setShowCategories: (val: boolean) => Promise<void>;
 }
 
 function persist(habits: Habit[]) {
@@ -54,13 +56,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   habitNotifications: [],
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
   customCategories: [],
+  showCategories: true,
 
   init: async () => {
     try {
-      const [stored, reviewShown, notifData] = await Promise.all([
+      const [stored, reviewShown, notifData, generalSettings] = await Promise.all([
         loadHabits<Habit[]>(),
         loadReviewState(),
         loadNotificationData<NotificationStoreData>(),
+        loadGeneralSettings(),
       ]);
 
       const raw = notifData?.habitNotifications;
@@ -102,6 +106,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         reviewPromptShown: reviewShown,
         habitNotifications: habitNotifs,
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
+        showCategories: generalSettings?.showCategories ?? true,
       });
 
       if (!Array.isArray(raw)) {
@@ -357,6 +362,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         h.category === key ? { ...h, category: 'none' } : h
       ),
     });
+  },
+
+  setShowCategories: async val => {
+    set({ showCategories: val });
+    await saveGeneralSettings({ showCategories: val });
+    logEvent('info', 'Show categories toggled', { val });
   },
 }));
 

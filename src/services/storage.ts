@@ -4,6 +4,7 @@ const HABITS_KEY = '@habit_tracker/habits';
 const LOGS_KEY = '@habit_tracker/logs';
 const REVIEW_KEY = '@habit_tracker/review';
 const NOTIFICATIONS_KEY = '@habit_tracker/notifications';
+const GENERAL_KEY = '@habit_tracker/general';
 
 export async function loadHabits<T>(): Promise<T | null> {
   const raw = await AsyncStorage.getItem(HABITS_KEY);
@@ -41,6 +42,19 @@ export async function saveNotificationData(data: unknown): Promise<void> {
   await AsyncStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(data));
 }
 
+export interface GeneralSettings {
+  showCategories: boolean;
+}
+
+export async function loadGeneralSettings(): Promise<GeneralSettings | null> {
+  const raw = await AsyncStorage.getItem(GENERAL_KEY);
+  return raw ? (JSON.parse(raw) as GeneralSettings) : null;
+}
+
+export async function saveGeneralSettings(data: GeneralSettings): Promise<void> {
+  await AsyncStorage.setItem(GENERAL_KEY, JSON.stringify(data));
+}
+
 export async function clearAll(): Promise<void> {
-  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY]);
+  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY, GENERAL_KEY]);
 }
