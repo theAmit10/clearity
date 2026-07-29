@@ -20,19 +20,25 @@ export default function HomeScreen({ navigation }: any) {
   const allHabits = useHabitStore(s => s.habits);
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
-  const activeHabits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
+  const activeHabits = useMemo(
+    () => allHabits.filter(h => !h.archived),
+    [allHabits],
+  );
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categorySet = useMemo(() => {
     const cats = new Set<string>();
-    activeHabits.forEach(h => { if (h.category && h.category !== 'none') cats.add(h.category); });
+    activeHabits.forEach(h => {
+      if (h.category && h.category !== 'none') cats.add(h.category);
+    });
     return ['all', ...cats];
   }, [activeHabits]);
 
   const habits = useMemo(
-    () => selectedCategory === 'all'
-      ? activeHabits
-      : activeHabits.filter(h => h.category === selectedCategory),
+    () =>
+      selectedCategory === 'all'
+        ? activeHabits
+        : activeHabits.filter(h => h.category === selectedCategory),
     [activeHabits, selectedCategory],
   );
 
@@ -88,7 +94,11 @@ export default function HomeScreen({ navigation }: any) {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.catFilterRow}
-          style={{ maxHeight: 40 }}
+          style={{
+            height: 60,
+            maxHeight: 60,
+            minHeight: 60,
+          }}
         >
           {categorySet.map(cat => {
             const selected = selectedCategory === cat;
@@ -100,7 +110,9 @@ export default function HomeScreen({ navigation }: any) {
                 forcePressed={selected}
                 style={[
                   styles.catFilterPill,
-                  selected && { backgroundColor: `${theme.colors.textPrimary}15` },
+                  selected && {
+                    backgroundColor: `${theme.colors.textPrimary}15`,
+                  },
                 ]}
                 onPress={() => setSelectedCategory(cat)}
               >
@@ -175,6 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginBottom: 30,
+    paddingBottom: 200,
     gap: 14,
   },
   emptyWrap: {
@@ -198,6 +211,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 8,
     paddingVertical: 8,
+    marginBottom: 10,
   },
   catFilterPill: {
     paddingHorizontal: 14,
