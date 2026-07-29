@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
+import crashlytics from '@react-native-firebase/crashlytics';
 import { logEvent } from '../services/logger';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -32,6 +33,7 @@ export default function ErrorBoundary({ children }: { children: React.ReactNode 
   return (
     <ErrorBoundaryInner
       onError={(error, info) => {
+        crashlytics().recordError(error, 'ErrorBoundary');
         logEvent('error', error.message, { stack: error.stack, componentStack: info.componentStack });
       }}
       fallback={(reset) => (

@@ -13,6 +13,7 @@ import {
   rescheduleAll,
 } from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
   const init = useHabitStore(s => s.init);
@@ -22,6 +23,7 @@ function AppContent() {
   const { theme } = useTheme();
 
   useEffect(() => {
+    crashlytics().setCrashlyticsCollectionEnabled(true);
     installGlobalErrorHandler();
     initAnalytics();
     init();
@@ -43,7 +45,9 @@ function AppContent() {
 
   if (!loaded) {
     return (
-      <View style={[styles.loading, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.loading, { backgroundColor: theme.colors.background }]}
+      >
         <ActivityIndicator size="large" color={theme.colors.textMuted} />
       </View>
     );
