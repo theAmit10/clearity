@@ -86,7 +86,7 @@ function SettingsStack() {
       <Stack.Screen
         name="Paywall"
         component={PaywallScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, presentation: 'modal' }}
       />
       <Stack.Screen
         name="ReorderHabits"

@@ -9,7 +9,6 @@ import { useHabitStore } from './src/store/habitStore';
 import { installGlobalErrorHandler } from './src/services/logger';
 import {
   setupChannel,
-  requestPermission,
   rescheduleAll,
 } from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
@@ -36,7 +35,6 @@ function AppContent() {
     (async () => {
       try {
         await setupChannel();
-        await requestPermission();
         const habitConfigs = habitNotifications;
         await rescheduleAll(habitConfigs, adminNotifications);
       } catch (err) {

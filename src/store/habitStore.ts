@@ -8,7 +8,7 @@ import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, setOnCustomerInfoUpdate } from '../services/revenueCat';
-import { FREE_HABIT_LIMIT } from '../constants/appInfo';
+import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
 
 interface HabitState {
   habits: Habit[];
@@ -289,6 +289,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   addHabitNotification: async (habitId, data) => {
+    const state = get();
+    const existingCount = state.habitNotifications.filter(n => n.habitId === habitId).length;
+    if (!state.isPro && existingCount >= FREE_NOTIF_LIMIT) {
+      logEvent('info', 'Notification creation blocked — free limit reached');
+      throw new Error(`Free tier is limited to ${FREE_NOTIF_LIMIT} reminder per habit. Upgrade to Pro for unlimited.`);
+    }
     const config: HabitNotificationConfig = {
       id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       habitId,
@@ -298,7 +304,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       hour: data.hour,
       minute: data.minute,
     };
-    const habitNotifications = [...get().habitNotifications, config];
+    const habitNotifications = [...state.habitNotifications, config];
     set({ habitNotifications });
     await saveNotificationData({
       habitNotifications,

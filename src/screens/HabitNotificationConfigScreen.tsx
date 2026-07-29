@@ -9,14 +9,15 @@ import {
   Animated,
   Dimensions,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { getHabitIcon } from '../constants/habitIcons';
 import { TrashIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../theme/ThemeProvider';
-
-const MAX_NOTIFICATIONS = 10;
+import { FREE_NOTIF_LIMIT } from '../constants/appInfo';
+import { requestPermission } from '../services/notification';
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
@@ -69,6 +70,8 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   const addHabitNotification = useHabitStore(s => s.addHabitNotification);
   const updateHabitNotification = useHabitStore(s => s.updateHabitNotification);
   const removeHabitNotification = useHabitStore(s => s.removeHabitNotification);
+  const isPro = useHabitStore(s => s.isPro);
+  const maxNotifs = isPro ? 10 : FREE_NOTIF_LIMIT;
 
   const habit = habits.find(h => h.id === habitId);
   const myNotifs = habitNotifications.filter(n => n.habitId === habitId);
@@ -157,7 +160,16 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
     if (editingId) {
       await updateHabitNotification(editingId, { ...data, enabled });
     } else {
-      await addHabitNotification(habitId, data);
+      try {
+        await requestPermission();
+        await addHabitNotification(habitId, data);
+      } catch (err: any) {
+        Alert.alert(
+          'Reminder limit reached',
+          err?.message ?? `Free tier is limited to ${FREE_NOTIF_LIMIT} reminder per habit. Upgrade to Pro for unlimited.`,
+        );
+        return;
+      }
     }
     setMode('list');
   };
@@ -344,7 +356,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           <View style={styles.headerTextCol}>
             <Text style={[styles.title, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
             <Text style={[styles.subtitle, { color: theme.colors.iosSecondaryLabel }]}>
-              {myNotifs.length}/{MAX_NOTIFICATIONS} reminders configured
+              {myNotifs.length}/{maxNotifs} reminders configured
             </Text>
           </View>
         </View>
@@ -391,7 +403,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           </View>
         )}
 
-        {myNotifs.length < MAX_NOTIFICATIONS && (
+        {myNotifs.length < maxNotifs ? (
           <Pressable
             style={[styles.addButton, { backgroundColor: theme.colors.surface }]}
             onPress={() => openForm()}
@@ -400,7 +412,16 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
               + Add Reminder
             </Text>
           </Pressable>
-        )}
+        ) : !isPro ? (
+          <Pressable
+            style={[styles.addButton, { backgroundColor: theme.colors.surface }]}
+            onPress={() => navigation.navigate('Paywall')}
+          >
+            <Text style={[styles.addButtonText, { color: theme.colors.iosBlue }]}>
+              Upgrade to Pro for more reminders
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
+import LockClosedIcon from 'react-native-heroicons/outline/LockClosedIcon';
 import { useHabitStore } from '../store/habitStore';
 import { exportHabits, pickAndParseImportFile } from '../services/importExport';
 import { clearAll } from '../services/storage';
@@ -108,6 +109,13 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
+
+  const proBadge = (
+    <View style={styles.proBadge}>
+      <LockClosedIcon size={12} color={theme.colors.iosGray} />
+      <Text style={[styles.proBadgeText, { color: theme.colors.iosGray }]}>Pro</Text>
+    </View>
+  );
 
   const handleRestore = async () => {
     setBusy(true);
@@ -214,11 +222,13 @@ export default function SettingsScreen({ navigation }: any) {
     onPress,
     disabled,
     destructive,
+    rightContent,
   }: {
     label: string;
     onPress: () => void;
     disabled?: boolean;
     destructive?: boolean;
+    rightContent?: React.ReactNode;
   }) {
     return (
       <TouchableHighlight
@@ -228,16 +238,19 @@ export default function SettingsScreen({ navigation }: any) {
         activeOpacity={1}
         style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}
       >
-        <Text
-          style={[
-            styles.rowLabel,
-            { color: theme.colors.iosBlue },
-            destructive && { color: theme.colors.iosRed },
-            disabled && styles.rowLabelDisabled,
-          ]}
-        >
-          {label}
-        </Text>
+        <View style={styles.rowInner}>
+          <Text
+            style={[
+              styles.rowLabel,
+              { color: theme.colors.iosBlue },
+              destructive && { color: theme.colors.iosRed },
+              disabled && styles.rowLabelDisabled,
+            ]}
+          >
+            {label}
+          </Text>
+          {rightContent}
+        </View>
       </TouchableHighlight>
     );
   }
@@ -334,7 +347,8 @@ export default function SettingsScreen({ navigation }: any) {
             weekly heatmap.
           </Text>
           <Row
-            label={isPro ? 'Widget settings' : 'Widget settings — Pro'}
+            label="Widget settings"
+            rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
                 navigation.navigate('WidgetSettings');
@@ -356,7 +370,8 @@ export default function SettingsScreen({ navigation }: any) {
             performance.
           </Text>
           <Row
-            label={isPro ? 'View analytics' : 'View analytics — Pro'}
+            label="View analytics"
+            rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
                 navigation.navigate('Analytics');
@@ -391,7 +406,8 @@ export default function SettingsScreen({ navigation }: any) {
             return (
               <Row
                 key={t.name}
-                label={`${active ? '✓ ' : locked ? '🔒 ' : '   '}${t.label}${locked ? ' — Pro' : ''}`}
+                label={`${active ? '✓ ' : '   '}${t.label}`}
+                rightContent={locked ? proBadge : null}
                 onPress={() => {
                   if (locked) {
                     navigation.navigate('Paywall');
@@ -465,6 +481,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  rowLabel: { fontSize: 16 },
+  rowInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowLabel: { fontSize: 16, flex: 1 },
   rowLabelDisabled: { opacity: 0.4 },
+  proBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  proBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });
