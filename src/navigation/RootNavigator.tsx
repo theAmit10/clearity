@@ -18,6 +18,7 @@ import HabitNotificationConfigScreen from '../screens/HabitNotificationConfigScr
 import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import WidgetSettingsScreen from '../screens/WidgetSettingsScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
@@ -80,6 +81,11 @@ function SettingsStack() {
       <Stack.Screen
         name="General"
         component={GeneralScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Paywall"
+        component={PaywallScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

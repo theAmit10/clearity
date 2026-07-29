@@ -22,14 +22,22 @@ import {
   FEEDBACK_EMAIL,
   IOS_APP_STORE_ID,
   ANDROID_PACKAGE_NAME,
+  FREE_HABIT_LIMIT,
+  FREE_THEMES,
 } from '../constants/appInfo';
 import { useTheme } from '../theme/ThemeProvider';
+import {
+  restorePurchases,
+} from '../services/revenueCat';
+import RevenueCatUI from 'react-native-purchases-ui';
+import { logEvent } from '../services/logger';
 
 export default function SettingsScreen({ navigation }: any) {
   const { theme, themeName, setTheme, availableThemes } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
   const mergeHabits = useHabitStore(s => s.mergeHabits);
+  const isPro = useHabitStore(s => s.isPro);
   const [busy, setBusy] = useState(false);
 
   const handleExport = async () => {
@@ -97,6 +105,33 @@ export default function SettingsScreen({ navigation }: any) {
         `No mail app is set up on this device. You can reach us directly at ${FEEDBACK_EMAIL}.`,
       );
     });
+  };
+
+  const refreshProStatus = useHabitStore(s => s.refreshProStatus);
+
+  const handleRestore = async () => {
+    setBusy(true);
+    try {
+      const info = await restorePurchases();
+      await refreshProStatus();
+      Alert.alert(
+        'Restore Complete',
+        info ? 'Your Pro subscription has been restored.' : 'No purchases found to restore.',
+      );
+    } catch {
+      Alert.alert('Restore Failed', 'Could not restore purchases. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleCustomerCenter = async () => {
+    try {
+      await RevenueCatUI.presentCustomerCenter();
+      await refreshProStatus();
+    } catch (err) {
+      logEvent('error', 'Customer Center failed', err);
+    }
   };
 
   const handleRateApp = () => {
@@ -242,6 +277,37 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
+        <Section title="Habitic Pro">
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            {isPro
+              ? 'You have Habitic Pro. Thank you for supporting the app!'
+              : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
+          </Text>
+          {isPro ? (
+            <Row
+              label="Manage subscription"
+              onPress={handleCustomerCenter}
+              disabled={busy}
+            />
+          ) : (
+            <Row
+              label="Upgrade to Pro"
+              onPress={() => navigation.navigate('Paywall')}
+              disabled={busy}
+            />
+          )}
+          <Row
+            label="Restore purchases"
+            onPress={handleRestore}
+            disabled={busy}
+          />
+        </Section>
+
         <Section title="General">
           <Text
             style={[
@@ -257,7 +323,7 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title="Widget">
+        <Section title="Widget (Pro)">
           <Text
             style={[
               styles.description,
@@ -268,12 +334,18 @@ export default function SettingsScreen({ navigation }: any) {
             weekly heatmap.
           </Text>
           <Row
-            label="Widget settings"
-            onPress={() => navigation.navigate('WidgetSettings')}
+            label={isPro ? 'Widget settings' : 'Widget settings — Pro'}
+            onPress={() => {
+              if (isPro) {
+                navigation.navigate('WidgetSettings');
+              } else {
+                navigation.navigate('Paywall');
+              }
+            }}
           />
         </Section>
 
-        <Section title="Analytics">
+        <Section title="Analytics (Pro)">
           <Text
             style={[
               styles.description,
@@ -284,8 +356,14 @@ export default function SettingsScreen({ navigation }: any) {
             performance.
           </Text>
           <Row
-            label="View analytics"
-            onPress={() => navigation.navigate('Analytics')}
+            label={isPro ? 'View analytics' : 'View analytics — Pro'}
+            onPress={() => {
+              if (isPro) {
+                navigation.navigate('Analytics');
+              } else {
+                navigation.navigate('Paywall');
+              }
+            }}
           />
         </Section>
 
@@ -308,11 +386,19 @@ export default function SettingsScreen({ navigation }: any) {
         <Section title="Theme">
           {availableThemes.map(t => {
             const active = themeName === t.name;
+            const isPremium = !FREE_THEMES.includes(t.name);
+            const locked = isPremium && !isPro;
             return (
               <Row
                 key={t.name}
-                label={`${active ? '✓ ' : '   '}${t.label}`}
-                onPress={() => setTheme(t.name)}
+                label={`${active ? '✓ ' : locked ? '🔒 ' : '   '}${t.label}${locked ? ' — Pro' : ''}`}
+                onPress={() => {
+                  if (locked) {
+                    navigation.navigate('Paywall');
+                  } else {
+                    setTheme(t.name);
+                  }
+                }}
               />
             );
           })}

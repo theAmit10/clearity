@@ -26,3 +26,12 @@ export const ANDROID_PACKAGE_NAME = 'com.codethenic.habittracker';
 
 // Mixpanel — set via .env file (never committed to git)
 export const MIXPANEL_TOKEN: string = Config.MIXPANEL_TOKEN;
+
+// RevenueCat — set via .env file (never committed to git)
+export const REVENUECAT_API_KEY: string = Config.REVENUECAT_API_KEY;
+
+export const REVENUECAT_ENTITLEMENT_ID = 'pro';
+export const FREE_HABIT_LIMIT = 4;
+
+export const PREMIUM_THEMES: string[] = ['blue', 'gold', 'pink', 'green', 'gray', 'purple'];
+export const FREE_THEMES: string[] = ['light', 'dark'];

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
@@ -21,6 +22,7 @@ import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import type { FrequencyType } from '../types/habit';
+import { FREE_HABIT_LIMIT } from '../constants/appInfo';
 
 const COLORS = [
   '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
@@ -50,6 +52,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const markReviewPromptShown = useHabitStore(s => s.markReviewPromptShown);
   const customCategories = useHabitStore(s => s.customCategories);
   const addCustomCategory = useHabitStore(s => s.addCustomCategory);
+  const isPro = useHabitStore(s => s.isPro);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -90,20 +93,28 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
     };
     if (existing) {
       await updateHabit(existing.id, payload);
+      navigation.goBack();
     } else {
-      const isFirstHabit = habits.length === 0;
-      await addHabit(payload);
-      if (isFirstHabit && !reviewPromptShown) {
-        await markReviewPromptShown();
-        logEvent('info', 'In-app review requested');
-        try {
-          requestReview();
-        } catch (e) {
-          logEvent('error', 'In-app review failed', e);
+      try {
+        await addHabit(payload);
+        const isFirstHabit = habits.length === 0;
+        if (isFirstHabit && !reviewPromptShown) {
+          await markReviewPromptShown();
+          logEvent('info', 'In-app review requested');
+          try {
+            requestReview();
+          } catch (e) {
+            logEvent('error', 'In-app review failed', e);
+          }
         }
+        navigation.goBack();
+      } catch (err: any) {
+        Alert.alert(
+          'Habit limit reached',
+          err?.message ?? `Free tier is limited to ${FREE_HABIT_LIMIT} habits. Upgrade to Pro for unlimited.`,
+        );
       }
     }
-    navigation.goBack();
   };
 
   return (
@@ -345,13 +356,20 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               distance={4}
               style={styles.catPill}
               onPress={() => {
+                if (!isPro) {
+                  Alert.alert(
+                    'Custom Categories (Pro)',
+                    'Create custom categories with a Pro subscription.',
+                  );
+                  return;
+                }
                 setNewCatName('');
                 setNewCatIcon(HABIT_ICONS[0].key);
                 setShowCategoryModal(true);
               }}
             >
               <Text style={[styles.catPillText, { color: theme.colors.textMuted }]}>
-                + Create
+                {isPro ? '+ Create' : '+ Create — Pro'}
               </Text>
             </NeumorphicButton>
           </View>

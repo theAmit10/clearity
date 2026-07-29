@@ -7,6 +7,8 @@ import { trackEvent } from '../services/analytics';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule } from '../native/WidgetModule';
+import { getCustomerInfo, isPro as checkIsPro, setOnCustomerInfoUpdate } from '../services/revenueCat';
+import { FREE_HABIT_LIMIT } from '../constants/appInfo';
 
 interface HabitState {
   habits: Habit[];
@@ -16,7 +18,9 @@ interface HabitState {
   adminNotifications: AdminNotificationConfig[];
   customCategories: HabitCategory[];
   showCategories: boolean;
+  isPro: boolean;
   init: () => Promise<void>;
+  refreshProStatus: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
@@ -57,6 +61,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
   customCategories: [],
   showCategories: true,
+  isPro: false,
+
+  refreshProStatus: async () => {
+    const info = await getCustomerInfo();
+    set({ isPro: checkIsPro(info) });
+  },
 
   init: async () => {
     try {
@@ -66,6 +76,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         loadNotificationData<NotificationStoreData>(),
         loadGeneralSettings(),
       ]);
+
+      const info = await getCustomerInfo();
+      set({ isPro: checkIsPro(info) });
+      setOnCustomerInfoUpdate(() => {
+        get().refreshProStatus();
+      });
 
       const raw = notifData?.habitNotifications;
       let habitNotifs: HabitNotificationConfig[];
@@ -126,6 +142,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   addHabit: async data => {
+    const state = get();
+    const activeCount = state.habits.filter(h => !h.archived).length;
+    if (!state.isPro && activeCount >= FREE_HABIT_LIMIT) {
+      logEvent('info', 'Habit creation blocked — free limit reached');
+      throw new Error(`Free tier is limited to ${FREE_HABIT_LIMIT} habits. Upgrade to Pro for unlimited.`);
+    }
     const habit: Habit = {
       ...data,
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -134,7 +156,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       completions: {},
       missedNotes: {},
     };
-    const habits = [...get().habits, habit];
+    const habits = [...state.habits, habit];
     set({ habits });
     persist(habits);
     updateWidget(habits);
@@ -350,6 +372,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   addCustomCategory: cat => {
+    if (!get().isPro) {
+      logEvent('info', 'Custom category creation blocked — Pro required');
+      return;
+    }
     const existing = get().customCategories;
     if (existing.find(c => c.key === cat.key)) return;
     set({ customCategories: [...existing, cat] });

@@ -27,6 +27,8 @@
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^3.0.2",
     "react-native-heroicons": "^4.0.0",
+    "react-native-purchases": "^10.5.0",
+    "react-native-purchases-ui": "^10.5.0",
     "react-native-reanimated": "^4.5.1",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.25.2",

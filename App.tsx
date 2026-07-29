@@ -13,6 +13,7 @@ import {
   rescheduleAll,
 } from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
+import { initRevenueCat } from './src/services/revenueCat';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
@@ -26,6 +27,7 @@ function AppContent() {
     crashlytics().setCrashlyticsCollectionEnabled(true);
     installGlobalErrorHandler();
     initAnalytics();
+    initRevenueCat();
     init();
   }, []);
 
