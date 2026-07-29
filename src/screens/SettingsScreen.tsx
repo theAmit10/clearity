@@ -319,9 +319,9 @@ export default function SettingsScreen({ navigation }: any) {
         </Section>
 
         <Section title="Community & Feedback">
-          <Row label={`Follow @${X_HANDLE} on X`} onPress={handleFollowX} />
+          <Row label="Let's build together" onPress={handleRateApp} />
           <Row label="Send feedback" onPress={handleSendFeedback} />
-          <Row label="Rate this app" onPress={handleRateApp} />
+          <Row label={`Follow @${X_HANDLE} on X`} onPress={handleFollowX} />
         </Section>
 
         {/* <Section title="Diagnostics (stored locally only)">
