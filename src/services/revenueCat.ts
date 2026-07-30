@@ -9,6 +9,8 @@ import { logEvent } from './logger';
 
 let configured = false;
 let customerInfoCallback: ((info: CustomerInfo) => void) | null = null;
+let usingMockOfferings = false;
+let devProActive = false;
 
 export function setOnCustomerInfoUpdate(callback: (info: CustomerInfo) => void): void {
   customerInfoCallback = callback;
@@ -25,6 +27,8 @@ export async function initRevenueCat(): Promise<void> {
 
   try {
     Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  
+    // Purchases.configure({ apiKey: 'appl_mBidSITFmKKPbThRmQAswurmaKk' });
     Purchases.configure({ apiKey: REVENUECAT_API_KEY });
     configured = true;
     logEvent('info', 'RevenueCat initialized');
@@ -37,12 +41,72 @@ export function isConfigured(): boolean {
   return configured;
 }
 
+function createMockPackage(identifier: string, price: number, priceString: string, perWeek: string): PurchasesPackage {
+  return {
+    identifier,
+    packageType: identifier,
+    product: {
+      identifier,
+      description: `${identifier} plan`,
+      title: `${identifier} plan`,
+      price,
+      priceString,
+      currencyCode: 'USD',
+      pricePerMonth: price / 12,
+      pricePerWeek: perWeek ? parseFloat(perWeek.replace('$', '')) : null,
+      pricePerMonthString: `$${(price / 12).toFixed(2)}`,
+      pricePerWeekString: perWeek,
+    },
+  } as unknown as PurchasesPackage;
+}
+
+function createMockOfferings(): PurchasesOfferings {
+  return {
+    all: {},
+    current: {
+      identifier: 'default',
+      serverDescription: 'Local development fallback',
+      metadata: {},
+      weekly: createMockPackage('weekly_hrc', 3.99, '$3.99', '$3.99'),
+      annual: createMockPackage('yearly_hrc', 29.99, '$29.99', '$0.58'),
+      lifetime: createMockPackage('lifetime_hrc', 59.99, '$59.99', ''),
+      monthly: null,
+      sixMonth: null,
+      threeMonth: null,
+      twoMonth: null,
+    },
+  } as unknown as PurchasesOfferings;
+}
+
+// export async function getOfferings(): Promise<PurchasesOfferings | null> {
+//   try {
+//     const offerings = await Purchases.getOfferings();
+//     if (offerings?.current) {
+//       logEvent('info', 'Offerings loaded from RevenueCat');
+//       return offerings;
+//     }
+//     logEvent('warn', 'No offerings from RevenueCat — using local fallback');
+//     usingMockOfferings = true;
+//     return createMockOfferings();
+//   } catch (err) {
+//     logEvent('error', 'Failed to fetch offerings, using local fallback', err);
+//     usingMockOfferings = true;
+//     return createMockOfferings();
+//   }
+// }
+
 export async function getOfferings(): Promise<PurchasesOfferings | null> {
   try {
-    return await Purchases.getOfferings();
+    const offerings = await Purchases.getOfferings();
+    if (offerings?.current) {
+      logEvent('info', 'Offerings loaded from RevenueCat');
+      return offerings;
+    }
+    logEvent('warn', 'No offerings from RevenueCat — check ASC product status, RevenueCat Offering config, and API key');
+    return null; // don't silently mock — surface the real state
   } catch (err) {
     logEvent('error', 'Failed to fetch offerings', err);
-    return null;
+    return null; // don't silently mock — surface the real error
   }
 }
 
@@ -62,6 +126,11 @@ export async function purchasePackage(
       return null;
     }
     logEvent('error', 'Purchase failed', err);
+    if (usingMockOfferings) {
+      logEvent('info', 'Dev mode: simulating successful purchase');
+      devProActive = true;
+      return { customerInfo: { entitlements: { active: { [REVENUECAT_ENTITLEMENT_ID]: { isActive: true } } } } } as any;
+    }
     return null;
   }
 }
@@ -75,11 +144,19 @@ export async function restorePurchases(): Promise<CustomerInfo | null> {
     return customerInfo;
   } catch (err) {
     logEvent('error', 'Restore failed', err);
+    if (usingMockOfferings) {
+      logEvent('info', 'Dev mode: simulating restore success');
+      devProActive = true;
+      return { entitlements: { active: { [REVENUECAT_ENTITLEMENT_ID]: { isActive: true } } } } as any;
+    }
     return null;
   }
 }
 
 export async function getCustomerInfo(): Promise<CustomerInfo | null> {
+  if (devProActive) {
+    return { entitlements: { active: { [REVENUECAT_ENTITLEMENT_ID]: { isActive: true } } } } as any;
+  }
   try {
     return await Purchases.getCustomerInfo();
   } catch (err) {
@@ -104,4 +181,8 @@ export async function showManageSubscriptions(): Promise<void> {
   } catch (err) {
     logEvent('error', 'Failed to show manage subscriptions', err);
   }
+}
+
+export function resetDevProStatus(): void {
+  devProActive = false;
 }

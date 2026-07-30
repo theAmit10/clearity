@@ -30,7 +30,8 @@ export const MIXPANEL_TOKEN: string = Config.MIXPANEL_TOKEN;
 // RevenueCat — set via .env file (never committed to git)
 export const REVENUECAT_API_KEY: string = Config.REVENUECAT_API_KEY;
 
-export const REVENUECAT_ENTITLEMENT_ID = 'pro';
+export const REVENUECAT_ENTITLEMENT_ID = 'Habitic: Offline Habit Tracker Pro';
+// export const REVENUECAT_ENTITLEMENT_ID = 'pro';
 export const FREE_HABIT_LIMIT = 4;
 export const FREE_NOTIF_LIMIT = 1;
 
