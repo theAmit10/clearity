@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,12 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  withRepeat,
+  withSequence,
   Easing,
+  FadeIn,
+  FadeInDown,
+  ZoomIn,
 } from 'react-native-reanimated';
 import ChartBarIcon from 'react-native-heroicons/outline/ChartBarIcon';
 import Squares2X2Icon from 'react-native-heroicons/outline/Squares2X2Icon';
@@ -25,6 +30,7 @@ import PaintBrushIcon from 'react-native-heroicons/outline/PaintBrushIcon';
 import RocketLaunchIcon from 'react-native-heroicons/outline/RocketLaunchIcon';
 import BellAlertIcon from 'react-native-heroicons/outline/BellAlertIcon';
 import ArrowUpTrayIcon from 'react-native-heroicons/outline/ArrowUpTrayIcon';
+import CheckIcon from 'react-native-heroicons/outline/CheckIcon';
 import { useTheme } from '../theme/ThemeProvider';
 import {
   getOfferings,
@@ -59,17 +65,170 @@ const FEATURES: Feature[] = [
 const PRIVACY_URL = 'https://codethenic.com/privacy';
 const TERMS_URL = 'https://codethenic.com/terms';
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Small reusable "press scale" hook — every tappable surface in this
+ * screen (plan cards, CTA, close button) gets a consistent, springy
+ * squash-down feedback instead of the previous static Pressable.
+ * ──────────────────────────────────────────────────────────────────────*/
+function usePressScale(minScale = 0.96) {
+  const scale = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  const onPressIn = () => {
+    scale.value = withTiming(minScale, { duration: 90 });
+  };
+  const onPressOut = () => {
+    scale.value = withSpring(1, { damping: 12, stiffness: 220 });
+  };
+  return { style, onPressIn, onPressOut };
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Feature row — staggers in on mount so the feature list feels alive
+ * instead of popping in all at once.
+ * ──────────────────────────────────────────────────────────────────────*/
+function FeatureRow({
+  feature,
+  index,
+  accent,
+  textPrimary,
+}: {
+  feature: Feature;
+  index: number;
+  accent: string;
+  textPrimary: string;
+}) {
+  const Icon = feature.icon;
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(80 + index * 45)
+        .duration(320)
+        .easing(Easing.out(Easing.cubic))}
+      style={styles.featureRow}
+    >
+      <Raised radius={10} distance={3} style={styles.featureIconWrap}>
+        <Icon size={16} color={accent} />
+      </Raised>
+      <Text style={[styles.featureText, { color: textPrimary }]}>
+        {feature.label}
+      </Text>
+    </Animated.View>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Plan card — self-contained so each card owns its own animated values
+ * (press scale + selected-state spring) without breaking the rules of
+ * hooks inside a .map().
+ * ──────────────────────────────────────────────────────────────────────*/
+function PlanCard({
+  title,
+  price,
+  subtitle,
+  perWeek,
+  best,
+  selected,
+  onSelect,
+  theme,
+  index,
+}: {
+  title: string;
+  price: string;
+  subtitle: string;
+  perWeek?: string | null;
+  best?: boolean;
+  selected: boolean;
+  onSelect: () => void;
+  theme: any;
+  index: number;
+}) {
+  const { style: pressStyle, onPressIn, onPressOut } = usePressScale(0.95);
+
+  const selectStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: withSpring(selected ? 1.03 : 1, { damping: 14, stiffness: 180 }),
+      },
+    ],
+  }));
+
+  const Wrapper = selected ? Inset : Raised;
+
+  return (
+    <AnimatedPressable
+      onPress={onSelect}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      entering={FadeInDown.delay(160 + index * 60)
+        .duration(340)
+        .easing(Easing.out(Easing.cubic))}
+      style={[styles.planCardOuter, pressStyle, selectStyle]}
+    >
+      <Wrapper
+        radius={16}
+        distance={4}
+        style={[
+          styles.planCard,
+          selected && { borderColor: theme.colors.accent, borderWidth: 1.5 },
+        ]}
+        backgroundColor={selected ? `${theme.colors.accent}10` : undefined}
+      >
+        {best && (
+          <View
+            style={[styles.bestBadge, { backgroundColor: theme.colors.accent }]}
+          >
+            <Text style={styles.bestText}>BEST VALUE</Text>
+          </View>
+        )}
+
+        <View
+          style={[
+            styles.radioOuter,
+            {
+              borderColor: selected
+                ? theme.colors.accent
+                : theme.colors.shadowDark + '80',
+            },
+          ]}
+        >
+          {selected && (
+            <Animated.View
+              entering={ZoomIn.duration(180)}
+              style={[
+                styles.radioInner,
+                { backgroundColor: theme.colors.accent },
+              ]}
+            >
+              <CheckIcon size={10} color="#FFFFFF" />
+            </Animated.View>
+          )}
+        </View>
+
+        <Text style={[styles.planTitle, { color: theme.colors.textPrimary }]}>
+          {title}
+        </Text>
+        <Text style={[styles.planPrice, { color: theme.colors.textPrimary }]}>
+          {price}
+        </Text>
+        <Text style={[styles.planSubtitle, { color: theme.colors.textMuted }]}>
+          {subtitle}
+        </Text>
+        {perWeek && (
+          <Text style={[styles.planPerWeek, { color: theme.colors.textMuted }]}>
+            {perWeek}/wk
+          </Text>
+        )}
+      </Wrapper>
+    </AnimatedPressable>
+  );
+}
+
 export default function PaywallScreen({ navigation }: any) {
   const { theme } = useTheme();
 
-  // ── Fix #1 ──────────────────────────────────────────────────────────────
-  // Subscribe directly to the store's `isPro` flag instead of copying it
-  // into local state with `useState(storeIsPro)`. A `useState` initializer
-  // only runs once, on first render — if the store's isPro flips true
-  // *after* this screen mounts (e.g. refreshProStatus resolves elsewhere,
-  // a webhook-driven update lands, restore completes on another screen),
-  // the old local copy never picked that up and kept showing the paywall
-  // to an already-pro user.
   const storeIsPro = useHabitStore(s => s.isPro);
   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
 
@@ -78,72 +237,37 @@ export default function PaywallScreen({ navigation }: any) {
   const [offering, setOffering] = useState<any>(null);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
 
-  // Remote-verified pro status (fresh RevenueCat check), separate from the
-  // store's cached flag. We treat the user as pro if *either* signal says
-  // so, rather than requiring the remote fetch to succeed before trusting
-  // what the store already knows.
   const [remoteIsPro, setRemoteIsPro] = useState(false);
   const [proExpiration, setProExpiration] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
 
   const isProUser = storeIsPro || remoteIsPro;
 
-  const cardScale = useSharedValue(0.95);
-  const cardOpacity = useSharedValue(0);
+  // Subtle continuous pulse for the "Best value" badge — draws the eye
+  // without being distracting.
+  const badgePulse = useSharedValue(1);
+  useEffect(() => {
+    badgePulse.value = withRepeat(
+      withSequence(
+        withTiming(1.06, { duration: 900, easing: Easing.out(Easing.sin) }),
+        withTiming(1, { duration: 900, easing: Easing.in(Easing.sin) }),
+      ),
+      -1,
+      true,
+    );
+  }, []);
 
   useEffect(() => {
-    console.log('[Paywall DEBUG] ── mount ──');
-    console.log('[Paywall DEBUG] storeIsPro at mount:', storeIsPro);
-    console.log(
-      '[Paywall DEBUG] typeof refreshProStatus:',
-      typeof refreshProStatus,
-    );
-
     (async () => {
       try {
-        // ── Fix #2 ────────────────────────────────────────────────────────
-        // `refreshProStatus` was imported but never called. Call it so the
-        // global store is reconciled with RevenueCat as soon as the paywall
-        // opens — this is the highest-stakes moment to have correct status.
         if (typeof refreshProStatus === 'function') {
-          const refreshResult = await refreshProStatus();
-          console.log(
-            '[Paywall DEBUG] refreshProStatus() resolved with:',
-            JSON.stringify(refreshResult, null, 2),
-          );
-        } else {
-          console.log(
-            '[Paywall DEBUG] refreshProStatus is not a function — skipping call',
-          );
+          await refreshProStatus();
         }
-
-        console.log(
-          '[Paywall DEBUG] storeIsPro right after refreshProStatus:',
-          useHabitStore.getState().isPro,
-        );
 
         const [offerings, info] = await Promise.all([
           getOfferings(),
           getCustomerInfo(),
         ]);
-
-        console.log(
-          '[Paywall DEBUG] getOfferings() result:',
-          JSON.stringify(offerings, null, 2),
-        );
-        console.log(
-          '[Paywall DEBUG] getCustomerInfo() raw result:',
-          JSON.stringify(info, null, 2),
-        );
-        console.log(
-          '[Paywall DEBUG] info.entitlements.active keys:',
-          info?.entitlements?.active
-            ? Object.keys(info.entitlements.active)
-            : 'entitlements.active missing/undefined',
-        );
-
-        const proResult = isPro(info);
-        console.log('[Paywall DEBUG] isPro(info) returned:', proResult);
 
         if (offerings?.current) {
           setOffering(offerings.current);
@@ -152,66 +276,25 @@ export default function PaywallScreen({ navigation }: any) {
             offerings.current.lifetime ||
             offerings.current.weekly;
           if (pkg) setSelectedPackage(pkg);
-        } else {
-          console.log(
-            '[Paywall DEBUG] offerings.current is falsy — no offering set',
-          );
         }
 
+        const proResult = isPro(info);
         if (proResult) {
           setRemoteIsPro(true);
-          const exp = getProExpirationDate(info);
-          console.log('[Paywall DEBUG] getProExpirationDate(info):', exp);
-          setProExpiration(exp);
+          setProExpiration(getProExpirationDate(info));
         }
       } catch (err) {
-        // ── Fix #3 ────────────────────────────────────────────────────────
-        // Previously, any failure here (network blip, RevenueCat error)
-        // left `ready` stuck at false forever — an infinite spinner — and
-        // silently prevented the pro check from ever completing. Now we
-        // surface the error and still fall back to whatever the store
-        // already knows (storeIsPro), so a paying user isn't shown the
-        // paywall just because one fetch failed.
-        console.log('[Paywall DEBUG] ERROR thrown during status check:', err);
         logEvent('error', 'PaywallScreen: failed to load offerings/status', {
           error: String(err),
         });
         setFetchError(true);
       } finally {
-        console.log(
-          '[Paywall DEBUG] final storeIsPro:',
-          useHabitStore.getState().isPro,
-        );
         setReady(true);
       }
     })();
   }, []);
 
-  useEffect(() => {
-    console.log(
-      '[Paywall DEBUG] render — storeIsPro:',
-      storeIsPro,
-      'remoteIsPro:',
-      remoteIsPro,
-      'combined isProUser:',
-      storeIsPro || remoteIsPro,
-    );
-  }, [storeIsPro, remoteIsPro]);
-
-  useEffect(() => {
-    cardScale.value = withSpring(1, { damping: 15, stiffness: 120 });
-    cardOpacity.value = withTiming(1, {
-      duration: 400,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [ready]);
-
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: cardScale.value }],
-    opacity: cardOpacity.value,
-  }));
-
-  const handlePurchase = async () => {
+  const handlePurchase = useCallback(async () => {
     if (!selectedPackage || loading) return;
     setLoading(true);
     try {
@@ -234,9 +317,9 @@ export default function PaywallScreen({ navigation }: any) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPackage, loading, navigation]);
 
-  const handleRestore = async () => {
+  const handleRestore = useCallback(async () => {
     setLoading(true);
     try {
       const info = await restorePurchases();
@@ -260,9 +343,9 @@ export default function PaywallScreen({ navigation }: any) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigation]);
 
-  const handleDismiss = async () => {
+  const handleDismiss = useCallback(async () => {
     try {
       const info = await getCustomerInfo();
       if (isPro(info)) {
@@ -275,9 +358,9 @@ export default function PaywallScreen({ navigation }: any) {
       });
     }
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  const handleManageSubscription = async () => {
+  const handleManageSubscription = useCallback(async () => {
     await showManageSubscriptions();
     try {
       const info = await getCustomerInfo();
@@ -291,12 +374,18 @@ export default function PaywallScreen({ navigation }: any) {
       logEvent(
         'error',
         'PaywallScreen: manage-subscription status check failed',
-        {
-          error: String(err),
-        },
+        { error: String(err) },
       );
     }
-  };
+  }, [navigation]);
+
+  const closePress = usePressScale(0.85);
+  const ctaPress = usePressScale(0.97);
+  const managePress = usePressScale(0.97);
+
+  const badgePulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: badgePulse.value }],
+  }));
 
   if (!ready) {
     return (
@@ -310,6 +399,7 @@ export default function PaywallScreen({ navigation }: any) {
     );
   }
 
+  /* ── PRO STATE ─────────────────────────────────────────────────────── */
   if (isProUser) {
     return (
       <SafeAreaView
@@ -317,7 +407,7 @@ export default function PaywallScreen({ navigation }: any) {
         edges={['bottom']}
       >
         <View style={styles.proContainer}>
-          <Animated.View style={cardStyle}>
+          <Animated.View entering={FadeIn.duration(300)}>
             <Raised radius={theme.radii.card} distance={10} style={styles.card}>
               <View style={styles.header}>
                 <Text
@@ -325,24 +415,34 @@ export default function PaywallScreen({ navigation }: any) {
                 >
                   Habitic Pro
                 </Text>
-                <NeumorphicButton
-                  radius={16}
-                  distance={5}
-                  style={styles.closeButton}
+                <AnimatedPressable
                   onPress={handleDismiss}
+                  onPressIn={closePress.onPressIn}
+                  onPressOut={closePress.onPressOut}
+                  style={closePress.style}
                 >
-                  <Text
-                    style={[
-                      styles.closeText,
-                      { color: theme.colors.textMuted },
-                    ]}
+                  <NeumorphicButton
+                    radius={16}
+                    distance={5}
+                    style={styles.closeButton}
+                    onPress={handleDismiss}
                   >
-                    ✕
-                  </Text>
-                </NeumorphicButton>
+                    <Text
+                      style={[
+                        styles.closeText,
+                        { color: theme.colors.textMuted },
+                      ]}
+                    >
+                      ✕
+                    </Text>
+                  </NeumorphicButton>
+                </AnimatedPressable>
               </View>
 
-              <View style={styles.proBadgeContainer}>
+              <Animated.View
+                entering={ZoomIn.delay(120).duration(400)}
+                style={styles.proBadgeContainer}
+              >
                 <View
                   style={[
                     styles.proBadge,
@@ -385,31 +485,18 @@ export default function PaywallScreen({ navigation }: any) {
                     just now)
                   </Text>
                 )}
-              </View>
+              </Animated.View>
 
               <View style={styles.featuresGrid}>
-                {FEATURES.map((feat, i) => {
-                  const Icon = feat.icon;
-                  return (
-                    <View key={i} style={styles.featureRow}>
-                      <Raised
-                        radius={10}
-                        distance={3}
-                        style={styles.featureIconWrap}
-                      >
-                        <Icon size={16} color={theme.colors.accent} />
-                      </Raised>
-                      <Text
-                        style={[
-                          styles.featureText,
-                          { color: theme.colors.textPrimary },
-                        ]}
-                      >
-                        {feat.label}
-                      </Text>
-                    </View>
-                  );
-                })}
+                {FEATURES.map((feat, i) => (
+                  <FeatureRow
+                    key={i}
+                    feature={feat}
+                    index={i}
+                    accent={theme.colors.accent}
+                    textPrimary={theme.colors.textPrimary}
+                  />
+                ))}
               </View>
 
               <View
@@ -419,15 +506,22 @@ export default function PaywallScreen({ navigation }: any) {
                 ]}
               />
 
-              <NeumorphicButton
-                radius={16}
-                distance={6}
-                backgroundColor={theme.colors.accent}
-                style={styles.ctaButton}
+              <AnimatedPressable
                 onPress={handleManageSubscription}
+                onPressIn={managePress.onPressIn}
+                onPressOut={managePress.onPressOut}
+                style={managePress.style}
               >
-                <Text style={styles.ctaText}>Manage Subscription</Text>
-              </NeumorphicButton>
+                <NeumorphicButton
+                  radius={16}
+                  distance={6}
+                  backgroundColor={theme.colors.accent}
+                  style={styles.ctaButton}
+                  onPress={handleManageSubscription}
+                >
+                  <Text style={styles.ctaText}>Manage Subscription</Text>
+                </NeumorphicButton>
+              </AnimatedPressable>
 
               <View style={styles.footer}>
                 <Pressable onPress={handleRestore} disabled={loading}>
@@ -448,6 +542,7 @@ export default function PaywallScreen({ navigation }: any) {
     );
   }
 
+  /* ── PAYWALL STATE ─────────────────────────────────────────────────── */
   const packages = [
     offering?.weekly && {
       key: 'weekly',
@@ -481,30 +576,43 @@ export default function PaywallScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View style={cardStyle}>
+        <Animated.View entering={FadeIn.duration(280)}>
           <Raised radius={theme.radii.card} distance={10} style={styles.card}>
             <View style={styles.header}>
               <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
                 Habitic Pro
               </Text>
-              <NeumorphicButton
-                radius={16}
-                distance={5}
-                style={styles.closeButton}
+              <AnimatedPressable
                 onPress={handleDismiss}
+                onPressIn={closePress.onPressIn}
+                onPressOut={closePress.onPressOut}
+                style={closePress.style}
               >
-                <Text
-                  style={[styles.closeText, { color: theme.colors.textMuted }]}
+                <NeumorphicButton
+                  radius={16}
+                  distance={5}
+                  style={styles.closeButton}
+                  onPress={handleDismiss}
                 >
-                  ✕
-                </Text>
-              </NeumorphicButton>
+                  <Text
+                    style={[
+                      styles.closeText,
+                      { color: theme.colors.textMuted },
+                    ]}
+                  >
+                    ✕
+                  </Text>
+                </NeumorphicButton>
+              </AnimatedPressable>
             </View>
 
-            <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+            <Animated.Text
+              entering={FadeInDown.delay(40).duration(300)}
+              style={[styles.subtitle, { color: theme.colors.textMuted }]}
+            >
               Unlock the full Habitic experience. Support development and get
               powerful features to supercharge your habit tracking.
-            </Text>
+            </Animated.Text>
 
             {fetchError && (
               <Text
@@ -519,28 +627,15 @@ export default function PaywallScreen({ navigation }: any) {
             )}
 
             <View style={styles.featuresGrid}>
-              {FEATURES.map((feat, i) => {
-                const Icon = feat.icon;
-                return (
-                  <View key={i} style={styles.featureRow}>
-                    <Raised
-                      radius={10}
-                      distance={3}
-                      style={styles.featureIconWrap}
-                    >
-                      <Icon size={16} color={theme.colors.accent} />
-                    </Raised>
-                    <Text
-                      style={[
-                        styles.featureText,
-                        { color: theme.colors.textPrimary },
-                      ]}
-                    >
-                      {feat.label}
-                    </Text>
-                  </View>
-                );
-              })}
+              {FEATURES.map((feat, i) => (
+                <FeatureRow
+                  key={i}
+                  feature={feat}
+                  index={i}
+                  accent={theme.colors.accent}
+                  textPrimary={theme.colors.textPrimary}
+                />
+              ))}
             </View>
 
             <View
@@ -550,94 +645,57 @@ export default function PaywallScreen({ navigation }: any) {
               ]}
             />
 
-            <Text
+            <Animated.Text
+              entering={FadeInDown.delay(120).duration(300)}
               style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}
             >
               Choose your plan
-            </Text>
+            </Animated.Text>
 
-            {packages.map(({ key, pkg, title, subtitle, best }: any) => {
-              const selected = selectedPackage?.identifier === pkg.identifier;
-              const Wrapper = selected ? Inset : Raised;
-              const price = pkg.product.priceString;
-              const perWeek =
-                key !== 'lifetime' ? pkg.product.pricePerWeekString : null;
-              return (
-                <Pressable key={key} onPress={() => setSelectedPackage(pkg)}>
-                  <Wrapper
-                    radius={14}
-                    distance={4}
-                    style={[
-                      styles.planCard,
-                      selected && {
-                        backgroundColor: `${theme.colors.accent}12`,
-                      },
-                    ]}
-                    backgroundColor={
-                      selected ? `${theme.colors.accent}08` : undefined
-                    }
-                  >
-                    {best && (
-                      <View
-                        style={[
-                          styles.bestBadge,
-                          { backgroundColor: theme.colors.accent },
-                        ]}
-                      >
-                        <Text style={styles.bestText}>Best value</Text>
-                      </View>
-                    )}
-                    <Text
-                      style={[
-                        styles.planTitle,
-                        { color: theme.colors.textPrimary },
-                      ]}
-                    >
-                      {title}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.planPrice,
-                        { color: theme.colors.textPrimary },
-                      ]}
-                    >
-                      {price}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.planSubtitle,
-                        { color: theme.colors.textMuted },
-                      ]}
-                    >
-                      {subtitle}
-                    </Text>
-                    {perWeek && (
-                      <Text
-                        style={[
-                          styles.planPerWeek,
-                          { color: theme.colors.textMuted },
-                        ]}
-                      >
-                        {perWeek}/week
-                      </Text>
-                    )}
-                  </Wrapper>
-                </Pressable>
-              );
-            })}
+            <View style={styles.plansRow}>
+              {packages.map(({ key, pkg, title, subtitle, best }: any, i) => {
+                const selected = selectedPackage?.identifier === pkg.identifier;
+                const perWeek =
+                  key !== 'lifetime' ? pkg.product.pricePerWeekString : null;
+                return (
+                  <PlanCard
+                    key={key}
+                    index={i}
+                    title={title}
+                    price={pkg.product.priceString}
+                    subtitle={subtitle}
+                    perWeek={perWeek}
+                    best={best}
+                    selected={selected}
+                    onSelect={() => setSelectedPackage(pkg)}
+                    theme={theme}
+                  />
+                );
+              })}
+            </View>
 
-            <NeumorphicButton
-              radius={16}
-              distance={6}
-              disabled={!selectedPackage || loading}
-              backgroundColor={theme.colors.accent}
-              style={styles.ctaButton}
+            <AnimatedPressable
               onPress={handlePurchase}
+              onPressIn={ctaPress.onPressIn}
+              onPressOut={ctaPress.onPressOut}
+              disabled={!selectedPackage || loading}
+              style={ctaPress.style}
             >
-              <Text style={styles.ctaText}>
-                {loading ? 'Processing…' : `Continue — ${selectedPkg}`}
-              </Text>
-            </NeumorphicButton>
+              <NeumorphicButton
+                radius={16}
+                distance={6}
+                disabled={!selectedPackage || loading}
+                backgroundColor={theme.colors.accent}
+                style={styles.ctaButton}
+                onPress={handlePurchase}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.ctaText}>Continue — {selectedPkg}</Text>
+                )}
+              </NeumorphicButton>
+            </AnimatedPressable>
 
             <View style={styles.footer}>
               <Pressable onPress={handleRestore} disabled={loading}>
@@ -784,45 +842,76 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  plansContainer: {
+  plansRow: {
+    flexDirection: 'row',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 18,
+    alignItems: 'flex-start',
+  },
+  planCardOuter: {
+    flex: 1,
   },
   planCard: {
-    padding: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 10,
     alignItems: 'center',
-    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    minHeight: 132,
+    justifyContent: 'center',
   },
   bestBadge: {
     position: 'absolute',
-    top: -8,
-    paddingHorizontal: 12,
+    top: -10,
+    alignSelf: 'center',
+    paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 10,
   },
   bestText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 9,
     fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  radioOuter: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioInner: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   planTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 6,
+    marginTop: 4,
   },
   planPrice: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '800',
     marginBottom: 2,
+    textAlign: 'center',
   },
   planSubtitle: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '500',
   },
   planPerWeek: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
-    marginTop: 2,
+    marginTop: 3,
   },
   ctaButton: {
     paddingVertical: 16,
@@ -922,41 +1011,142 @@ const styles = StyleSheet.create({
 
 // export default function PaywallScreen({ navigation }: any) {
 //   const { theme } = useTheme();
+
+//   // ── Fix #1 ──────────────────────────────────────────────────────────────
+//   // Subscribe directly to the store's `isPro` flag instead of copying it
+//   // into local state with `useState(storeIsPro)`. A `useState` initializer
+//   // only runs once, on first render — if the store's isPro flips true
+//   // *after* this screen mounts (e.g. refreshProStatus resolves elsewhere,
+//   // a webhook-driven update lands, restore completes on another screen),
+//   // the old local copy never picked that up and kept showing the paywall
+//   // to an already-pro user.
 //   const storeIsPro = useHabitStore(s => s.isPro);
 //   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
+
 //   const [ready, setReady] = useState(false);
 //   const [loading, setLoading] = useState(false);
 //   const [offering, setOffering] = useState<any>(null);
 //   const [selectedPackage, setSelectedPackage] = useState<any>(null);
-//   const [isProUser, setIsProUser] = useState(storeIsPro);
+
+//   // Remote-verified pro status (fresh RevenueCat check), separate from the
+//   // store's cached flag. We treat the user as pro if *either* signal says
+//   // so, rather than requiring the remote fetch to succeed before trusting
+//   // what the store already knows.
+//   const [remoteIsPro, setRemoteIsPro] = useState(false);
 //   const [proExpiration, setProExpiration] = useState<string | null>(null);
+//   const [fetchError, setFetchError] = useState(false);
+
+//   const isProUser = storeIsPro || remoteIsPro;
 
 //   const cardScale = useSharedValue(0.95);
 //   const cardOpacity = useSharedValue(0);
 
 //   useEffect(() => {
-//     (async () => {
-//       const [offerings, info] = await Promise.all([
-//         getOfferings(),
-//         getCustomerInfo(),
-//       ]);
-//       if (offerings?.current) {
-//         setOffering(offerings.current);
-//         const pkg =
-//           offerings.current.annual ||
-//           offerings.current.lifetime ||
-//           offerings.current.weekly;
-//         if (pkg) setSelectedPackage(pkg);
-//       }
+//     console.log('[Paywall DEBUG] ── mount ──');
+//     console.log('[Paywall DEBUG] storeIsPro at mount:', storeIsPro);
+//     console.log(
+//       '[Paywall DEBUG] typeof refreshProStatus:',
+//       typeof refreshProStatus,
+//     );
 
-//       console.log(info);
-//       if (isPro(info)) {
-//         setIsProUser(true);
-//         setProExpiration(getProExpirationDate(info));
+//     (async () => {
+//       try {
+//         // ── Fix #2 ────────────────────────────────────────────────────────
+//         // `refreshProStatus` was imported but never called. Call it so the
+//         // global store is reconciled with RevenueCat as soon as the paywall
+//         // opens — this is the highest-stakes moment to have correct status.
+//         if (typeof refreshProStatus === 'function') {
+//           const refreshResult = await refreshProStatus();
+//           console.log(
+//             '[Paywall DEBUG] refreshProStatus() resolved with:',
+//             JSON.stringify(refreshResult, null, 2),
+//           );
+//         } else {
+//           console.log(
+//             '[Paywall DEBUG] refreshProStatus is not a function — skipping call',
+//           );
+//         }
+
+//         console.log(
+//           '[Paywall DEBUG] storeIsPro right after refreshProStatus:',
+//           useHabitStore.getState().isPro,
+//         );
+
+//         const [offerings, info] = await Promise.all([
+//           getOfferings(),
+//           getCustomerInfo(),
+//         ]);
+
+//         console.log(
+//           '[Paywall DEBUG] getOfferings() result:',
+//           JSON.stringify(offerings, null, 2),
+//         );
+//         console.log(
+//           '[Paywall DEBUG] getCustomerInfo() raw result:',
+//           JSON.stringify(info, null, 2),
+//         );
+//         console.log(
+//           '[Paywall DEBUG] info.entitlements.active keys:',
+//           info?.entitlements?.active
+//             ? Object.keys(info.entitlements.active)
+//             : 'entitlements.active missing/undefined',
+//         );
+
+//         const proResult = isPro(info);
+//         console.log('[Paywall DEBUG] isPro(info) returned:', proResult);
+
+//         if (offerings?.current) {
+//           setOffering(offerings.current);
+//           const pkg =
+//             offerings.current.annual ||
+//             offerings.current.lifetime ||
+//             offerings.current.weekly;
+//           if (pkg) setSelectedPackage(pkg);
+//         } else {
+//           console.log(
+//             '[Paywall DEBUG] offerings.current is falsy — no offering set',
+//           );
+//         }
+
+//         if (proResult) {
+//           setRemoteIsPro(true);
+//           const exp = getProExpirationDate(info);
+//           console.log('[Paywall DEBUG] getProExpirationDate(info):', exp);
+//           setProExpiration(exp);
+//         }
+//       } catch (err) {
+//         // ── Fix #3 ────────────────────────────────────────────────────────
+//         // Previously, any failure here (network blip, RevenueCat error)
+//         // left `ready` stuck at false forever — an infinite spinner — and
+//         // silently prevented the pro check from ever completing. Now we
+//         // surface the error and still fall back to whatever the store
+//         // already knows (storeIsPro), so a paying user isn't shown the
+//         // paywall just because one fetch failed.
+//         console.log('[Paywall DEBUG] ERROR thrown during status check:', err);
+//         logEvent('error', 'PaywallScreen: failed to load offerings/status', {
+//           error: String(err),
+//         });
+//         setFetchError(true);
+//       } finally {
+//         console.log(
+//           '[Paywall DEBUG] final storeIsPro:',
+//           useHabitStore.getState().isPro,
+//         );
+//         setReady(true);
 //       }
-//       setReady(true);
 //     })();
 //   }, []);
+
+//   useEffect(() => {
+//     console.log(
+//       '[Paywall DEBUG] render — storeIsPro:',
+//       storeIsPro,
+//       'remoteIsPro:',
+//       remoteIsPro,
+//       'combined isProUser:',
+//       storeIsPro || remoteIsPro,
+//     );
+//   }, [storeIsPro, remoteIsPro]);
 
 //   useEffect(() => {
 //     cardScale.value = withSpring(1, { damping: 15, stiffness: 120 });
@@ -977,7 +1167,9 @@ const styles = StyleSheet.create({
 //     try {
 //       const result = await purchasePackage(selectedPackage);
 //       if (result) {
-//         useHabitStore.setState({ isPro: isPro(result.customerInfo) });
+//         const nowPro = isPro(result.customerInfo);
+//         useHabitStore.setState({ isPro: nowPro });
+//         setRemoteIsPro(nowPro);
 //         Alert.alert(
 //           'Welcome to Pro!',
 //           'You now have access to all premium features.',
@@ -999,8 +1191,10 @@ const styles = StyleSheet.create({
 //     try {
 //       const info = await restorePurchases();
 //       if (info) {
-//         useHabitStore.setState({ isPro: isPro(info) });
-//         if (isPro(info)) {
+//         const nowPro = isPro(info);
+//         useHabitStore.setState({ isPro: nowPro });
+//         setRemoteIsPro(nowPro);
+//         if (nowPro) {
 //           Alert.alert(
 //             'Restore Complete',
 //             'Your Pro subscription has been restored.',
@@ -1019,20 +1213,38 @@ const styles = StyleSheet.create({
 //   };
 
 //   const handleDismiss = async () => {
-//     const info = await getCustomerInfo();
-//     if (isPro(info)) {
-//       logEvent('info', 'User became pro via paywall');
-//       useHabitStore.setState({ isPro: true });
+//     try {
+//       const info = await getCustomerInfo();
+//       if (isPro(info)) {
+//         logEvent('info', 'User became pro via paywall');
+//         useHabitStore.setState({ isPro: true });
+//       }
+//     } catch (err) {
+//       logEvent('error', 'PaywallScreen: dismiss status check failed', {
+//         error: String(err),
+//       });
 //     }
 //     navigation.goBack();
 //   };
 
 //   const handleManageSubscription = async () => {
 //     await showManageSubscriptions();
-//     const info = await getCustomerInfo();
-//     useHabitStore.setState({ isPro: isPro(info) });
-//     if (!isPro(info)) {
-//       navigation.goBack();
+//     try {
+//       const info = await getCustomerInfo();
+//       const nowPro = isPro(info);
+//       useHabitStore.setState({ isPro: nowPro });
+//       setRemoteIsPro(nowPro);
+//       if (!nowPro) {
+//         navigation.goBack();
+//       }
+//     } catch (err) {
+//       logEvent(
+//         'error',
+//         'PaywallScreen: manage-subscription status check failed',
+//         {
+//           error: String(err),
+//         },
+//       );
 //     }
 //   };
 
@@ -1110,6 +1322,17 @@ const styles = StyleSheet.create({
 //                     ]}
 //                   >
 //                     Expires: {new Date(proExpiration).toLocaleDateString()}
+//                   </Text>
+//                 )}
+//                 {fetchError && (
+//                   <Text
+//                     style={[
+//                       styles.proExpiration,
+//                       { color: theme.colors.textMuted },
+//                     ]}
+//                   >
+//                     (Showing cached status — couldn't refresh from the store
+//                     just now)
 //                   </Text>
 //                 )}
 //               </View>
@@ -1232,6 +1455,18 @@ const styles = StyleSheet.create({
 //               Unlock the full Habitic experience. Support development and get
 //               powerful features to supercharge your habit tracking.
 //             </Text>
+
+//             {fetchError && (
+//               <Text
+//                 style={[
+//                   styles.subtitle,
+//                   { color: theme.colors.textMuted, marginTop: -12 },
+//                 ]}
+//               >
+//                 We couldn't refresh your subscription status just now. If you're
+//                 already Pro, try again shortly or restore purchases below.
+//               </Text>
+//             )}
 
 //             <View style={styles.featuresGrid}>
 //               {FEATURES.map((feat, i) => {
