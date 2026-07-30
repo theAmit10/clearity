@@ -19,6 +19,7 @@ import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import WidgetSettingsScreen from '../screens/WidgetSettingsScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import ManageSubscriptionScreen from '../screens/ManageSubscriptionScreen';
 import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
 
@@ -117,6 +118,11 @@ function SettingsStack() {
         name="Analytics"
         component={AnalyticsScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ManageSubscription"
+        component={ManageSubscriptionScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
       />
     </Stack.Navigator>
   );

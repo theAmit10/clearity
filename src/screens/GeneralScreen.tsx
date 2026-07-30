@@ -15,6 +15,12 @@ export default function GeneralScreen({ navigation }: any) {
   const { theme } = useTheme();
   const showCategories = useHabitStore(s => s.showCategories);
   const setShowCategories = useHabitStore(s => s.setShowCategories);
+  const showStreaks = useHabitStore(s => s.showStreaks);
+  const setShowStreaks = useHabitStore(s => s.setShowStreaks);
+  const showCategoryBadges = useHabitStore(s => s.showCategoryBadges);
+  const setShowCategoryBadges = useHabitStore(s => s.setShowCategoryBadges);
+  const showFrequency = useHabitStore(s => s.showFrequency);
+  const setShowFrequency = useHabitStore(s => s.setShowFrequency);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
@@ -34,6 +40,57 @@ export default function GeneralScreen({ navigation }: any) {
             <Switch
               value={showCategories}
               onValueChange={setShowCategories}
+              trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
+            <View style={styles.rowText}>
+              <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
+                Show streaks
+              </Text>
+              <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
+                Display streak count on each habit card
+              </Text>
+            </View>
+            <Switch
+              value={showStreaks}
+              onValueChange={setShowStreaks}
+              trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
+            <View style={styles.rowText}>
+              <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
+                Show category badges
+              </Text>
+              <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
+                Display category label on each habit card
+              </Text>
+            </View>
+            <Switch
+              value={showCategoryBadges}
+              onValueChange={setShowCategoryBadges}
+              trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
+            <View style={styles.rowText}>
+              <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
+                Show frequency labels
+              </Text>
+              <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
+                Display Daily / 3x per week label on each habit card
+              </Text>
+            </View>
+            <Switch
+              value={showFrequency}
+              onValueChange={setShowFrequency}
               trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
               thumbColor="#FFFFFF"
             />

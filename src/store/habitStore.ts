@@ -18,6 +18,9 @@ interface HabitState {
   adminNotifications: AdminNotificationConfig[];
   customCategories: HabitCategory[];
   showCategories: boolean;
+  showStreaks: boolean;
+  showCategoryBadges: boolean;
+  showFrequency: boolean;
   isPro: boolean;
   init: () => Promise<void>;
   refreshProStatus: () => Promise<void>;
@@ -40,6 +43,9 @@ interface HabitState {
   addCustomCategory: (cat: HabitCategory) => void;
   removeCustomCategory: (key: string) => void;
   setShowCategories: (val: boolean) => Promise<void>;
+  setShowStreaks: (val: boolean) => Promise<void>;
+  setShowCategoryBadges: (val: boolean) => Promise<void>;
+  setShowFrequency: (val: boolean) => Promise<void>;
 }
 
 function persist(habits: Habit[]) {
@@ -61,6 +67,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
   customCategories: [],
   showCategories: true,
+  showStreaks: true,
+  showCategoryBadges: true,
+  showFrequency: true,
   isPro: false,
 
   refreshProStatus: async () => {
@@ -123,6 +132,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         habitNotifications: habitNotifs,
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
         showCategories: generalSettings?.showCategories ?? true,
+        showStreaks: generalSettings?.showStreaks ?? true,
+        showCategoryBadges: generalSettings?.showCategoryBadges ?? true,
+        showFrequency: generalSettings?.showFrequency ?? true,
       });
 
       if (!Array.isArray(raw)) {
@@ -398,8 +410,26 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   setShowCategories: async val => {
     set({ showCategories: val });
-    await saveGeneralSettings({ showCategories: val });
+    await saveGeneralSettings({ showCategories: val, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency });
     logEvent('info', 'Show categories toggled', { val });
+  },
+
+  setShowStreaks: async val => {
+    set({ showStreaks: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: val, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency });
+    logEvent('info', 'Show streaks toggled', { val });
+  },
+
+  setShowCategoryBadges: async val => {
+    set({ showCategoryBadges: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: val, showFrequency: get().showFrequency });
+    logEvent('info', 'Show category badges toggled', { val });
+  },
+
+  setShowFrequency: async val => {
+    set({ showFrequency: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: val });
+    logEvent('info', 'Show frequency toggled', { val });
   },
 }));
 

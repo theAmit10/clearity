@@ -30,7 +30,6 @@ import { useTheme } from '../theme/ThemeProvider';
 import {
   restorePurchases,
 } from '../services/revenueCat';
-import RevenueCatUI from 'react-native-purchases-ui';
 import { logEvent } from '../services/logger';
 
 export default function SettingsScreen({ navigation }: any) {
@@ -133,13 +132,8 @@ export default function SettingsScreen({ navigation }: any) {
     }
   };
 
-  const handleCustomerCenter = async () => {
-    try {
-      await RevenueCatUI.presentCustomerCenter();
-      await refreshProStatus();
-    } catch (err) {
-      logEvent('error', 'Customer Center failed', err);
-    }
+  const handleCustomerCenter = () => {
+    navigation.navigate('ManageSubscription');
   };
 
   const handleRateApp = () => {

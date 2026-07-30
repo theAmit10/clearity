@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Habit } from '../types/habit';
-import { computeStats } from '../store/habitStore';
+import { computeStats, useHabitStore } from '../store/habitStore';
 import HeatmapGrid from './HeatmapGrid';
 import { todayKey } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
@@ -30,6 +30,9 @@ export default function HabitCard({
   isDragging,
 }: Props) {
   const { theme } = useTheme();
+  const showStreaks = useHabitStore(s => s.showStreaks);
+  const showCategoryBadges = useHabitStore(s => s.showCategoryBadges);
+  const showFrequency = useHabitStore(s => s.showFrequency);
   const stats = computeStats(habit);
   const count = habit.completions[todayKey()] || 0;
   const target = habit.frequency === 'n_times_in_m_days' ? (habit.frequencyValue ?? 1) : 1;
@@ -67,7 +70,7 @@ export default function HabitCard({
               <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
                 {habit.name}
               </Text>
-              {habit.category && habit.category !== 'none' && (
+              {showCategoryBadges && habit.category && habit.category !== 'none' && (
                 <View style={[styles.catBadge, { backgroundColor: `${habit.color}1A` }]}>
                   <Text style={[styles.catBadgeText, { color: habit.color }]}>
                     {habit.category}
@@ -76,19 +79,23 @@ export default function HabitCard({
               )}
             </View>
             <View style={styles.streakRow}>
-              <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
-                {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
-                Streak
-              </Text>
-              <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}              >
-                {habit.frequency === 'n_times_per_week'
-                  ? `${habit.frequencyValue ?? 3}x / week`
-                  : habit.frequency === 'n_times_per_month'
-                  ? `${habit.frequencyValue ?? 1}x / month`
-                  : habit.frequency === 'n_times_in_m_days'
-                  ? `${habit.frequencyValue ?? 1}x / ${habit.frequencyWindow ?? 7} days`
-                  : 'Daily'}
-              </Text>
+              {showStreaks && (
+                <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
+                  {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
+                  Streak
+                </Text>
+              )}
+              {showFrequency && (
+                <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}>
+                  {habit.frequency === 'n_times_per_week'
+                    ? `${habit.frequencyValue ?? 3}x / week`
+                    : habit.frequency === 'n_times_per_month'
+                    ? `${habit.frequencyValue ?? 1}x / month`
+                    : habit.frequency === 'n_times_in_m_days'
+                    ? `${habit.frequencyValue ?? 1}x / ${habit.frequencyWindow ?? 7} days`
+                    : 'Daily'}
+                </Text>
+              )}
             </View>
           </View>
 

@@ -44,6 +44,9 @@ export async function saveNotificationData(data: unknown): Promise<void> {
 
 export interface GeneralSettings {
   showCategories: boolean;
+  showStreaks: boolean;
+  showCategoryBadges: boolean;
+  showFrequency: boolean;
 }
 
 export async function loadGeneralSettings(): Promise<GeneralSettings | null> {
