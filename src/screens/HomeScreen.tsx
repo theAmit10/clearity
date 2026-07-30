@@ -10,7 +10,6 @@ import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import {
-  BUILT_IN_CATEGORIES,
   getCategoryName,
   getCategoryIcon,
 } from '../constants/habitCategories';
@@ -35,11 +34,11 @@ export default function HomeScreen({ navigation }: any) {
 
   const categorySet = useMemo(() => {
     const keys = new Set<string>();
-    BUILT_IN_CATEGORIES.forEach(c => {
-      if (c.key !== 'none') keys.add(c.key);
+    activeHabits.forEach(h => {
+      if (h.category && h.category !== 'none') keys.add(h.category);
     });
     return ['all', ...keys];
-  }, []);
+  }, [activeHabits]);
 
   const habits = useMemo(
     () =>
