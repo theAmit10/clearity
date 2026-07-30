@@ -71,6 +71,10 @@ yarn-error.log
 .env.local
 .env.production
 
+# Firebase / Google Services (contains secrets)
+ios/GoogleService-Info.plist
+ios/GoogleService-Info-dev.plist
+
 # Yarn
 .yarn/*
 !.yarn/patches
