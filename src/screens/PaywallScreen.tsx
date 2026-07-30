@@ -62,8 +62,10 @@ const FEATURES: Feature[] = [
   { icon: RocketLaunchIcon, label: 'Early access to new features' },
 ];
 
-const PRIVACY_URL = 'https://codethenic.com/privacy';
-const TERMS_URL = 'https://codethenic.com/terms';
+const PRIVACY_URL =
+  'https://www.freeprivacypolicy.com/live/1ed189c3-cedf-41d4-8836-4dd1682e13d8';
+const TERMS_URL =
+  'https://www.freeprivacypolicy.com/live/1ed189c3-cedf-41d4-8836-4dd1682e13d8';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 

@@ -18,17 +18,22 @@ import crashlytics from '@react-native-firebase/crashlytics';
 function AppContent() {
   const init = useHabitStore(s => s.init);
   const loaded = useHabitStore(s => s.loaded);
+  const crashlyticsEnabled = useHabitStore(s => s.crashlyticsEnabled);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
   const { theme } = useTheme();
 
   useEffect(() => {
-    crashlytics().setCrashlyticsCollectionEnabled(true);
     installGlobalErrorHandler();
     initAnalytics();
     initRevenueCat();
     init();
   }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    crashlytics().setCrashlyticsCollectionEnabled(crashlyticsEnabled);
+  }, [crashlyticsEnabled, loaded]);
 
   useEffect(() => {
     if (!loaded) return;

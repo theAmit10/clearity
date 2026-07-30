@@ -21,6 +21,7 @@ interface HabitState {
   showStreaks: boolean;
   showCategoryBadges: boolean;
   showFrequency: boolean;
+  crashlyticsEnabled: boolean;
   isPro: boolean;
   init: () => Promise<void>;
   refreshProStatus: () => Promise<void>;
@@ -46,6 +47,7 @@ interface HabitState {
   setShowStreaks: (val: boolean) => Promise<void>;
   setShowCategoryBadges: (val: boolean) => Promise<void>;
   setShowFrequency: (val: boolean) => Promise<void>;
+  setCrashlyticsEnabled: (val: boolean) => Promise<void>;
 }
 
 function persist(habits: Habit[]) {
@@ -70,6 +72,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   showStreaks: true,
   showCategoryBadges: true,
   showFrequency: true,
+  crashlyticsEnabled: true,
   isPro: false,
 
   refreshProStatus: async () => {
@@ -135,6 +138,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         showStreaks: generalSettings?.showStreaks ?? true,
         showCategoryBadges: generalSettings?.showCategoryBadges ?? true,
         showFrequency: generalSettings?.showFrequency ?? true,
+        crashlyticsEnabled: generalSettings?.crashlyticsEnabled ?? true,
       });
 
       if (!Array.isArray(raw)) {
@@ -410,26 +414,32 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   setShowCategories: async val => {
     set({ showCategories: val });
-    await saveGeneralSettings({ showCategories: val, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency });
+    await saveGeneralSettings({ showCategories: val, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
     logEvent('info', 'Show categories toggled', { val });
   },
 
   setShowStreaks: async val => {
     set({ showStreaks: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: val, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: val, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
     logEvent('info', 'Show streaks toggled', { val });
   },
 
   setShowCategoryBadges: async val => {
     set({ showCategoryBadges: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: val, showFrequency: get().showFrequency });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: val, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
     logEvent('info', 'Show category badges toggled', { val });
   },
 
   setShowFrequency: async val => {
     set({ showFrequency: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: val, crashlyticsEnabled: get().crashlyticsEnabled });
     logEvent('info', 'Show frequency toggled', { val });
+  },
+
+  setCrashlyticsEnabled: async val => {
+    set({ crashlyticsEnabled: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: val });
+    logEvent('info', 'Crashlytics toggled', { val });
   },
 }));
 

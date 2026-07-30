@@ -21,6 +21,8 @@ export default function GeneralScreen({ navigation }: any) {
   const setShowCategoryBadges = useHabitStore(s => s.setShowCategoryBadges);
   const showFrequency = useHabitStore(s => s.showFrequency);
   const setShowFrequency = useHabitStore(s => s.setShowFrequency);
+  const crashlyticsEnabled = useHabitStore(s => s.crashlyticsEnabled);
+  const setCrashlyticsEnabled = useHabitStore(s => s.setCrashlyticsEnabled);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
@@ -91,6 +93,23 @@ export default function GeneralScreen({ navigation }: any) {
             <Switch
               value={showFrequency}
               onValueChange={setShowFrequency}
+              trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
+            <View style={styles.rowText}>
+              <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
+                Crash reporting
+              </Text>
+              <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
+                Send crash reports to help improve the app
+              </Text>
+            </View>
+            <Switch
+              value={crashlyticsEnabled}
+              onValueChange={setCrashlyticsEnabled}
               trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosBlue }}
               thumbColor="#FFFFFF"
             />

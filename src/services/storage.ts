@@ -47,6 +47,7 @@ export interface GeneralSettings {
   showStreaks: boolean;
   showCategoryBadges: boolean;
   showFrequency: boolean;
+  crashlyticsEnabled: boolean;
 }
 
 export async function loadGeneralSettings(): Promise<GeneralSettings | null> {
