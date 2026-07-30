@@ -97,7 +97,7 @@ export default function HomeScreen({ navigation }: any) {
       </View>
 
       <View style={styles.body}>
-        {showCategories && categorySet.length > 1 && (
+        {showCategories && categorySet.length > 1 && habits.length !== 0 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
