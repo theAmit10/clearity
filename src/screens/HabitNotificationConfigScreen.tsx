@@ -71,6 +71,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   const updateHabitNotification = useHabitStore(s => s.updateHabitNotification);
   const removeHabitNotification = useHabitStore(s => s.removeHabitNotification);
   const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
   const maxNotifs = isPro ? 10 : FREE_NOTIF_LIMIT;
 
   const habit = habits.find(h => h.id === habitId);
@@ -415,10 +416,15 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
         ) : !isPro ? (
           <Pressable
             style={[styles.addButton, { backgroundColor: theme.colors.surface }]}
-            onPress={() => navigation.navigate('Paywall')}
+            onPress={() =>
+              navigation.navigate(
+                'Paywall',
+                proExpired ? { mode: 'expired' } : undefined,
+              )
+            }
           >
             <Text style={[styles.addButtonText, { color: theme.colors.iosBlue }]}>
-              Upgrade to Pro for more reminders
+              {proExpired ? 'Renew Pro for more reminders' : 'Upgrade to Pro for more reminders'}
             </Text>
           </Pressable>
         ) : null}

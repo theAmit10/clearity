@@ -8,6 +8,7 @@ import {
   ScrollView,
   Linking,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
@@ -38,7 +39,9 @@ export default function SettingsScreen({ navigation }: any) {
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
   const mergeHabits = useHabitStore(s => s.mergeHabits);
   const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
   const [busy, setBusy] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   const handleExport = async () => {
     setBusy(true);
@@ -109,6 +112,8 @@ export default function SettingsScreen({ navigation }: any) {
 
   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
 
+  const paywallParams = proExpired ? { mode: 'expired' } : undefined;
+
   const proBadge = (
     <View style={styles.proBadge}>
       <LockClosedIcon size={12} color={theme.colors.iosGray} />
@@ -117,18 +122,23 @@ export default function SettingsScreen({ navigation }: any) {
   );
 
   const handleRestore = async () => {
-    setBusy(true);
+    if (restoring) return;
+    setRestoring(true);
     try {
       const info = await restorePurchases();
       await refreshProStatus();
-      Alert.alert(
-        'Restore Complete',
-        info ? 'Your Pro subscription has been restored.' : 'No purchases found to restore.',
-      );
+      const nowPro = useHabitStore.getState().isPro;
+      if (!info) {
+        Alert.alert('Restore Failed', 'Could not restore purchases. Please try again.');
+      } else if (nowPro) {
+        Alert.alert('Restore Complete', 'Your Pro subscription has been restored.');
+      } else {
+        Alert.alert('No Purchases Found', 'No previous purchases could be restored.');
+      }
     } catch {
       Alert.alert('Restore Failed', 'Could not restore purchases. Please try again.');
     } finally {
-      setBusy(false);
+      setRestoring(false);
     }
   };
 
@@ -274,12 +284,26 @@ export default function SettingsScreen({ navigation }: any) {
           />
           <Row
             label={`Export data (${habits.length} habits)`}
-            onPress={handleExport}
+            rightContent={isPro ? null : proBadge}
+            onPress={() => {
+              if (isPro) {
+                handleExport();
+              } else {
+                navigation.navigate('Paywall', paywallParams);
+              }
+            }}
             disabled={busy}
           />
           <Row
             label="Import data from file"
-            onPress={handleImport}
+            rightContent={isPro ? null : proBadge}
+            onPress={() => {
+              if (isPro) {
+                handleImport();
+              } else {
+                navigation.navigate('Paywall', paywallParams);
+              }
+            }}
             disabled={busy}
           />
         </Section>
@@ -293,7 +317,9 @@ export default function SettingsScreen({ navigation }: any) {
           >
             {isPro
               ? 'You have Habitic Pro. Thank you for supporting the app!'
-              : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
+              : proExpired
+                ? 'Your Pro plan has expired. Renew to keep using analytics, widget, unlimited habits, custom categories, and premium themes.'
+                : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
           </Text>
           {isPro ? (
             <Row
@@ -303,15 +329,20 @@ export default function SettingsScreen({ navigation }: any) {
             />
           ) : (
             <Row
-              label="Upgrade to Pro"
-              onPress={() => navigation.navigate('Paywall')}
+              label={proExpired ? 'Renew Pro' : 'Upgrade to Pro'}
+              onPress={() => navigation.navigate('Paywall', paywallParams)}
               disabled={busy}
             />
           )}
           <Row
-            label="Restore purchases"
+            label={restoring ? 'Restoring…' : 'Restore purchases'}
             onPress={handleRestore}
-            disabled={busy}
+            disabled={busy || restoring}
+            rightContent={
+              restoring ? (
+                <ActivityIndicator size="small" color={theme.colors.iosBlue} />
+              ) : null
+            }
           />
         </Section>
 
@@ -347,7 +378,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 navigation.navigate('WidgetSettings');
               } else {
-                navigation.navigate('Paywall');
+                navigation.navigate('Paywall', paywallParams);
               }
             }}
           />
@@ -370,7 +401,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 navigation.navigate('Analytics');
               } else {
-                navigation.navigate('Paywall');
+                navigation.navigate('Paywall', paywallParams);
               }
             }}
           />
@@ -404,7 +435,7 @@ export default function SettingsScreen({ navigation }: any) {
                 rightContent={locked ? proBadge : null}
                 onPress={() => {
                   if (locked) {
-                    navigation.navigate('Paywall');
+                    navigation.navigate('Paywall', paywallParams);
                   } else {
                     setTheme(t.name);
                   }

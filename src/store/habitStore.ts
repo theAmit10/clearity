@@ -1,14 +1,15 @@
 import { create } from 'zustand';
 import { Habit, HabitStats, HabitCategory } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
-import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings } from '../services/storage';
+import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings, loadCustomCategories, saveCustomCategories } from '../services/storage';
 import { logEvent } from '../services/logger';
 import { trackEvent } from '../services/analytics';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule } from '../native/WidgetModule';
-import { getCustomerInfo, isPro as checkIsPro, setOnCustomerInfoUpdate } from '../services/revenueCat';
+import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
 import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
+import type { CustomerInfo } from 'react-native-purchases';
 
 interface HabitState {
   habits: Habit[];
@@ -23,6 +24,7 @@ interface HabitState {
   showFrequency: boolean;
   crashlyticsEnabled: boolean;
   isPro: boolean;
+  proExpired: boolean;
   init: () => Promise<void>;
   refreshProStatus: () => Promise<void>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
@@ -50,6 +52,14 @@ interface HabitState {
   setCrashlyticsEnabled: (val: boolean) => Promise<void>;
 }
 
+function computeProState(info: CustomerInfo | null, wasPro: boolean) {
+  const nowPro = checkIsPro(info);
+  return {
+    isPro: nowPro,
+    proExpired: !nowPro && (wasPro || hadProButExpired(info)),
+  };
+}
+
 function persist(habits: Habit[]) {
   saveHabits(habits).catch(err => logEvent('error', 'Failed to persist habits', err));
 }
@@ -74,23 +84,30 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   showFrequency: true,
   crashlyticsEnabled: true,
   isPro: false,
+  proExpired: false,
 
   refreshProStatus: async () => {
     const info = await getCustomerInfo();
-    set({ isPro: checkIsPro(info) });
+    const wasExpired = get().proExpired;
+    const next = computeProState(info, get().isPro);
+    set(next);
+    if (next.proExpired && !wasExpired) trackEvent('subscription_expired');
   },
 
   init: async () => {
     try {
-      const [stored, reviewShown, notifData, generalSettings] = await Promise.all([
+      const [stored, reviewShown, notifData, generalSettings, customCategories] = await Promise.all([
         loadHabits<Habit[]>(),
         loadReviewState(),
         loadNotificationData<NotificationStoreData>(),
         loadGeneralSettings(),
+        loadCustomCategories<HabitCategory[]>(),
       ]);
 
       const info = await getCustomerInfo();
-      set({ isPro: checkIsPro(info) });
+      const proState = computeProState(info, false);
+      set(proState);
+      if (proState.proExpired) trackEvent('subscription_expired');
       setOnCustomerInfoUpdate(() => {
         get().refreshProStatus();
       });
@@ -134,6 +151,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         reviewPromptShown: reviewShown,
         habitNotifications: habitNotifs,
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
+        customCategories: customCategories ?? [],
         showCategories: generalSettings?.showCategories ?? true,
         showStreaks: generalSettings?.showStreaks ?? true,
         showCategoryBadges: generalSettings?.showCategoryBadges ?? true,
@@ -400,16 +418,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
     const existing = get().customCategories;
     if (existing.find(c => c.key === cat.key)) return;
-    set({ customCategories: [...existing, cat] });
+    const customCategories = [...existing, cat];
+    set({ customCategories });
+    saveCustomCategories(customCategories).catch(err =>
+      logEvent('error', 'Failed to persist custom categories', err),
+    );
   },
 
   removeCustomCategory: key => {
+    const customCategories = get().customCategories.filter(c => c.key !== key);
     set({
-      customCategories: get().customCategories.filter(c => c.key !== key),
+      customCategories,
       habits: get().habits.map(h =>
         h.category === key ? { ...h, category: 'none' } : h
       ),
     });
+    saveCustomCategories(customCategories).catch(err =>
+      logEvent('error', 'Failed to persist custom categories', err),
+    );
   },
 
   setShowCategories: async val => {

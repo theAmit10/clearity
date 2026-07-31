@@ -232,10 +232,11 @@ function PlanCard({
   );
 }
 
-export default function PaywallScreen({ navigation }: any) {
+export default function PaywallScreen({ navigation, route }: any) {
   const { theme } = useTheme();
 
   const storeIsPro = useHabitStore(s => s.isPro);
+  const storeProExpired = useHabitStore(s => s.proExpired);
   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
 
   const [ready, setReady] = useState(false);
@@ -248,6 +249,8 @@ export default function PaywallScreen({ navigation }: any) {
   const [fetchError, setFetchError] = useState(false);
 
   const isProUser = storeIsPro || remoteIsPro;
+  const expiredMode =
+    !isProUser && (route?.params?.mode === 'expired' || storeProExpired);
 
   // Subtle continuous pulse for the "Best value" badge — draws the eye
   // without being distracting.
@@ -285,9 +288,9 @@ export default function PaywallScreen({ navigation }: any) {
         }
 
         const proResult = isPro(info);
+        setProExpiration(getProExpirationDate(info));
         if (proResult) {
           setRemoteIsPro(true);
-          setProExpiration(getProExpirationDate(info));
         }
       } catch (err) {
         logEvent('error', 'PaywallScreen: failed to load offerings/status', {
@@ -307,8 +310,9 @@ export default function PaywallScreen({ navigation }: any) {
       const result = await purchasePackage(selectedPackage);
       if (result) {
         const nowPro = isPro(result.customerInfo);
-        useHabitStore.setState({ isPro: nowPro });
+        useHabitStore.setState({ isPro: nowPro, proExpired: false });
         setRemoteIsPro(nowPro);
+        setProExpiration(getProExpirationDate(result.customerInfo));
         Alert.alert(
           'Welcome to Pro!',
           'You now have access to all premium features.',
@@ -331,8 +335,9 @@ export default function PaywallScreen({ navigation }: any) {
       const info = await restorePurchases();
       if (info) {
         const nowPro = isPro(info);
-        useHabitStore.setState({ isPro: nowPro });
+        useHabitStore.setState({ isPro: nowPro, proExpired: false });
         setRemoteIsPro(nowPro);
+        setProExpiration(getProExpirationDate(info));
         if (nowPro) {
           Alert.alert(
             'Restore Complete',
@@ -356,7 +361,7 @@ export default function PaywallScreen({ navigation }: any) {
       const info = await getCustomerInfo();
       if (isPro(info)) {
         logEvent('info', 'User became pro via paywall');
-        useHabitStore.setState({ isPro: true });
+        useHabitStore.setState({ isPro: true, proExpired: false });
       }
     } catch (err) {
       logEvent('error', 'PaywallScreen: dismiss status check failed', {
@@ -371,8 +376,9 @@ export default function PaywallScreen({ navigation }: any) {
     try {
       const info = await getCustomerInfo();
       const nowPro = isPro(info);
-      useHabitStore.setState({ isPro: nowPro });
+      useHabitStore.setState({ isPro: nowPro, proExpired: false });
       setRemoteIsPro(nowPro);
+      setProExpiration(getProExpirationDate(info));
       if (!nowPro) {
         navigation.goBack();
       }
@@ -616,9 +622,22 @@ export default function PaywallScreen({ navigation }: any) {
               entering={FadeInDown.delay(40).duration(300)}
               style={[styles.subtitle, { color: theme.colors.textMuted }]}
             >
-              Unlock the full Habitic experience. Support development and get
-              powerful features to supercharge your habit tracking.
+              {expiredMode
+                ? 'Your Pro plan has expired. Renew to keep using unlimited habits, analytics, widgets, and all your premium features.'
+                : 'Unlock the full Habitic experience. Support development and get powerful features to supercharge your habit tracking.'}
             </Animated.Text>
+
+            {expiredMode && proExpiration && (
+              <Animated.Text
+                entering={FadeInDown.delay(80).duration(300)}
+                style={[
+                  styles.subtitle,
+                  { color: theme.colors.textMuted, marginTop: -8 },
+                ]}
+              >
+                Expired on {new Date(proExpiration).toLocaleDateString()}.
+              </Animated.Text>
+            )}
 
             {fetchError && (
               <Text
@@ -698,7 +717,9 @@ export default function PaywallScreen({ navigation }: any) {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.ctaText}>Continue — {selectedPkg}</Text>
+                  <Text style={styles.ctaText}>
+                    {expiredMode ? 'Renew' : 'Continue'} — {selectedPkg}
+                  </Text>
                 )}
               </NeumorphicButton>
             </AnimatedPressable>

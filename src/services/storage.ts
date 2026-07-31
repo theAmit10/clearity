@@ -5,6 +5,7 @@ const LOGS_KEY = '@habit_tracker/logs';
 const REVIEW_KEY = '@habit_tracker/review';
 const NOTIFICATIONS_KEY = '@habit_tracker/notifications';
 const GENERAL_KEY = '@habit_tracker/general';
+const CUSTOM_CATEGORIES_KEY = '@habit_tracker/custom_categories';
 
 export async function loadHabits<T>(): Promise<T | null> {
   const raw = await AsyncStorage.getItem(HABITS_KEY);
@@ -59,6 +60,15 @@ export async function saveGeneralSettings(data: GeneralSettings): Promise<void> 
   await AsyncStorage.setItem(GENERAL_KEY, JSON.stringify(data));
 }
 
+export async function loadCustomCategories<T>(): Promise<T | null> {
+  const raw = await AsyncStorage.getItem(CUSTOM_CATEGORIES_KEY);
+  return raw ? (JSON.parse(raw) as T) : null;
+}
+
+export async function saveCustomCategories(data: unknown): Promise<void> {
+  await AsyncStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(data));
+}
+
 export async function clearAll(): Promise<void> {
-  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY, GENERAL_KEY]);
+  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY, GENERAL_KEY, CUSTOM_CATEGORIES_KEY]);
 }

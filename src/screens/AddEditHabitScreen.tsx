@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   Alert,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
@@ -53,6 +54,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const customCategories = useHabitStore(s => s.customCategories);
   const addCustomCategory = useHabitStore(s => s.addCustomCategory);
   const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -109,6 +111,21 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
         }
         navigation.goBack();
       } catch (err: any) {
+        if (proExpired) {
+          Alert.alert(
+            'Your plan has expired',
+            'Renew your Pro subscription to keep creating unlimited habits.',
+            [
+              { text: 'Not now', style: 'cancel' },
+              {
+                text: 'Renew Pro',
+                onPress: () =>
+                  navigation.navigate('Paywall', { mode: 'expired' }),
+              },
+            ],
+          );
+          return;
+        }
         Alert.alert(
           'Habit limit reached',
           err?.message ?? `Free tier is limited to ${FREE_HABIT_LIMIT} habits. Upgrade to Pro for unlimited.`,
@@ -357,6 +374,21 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               style={styles.catPill}
               onPress={() => {
                 if (!isPro) {
+                  if (proExpired) {
+                    Alert.alert(
+                      'Your plan has expired',
+                      'Renew your Pro subscription to keep using custom categories.',
+                      [
+                        { text: 'Not now', style: 'cancel' },
+                        {
+                          text: 'Renew Pro',
+                          onPress: () =>
+                            navigation.navigate('Paywall', { mode: 'expired' }),
+                        },
+                      ],
+                    );
+                    return;
+                  }
                   Alert.alert(
                     'Custom Categories (Pro)',
                     'Create custom categories with a Pro subscription.',
@@ -399,82 +431,94 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           transparent
           onRequestClose={() => setShowCategoryModal(false)}
         >
-          <View style={[styles.modalOverlay, { backgroundColor: theme.colors.background }]}>
-            <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
-              New Category
-            </Text>
+          <KeyboardAvoidingView
+            style={[styles.modalOverlay, { backgroundColor: theme.colors.background }]}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <ScrollView
+              contentContainerStyle={styles.modalContent}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              showsVerticalScrollIndicator={false}
+            >
+              <Pressable onPress={() => Keyboard.dismiss()}>
+                <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
+                  New Category
+                </Text>
 
-            <Text style={[styles.label, { color: theme.colors.textMuted }]}>Name</Text>
-            <Inset radius={14} style={styles.inputWrap}>
-              <TextInput
-                value={newCatName}
-                onChangeText={setNewCatName}
-                placeholder="e.g. Reading"
-                placeholderTextColor={theme.colors.textMuted}
-                style={[styles.input, { color: theme.colors.textPrimary }]}
-                autoFocus
-              />
-            </Inset>
+                <Text style={[styles.label, { color: theme.colors.textMuted }]}>Name</Text>
+                <Inset radius={14} style={styles.inputWrap}>
+                  <TextInput
+                    value={newCatName}
+                    onChangeText={setNewCatName}
+                    placeholder="e.g. Reading"
+                    placeholderTextColor={theme.colors.textMuted}
+                    style={[styles.input, { color: theme.colors.textPrimary }]}
+                    autoFocus
+                  />
+                </Inset>
 
-            <Text style={[styles.label, { color: theme.colors.textMuted }]}>Icon</Text>
-            <View style={styles.row}>
-              {HABIT_ICONS.map(({ key, Icon }) => {
-                const selected = newCatIcon === key;
-                return (
+                <Text style={[styles.label, { color: theme.colors.textMuted }]}>Icon</Text>
+                <View style={styles.row}>
+                  {HABIT_ICONS.map(({ key, Icon }) => {
+                    const selected = newCatIcon === key;
+                    return (
+                      <NeumorphicButton
+                        key={key}
+                        radius={14}
+                        distance={4}
+                        forcePressed={selected}
+                        style={[
+                          styles.iconOption,
+                          selected && { backgroundColor: `${color}26` },
+                        ]}
+                        onPress={() => setNewCatIcon(key)}
+                      >
+                        <Icon size={22} color={selected ? color : theme.colors.textMuted} />
+                      </NeumorphicButton>
+                    );
+                  })}
+                </View>
+
+                <View style={styles.modalActions}>
                   <NeumorphicButton
-                    key={key}
-                    radius={14}
-                    distance={4}
-                    forcePressed={selected}
-                    style={[
-                      styles.iconOption,
-                      selected && { backgroundColor: `${color}26` },
-                    ]}
-                    onPress={() => setNewCatIcon(key)}
+                    radius={16}
+                    distance={6}
+                    style={[styles.modalButton, { backgroundColor: theme.colors.insetFill }]}
+                    onPress={() => setShowCategoryModal(false)}
                   >
-                    <Icon size={22} color={selected ? color : theme.colors.textMuted} />
+                    <Text style={[styles.modalButtonText, { color: theme.colors.textMuted }]}>
+                      Cancel
+                    </Text>
                   </NeumorphicButton>
-                );
-              })}
-            </View>
-
-            <View style={styles.modalActions}>
-              <NeumorphicButton
-                radius={16}
-                distance={6}
-                style={[styles.modalButton, { backgroundColor: theme.colors.insetFill }]}
-                onPress={() => setShowCategoryModal(false)}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.colors.textMuted }]}>
-                  Cancel
-                </Text>
-              </NeumorphicButton>
-              <NeumorphicButton
-                radius={16}
-                distance={6}
-                disabled={!newCatName.trim()}
-                backgroundColor={newCatName.trim() ? color : theme.colors.insetFill}
-                style={styles.modalButton}
-                onPress={() => {
-                  if (!newCatName.trim()) return;
-                  const key = newCatName.trim().toLowerCase().replace(/\s+/g, '-');
-                  const cat: HabitCategory = {
-                    key,
-                    name: newCatName.trim(),
-                    icon: newCatIcon,
-                    isCustom: true,
-                  };
-                  addCustomCategory(cat);
-                  setCategory(key);
-                  setShowCategoryModal(false);
-                }}
-              >
-                <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
-                  Create
-                </Text>
-              </NeumorphicButton>
-            </View>
-          </View>
+                  <NeumorphicButton
+                    radius={16}
+                    distance={6}
+                    disabled={!newCatName.trim()}
+                    backgroundColor={newCatName.trim() ? color : theme.colors.insetFill}
+                    style={styles.modalButton}
+                    onPress={() => {
+                      if (!newCatName.trim()) return;
+                      const key = newCatName.trim().toLowerCase().replace(/\s+/g, '-');
+                      const cat: HabitCategory = {
+                        key,
+                        name: newCatName.trim(),
+                        icon: newCatIcon,
+                        isCustom: true,
+                      };
+                      addCustomCategory(cat);
+                      setCategory(key);
+                      setShowCategoryModal(false);
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
+                      Create
+                    </Text>
+                  </NeumorphicButton>
+                </View>
+              </Pressable>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -572,8 +616,12 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
+  },
+  modalContent: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 40,
+    flexGrow: 1,
   },
   modalTitle: {
     fontSize: 22,

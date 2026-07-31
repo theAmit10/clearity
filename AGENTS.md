@@ -84,6 +84,7 @@ If auth is added in the future:
 | `habit_uncompleted` | User unchecks a habit | — | `src/store/habitStore.ts` |
 | `habits_reordered` | User reorders habit list | — | `src/store/habitStore.ts` |
 | `habits_imported` | User imports habits (replace or merge) | `count`, `type` | `src/store/habitStore.ts` |
+| `subscription_expired` | Pro subscription lapses (entitlement present but inactive, or active → inactive transition) | — | `src/store/habitStore.ts` |
 
 ### Value Moment
 

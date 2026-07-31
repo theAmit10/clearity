@@ -14,10 +14,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { WidgetModule } from '../native/WidgetModule';
 import { useTheme } from '../theme/ThemeProvider';
+import ProGate from '../components/ProGate';
 
 export default function WidgetSettingsScreen({ navigation }: any) {
   const { theme } = useTheme();
   const habits = useHabitStore(s => s.habits);
+  const isPro = useHabitStore(s => s.isPro);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,6 +59,10 @@ export default function WidgetSettingsScreen({ navigation }: any) {
     const payload = WidgetModule.buildPayload(activeHabits);
     await WidgetModule.updateWidgetData(payload);
   };
+
+  if (!isPro) {
+    return <ProGate />;
+  }
 
   if (loading) {
     return (

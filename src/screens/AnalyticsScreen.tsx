@@ -101,6 +101,7 @@ import {
 import { getHabitIcon } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import FlameStreak from '../components/FlameStreak';
+import ProGate from '../components/ProGate';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -146,6 +147,7 @@ export default function AnalyticsScreen({ navigation }: any) {
   const { theme } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const habits = useHabitStore(s => s.habits);
+  const isPro = useHabitStore(s => s.isPro);
   const cs = theme.colors;
 
   const stats = useMemo<StatsData>(() => computeStats(habits), [habits]);
@@ -207,6 +209,10 @@ export default function AnalyticsScreen({ navigation }: any) {
     },
     [screenHeight, markEntered],
   );
+
+  if (!isPro) {
+    return <ProGate />;
+  }
 
   if (activeHabits.length === 0) {
     return (

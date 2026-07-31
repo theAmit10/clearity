@@ -84,7 +84,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
     try {
       await showManageSubscriptions();
       const info = await getCustomerInfo();
-      useHabitStore.setState({ isPro: isPro(info) });
+      useHabitStore.setState({ isPro: isPro(info), proExpired: false });
       if (!isPro(info)) {
         navigation.goBack();
       }
@@ -98,7 +98,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
     try {
       const info = await restorePurchases();
       if (info) {
-        useHabitStore.setState({ isPro: isPro(info) });
+        useHabitStore.setState({ isPro: isPro(info), proExpired: false });
         if (isPro(info)) {
           Alert.alert('Restore Complete', 'Your Pro subscription has been restored.');
           setProExpiration(getProExpirationDate(info));

@@ -170,9 +170,20 @@ export function isPro(customerInfo: CustomerInfo | null): boolean {
   return customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_ID]?.isActive ?? false;
 }
 
-export function getProExpirationDate(customerInfo: CustomerInfo | null): string | null {
+function getProEntitlement(
+  customerInfo: CustomerInfo | null,
+): { isActive: boolean; expirationDate: string | null } | null {
   if (!customerInfo) return null;
-  return customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_ID]?.expirationDate ?? null;
+  return customerInfo.entitlements.all[REVENUECAT_ENTITLEMENT_ID] ?? null;
+}
+
+export function hadProButExpired(customerInfo: CustomerInfo | null): boolean {
+  const ent = getProEntitlement(customerInfo);
+  return !!ent && !ent.isActive;
+}
+
+export function getProExpirationDate(customerInfo: CustomerInfo | null): string | null {
+  return getProEntitlement(customerInfo)?.expirationDate ?? null;
 }
 
 export async function showManageSubscriptions(): Promise<void> {

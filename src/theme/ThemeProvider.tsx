@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useColorScheme, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { themes, type Theme, type ThemeName } from './themes';
+import { FREE_THEMES } from '../constants/appInfo';
+import { useHabitStore } from '../store/habitStore';
 
 const STORAGE_KEY = '@theme';
 
@@ -16,6 +18,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
+  const proExpired = useHabitStore(s => s.proExpired);
   const [themeName, setThemeName] = useState<ThemeName>('light');
 
   useEffect(() => {
@@ -32,6 +35,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeName(name);
     await AsyncStorage.setItem(STORAGE_KEY, name);
   }, []);
+
+  // Full-revoke: a lapsed Pro user must not keep a premium theme.
+  useEffect(() => {
+    if (!proExpired) return;
+    if (FREE_THEMES.includes(themeName)) return;
+    setTheme(systemScheme === 'dark' ? 'dark' : 'light');
+  }, [proExpired, themeName, systemScheme, setTheme]);
 
   const theme = themes[themeName];
 
