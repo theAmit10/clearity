@@ -28,9 +28,7 @@ import {
   FREE_THEMES,
 } from '../constants/appInfo';
 import { useTheme } from '../theme/ThemeProvider';
-import {
-  restorePurchases,
-} from '../services/revenueCat';
+import { restorePurchases } from '../services/revenueCat';
 import { logEvent } from '../services/logger';
 
 export default function SettingsScreen({ navigation }: any) {
@@ -117,7 +115,9 @@ export default function SettingsScreen({ navigation }: any) {
   const proBadge = (
     <View style={styles.proBadge}>
       <LockClosedIcon size={12} color={theme.colors.iosGray} />
-      <Text style={[styles.proBadgeText, { color: theme.colors.iosGray }]}>Pro</Text>
+      <Text style={[styles.proBadgeText, { color: theme.colors.iosGray }]}>
+        Pro
+      </Text>
     </View>
   );
 
@@ -129,14 +129,26 @@ export default function SettingsScreen({ navigation }: any) {
       await refreshProStatus();
       const nowPro = useHabitStore.getState().isPro;
       if (!info) {
-        Alert.alert('Restore Failed', 'Could not restore purchases. Please try again.');
+        Alert.alert(
+          'Restore Failed',
+          'Could not restore purchases. Please try again.',
+        );
       } else if (nowPro) {
-        Alert.alert('Restore Complete', 'Your Pro subscription has been restored.');
+        Alert.alert(
+          'Restore Complete',
+          'Your Pro subscription has been restored.',
+        );
       } else {
-        Alert.alert('No Purchases Found', 'No previous purchases could be restored.');
+        Alert.alert(
+          'No Purchases Found',
+          'No previous purchases could be restored.',
+        );
       }
     } catch {
-      Alert.alert('Restore Failed', 'Could not restore purchases. Please try again.');
+      Alert.alert(
+        'Restore Failed',
+        'Could not restore purchases. Please try again.',
+      );
     } finally {
       setRestoring(false);
     }
@@ -268,6 +280,21 @@ export default function SettingsScreen({ navigation }: any) {
           Settings
         </Text>
 
+        <Section title="General">
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            Customize the home screen layout and default behavior.
+          </Text>
+          <Row
+            label="General settings"
+            onPress={() => navigation.navigate('General')}
+          />
+        </Section>
+
         <Section title="Habits">
           <Text
             style={[
@@ -318,8 +345,8 @@ export default function SettingsScreen({ navigation }: any) {
             {isPro
               ? 'You have Habitic Pro. Thank you for supporting the app!'
               : proExpired
-                ? 'Your Pro plan has expired. Renew to keep using analytics, widget, unlimited habits, custom categories, and premium themes.'
-                : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
+              ? 'Your Pro plan has expired. Renew to keep using analytics, widget, unlimited habits, custom categories, and premium themes.'
+              : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
           </Text>
           {isPro ? (
             <Row
@@ -343,21 +370,6 @@ export default function SettingsScreen({ navigation }: any) {
                 <ActivityIndicator size="small" color={theme.colors.iosBlue} />
               ) : null
             }
-          />
-        </Section>
-
-        <Section title="General">
-          <Text
-            style={[
-              styles.description,
-              { color: theme.colors.iosSecondaryLabel },
-            ]}
-          >
-            Customize the home screen layout and default behavior.
-          </Text>
-          <Row
-            label="General settings"
-            onPress={() => navigation.navigate('General')}
           />
         </Section>
 
