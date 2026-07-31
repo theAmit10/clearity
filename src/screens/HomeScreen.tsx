@@ -12,8 +12,10 @@ import { useTheme } from '../theme/ThemeProvider';
 import {
   getCategoryName,
   getCategoryIcon,
+  BUILT_IN_CATEGORIES,
 } from '../constants/habitCategories';
 import { getHabitIcon } from '../constants/habitIcons';
+import type { HabitCategory } from '../types/habit';
 
 export default function HomeScreen({ navigation }: any) {
   const { theme } = useTheme();
@@ -26,11 +28,20 @@ export default function HomeScreen({ navigation }: any) {
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
   const showCategories = useHabitStore(s => s.showCategories);
+  const customCategories = useHabitStore(s => s.customCategories);
   const activeHabits = useMemo(
     () => allHabits.filter(h => !h.archived),
     [allHabits],
   );
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categoryMeta = useMemo(() => {
+    const map = new Map<string, HabitCategory>();
+    for (const c of [...BUILT_IN_CATEGORIES, ...customCategories]) {
+      map.set(c.key, c);
+    }
+    return map;
+  }, [customCategories]);
 
   const categorySet = useMemo(() => {
     const keys = new Set<string>();
@@ -106,10 +117,11 @@ export default function HomeScreen({ navigation }: any) {
             {categorySet.map(cat => {
               const selected = selectedCategory === cat;
               const isAll = cat === 'all';
+              const meta = categoryMeta.get(cat);
               const IconComp = isAll
                 ? null
-                : getHabitIcon(getCategoryIcon(cat));
-              const label = isAll ? 'All' : getCategoryName(cat);
+                : getHabitIcon(meta?.icon ?? getCategoryIcon(cat));
+              const label = isAll ? 'All' : meta?.name ?? getCategoryName(cat);
               return (
                 <NeumorphicButton
                   key={cat}

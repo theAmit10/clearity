@@ -12,6 +12,7 @@ import { todayKey } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
+import { getCategoryMeta } from '../constants/habitCategories';
 import Svg, { Path } from 'react-native-svg';
 
 interface Props {
@@ -33,6 +34,11 @@ export default function HabitCard({
   const showStreaks = useHabitStore(s => s.showStreaks);
   const showCategoryBadges = useHabitStore(s => s.showCategoryBadges);
   const showFrequency = useHabitStore(s => s.showFrequency);
+  const customCategories = useHabitStore(s => s.customCategories);
+  const categoryName =
+    habit.category && habit.category !== 'none'
+      ? getCategoryMeta(habit.category, customCategories)?.name ?? habit.category
+      : '';
   const stats = computeStats(habit);
   const count = habit.completions[todayKey()] || 0;
   const target = habit.frequency === 'n_times_in_m_days' ? (habit.frequencyValue ?? 1) : 1;
@@ -70,10 +76,10 @@ export default function HabitCard({
               <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
                 {habit.name}
               </Text>
-              {showCategoryBadges && habit.category && habit.category !== 'none' && (
+              {showCategoryBadges && categoryName && (
                 <View style={[styles.catBadge, { backgroundColor: `${habit.color}1A` }]}>
                   <Text style={[styles.catBadgeText, { color: habit.color }]}>
-                    {habit.category}
+                    {categoryName}
                   </Text>
                 </View>
               )}

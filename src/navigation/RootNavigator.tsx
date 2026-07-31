@@ -10,6 +10,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
+import NewCategoryScreen from '../screens/NewCategoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import GeneralScreen from '../screens/GeneralScreen';
 import ReorderHabitsScreen from '../screens/ReorderHabitsScreen';
@@ -61,6 +62,11 @@ function HomeStack() {
       <Stack.Screen
         name="AddEditHabit"
         component={AddEditHabitScreen}
+        options={{ ...headerOpts, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="NewCategory"
+        component={NewCategoryScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
       />
     </Stack.Navigator>

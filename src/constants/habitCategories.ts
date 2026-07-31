@@ -30,3 +30,10 @@ export function getCategoryName(key: string): string {
   if (builtIn) return builtIn.name;
   return key;
 }
+
+export function getCategoryMeta(
+  key: string,
+  customCategories: HabitCategory[] = [],
+): HabitCategory | undefined {
+  return [...BUILT_IN_CATEGORIES, ...customCategories].find(c => c.key === key);
+}
