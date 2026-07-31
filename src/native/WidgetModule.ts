@@ -15,14 +15,6 @@ export interface WidgetDataPayload {
   weekEnd: string;
 }
 
-function getTodayKey(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 function getWeekRange(): { weekStart: string; weekEnd: string } {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -52,6 +44,17 @@ export const WidgetModule = {
     return NativeWidgetModule.getSelectedHabitIds();
   },
 
+  setSelectedYearHabitId: async (id: string | null): Promise<void> => {
+    if (!NativeWidgetModule) return;
+    return NativeWidgetModule.setSelectedYearHabitId(id ?? '');
+  },
+
+  getSelectedYearHabitId: async (): Promise<string | null> => {
+    if (!NativeWidgetModule) return null;
+    const id = await NativeWidgetModule.getSelectedYearHabitId();
+    return id || null;
+  },
+
   updateWidgetData: async (payload: WidgetDataPayload): Promise<void> => {
     if (!NativeWidgetModule) return;
     const json = JSON.stringify(payload);
@@ -67,20 +70,20 @@ export const WidgetModule = {
     habits: { id: string; name: string; color: string; completions: Record<string, number> }[],
   ): WidgetDataPayload => {
     const { weekStart, weekEnd } = getWeekRange();
-    const todayKey = getTodayKey();
+    const yearStart = `${new Date().getFullYear()}-01-01`;
 
     const filtered = habits.map(h => {
-      const weekCompletions: Record<string, number> = {};
+      const yearCompletions: Record<string, number> = {};
       for (const dateKey of Object.keys(h.completions)) {
-        if (dateKey >= weekStart && dateKey <= weekEnd) {
-          weekCompletions[dateKey] = h.completions[dateKey];
+        if (dateKey >= yearStart) {
+          yearCompletions[dateKey] = h.completions[dateKey];
         }
       }
       return {
         id: h.id,
         name: h.name,
         color: h.color,
-        completions: weekCompletions,
+        completions: yearCompletions,
       };
     });
 

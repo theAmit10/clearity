@@ -27,14 +27,20 @@ export default function WidgetSettingsScreen({ navigation }: any) {
     (async () => {
       try {
         const ids = await WidgetModule.getSelectedHabitIds();
-        setSelectedIds(ids);
+        const validIds = ids.filter(id => habits.some(h => h.id === id));
+        setSelectedIds(validIds);
+        if (validIds.length !== ids.length) {
+          await WidgetModule.setSelectedHabitIds(validIds);
+          const activeHabits = habits.filter(h => !h.archived);
+          await WidgetModule.updateWidgetData(WidgetModule.buildPayload(activeHabits));
+        }
       } catch {
         // module not available
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [habits]);
 
   const toggleHabit = async (habitId: string) => {
     const next = selectedIds.includes(habitId)
@@ -87,8 +93,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <Text style={[styles.title, { color: theme.colors.iosLabel }]}>Widget</Text>
 
         <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
-          Select which habits to display on your widget. You can select up to 3
-          habits. The widget shows a weekly heatmap for the current week.
+          Customize your home screen widgets. Pick up to 3 habits for the weekly
+          heatmap widget.
         </Text>
 
         <View style={styles.section}>
@@ -135,10 +141,10 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <View style={[styles.infoBox, { backgroundColor: theme.colors.iosBlue + '1A' }]}>
           <Text style={[styles.infoTitle, { color: theme.colors.iosLabel }]}>How it works</Text>
           <Text style={[styles.infoText, { color: theme.colors.iosLabel + '99' }]}>
-            After selecting habits, add the widget to your home screen:
+            After selecting habits, add the widgets to your home screen:
             {'\n\n'}
             {Platform.OS === 'ios'
-              ? `1. Touch and hold an empty area on your Home Screen\n2. Tap the + button in the top-left corner\n3. Search for "Habitic Widget"\n4. Choose a size\n5. Tap "Add Widget"`
+              ? `1. Touch and hold an empty area on your Home Screen\n2. Tap the + button in the top-left corner\n3. Search for "Habitic Widget"\n4. Pick "Week Heatmap" (small/medium)\n5. Choose a size\n6. Tap "Add Widget"`
               : `1. Touch and hold an empty area on your Home Screen\n2. Tap "Widgets"\n3. Find "Habit Tracker" in the list\n4. Drag the widget to your Home Screen`}
           </Text>
         </View>

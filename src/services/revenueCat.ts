@@ -28,8 +28,8 @@ export async function initRevenueCat(): Promise<void> {
   try {
     Purchases.setLogLevel(LOG_LEVEL.DEBUG);
   
-    Purchases.configure({ apiKey: 'appl_mBidSITFmKKPbThRmQAswurmaKk' });
-    // Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+    // Purchases.configure({ apiKey: 'test_xNzepmMnpogpVQWuTMAAboKrezP' });
+    Purchases.configure({ apiKey: REVENUECAT_API_KEY });
     configured = true;
     logEvent('info', 'RevenueCat initialized');
   } catch (err) {

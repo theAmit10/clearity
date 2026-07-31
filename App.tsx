@@ -1,6 +1,8 @@
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, LogBox } from 'react-native';
+
+LogBox.ignoreLogs([/InteractionManager has been deprecated/]);
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import RootNavigator from './src/navigation/RootNavigator';

@@ -18,6 +18,7 @@
 		BB83637DF808F36E245070CA /* WidgetModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C50C44D729C047D05D3702 /* WidgetModule.swift */; };
 		C82BAF6BB5976E9FCDDD1E82 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E112B365D6D93D60F7F265 /* WidgetKit.framework */; };
 		CFB2128E784919F59752CF31 /* WeekHeatmapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 595235ECDB4F46931FB17CFE /* WeekHeatmapWidget.swift */; };
+		E5A1B2C3D4E5F60718293A01 /* YearHeatmapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */; };
 		D3C0265A3019D1B500A261AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D3C026593019D1B500A261AE /* GoogleService-Info.plist */; };
 		D3EE0CD8301B7EB30054D8B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D3EE0CD7301B7EB30054D8B4 /* GoogleService-Info.plist */; };
 		D47693C93560286C885A318D /* libPods-Habita.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D003DA7383B1D751DF13F6F /* libPods-Habita.a */; };
@@ -37,14 +38,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		85D77F1FF2FDFFE28410BDB6 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
 				D59963EBE0874C0E367610E4 /* HabitTrackerWidget.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -57,6 +58,7 @@
 		30FF7F4976761890370AF752 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Foundation.framework; sourceTree = SDKROOT; };
 		49C50C44D729C047D05D3702 /* WidgetModule.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetModule.swift; sourceTree = "<group>"; };
 		595235ECDB4F46931FB17CFE /* WeekHeatmapWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekHeatmapWidget.swift; sourceTree = "<group>"; };
+		E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = YearHeatmapWidget.swift; sourceTree = "<group>"; };
 		61082563B9747DD91A9DB6DB /* HabitTrackerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitTrackerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = HabitTracker/AppDelegate.swift; sourceTree = "<group>"; };
 		7A577561DDD909B3DE3C9D34 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				D346A5E53005307700610890 /* HabitTrackerWidget.entitlements */,
 				FCC56E32E6308AE208E53716 /* HabitTrackerWidgetBundle.swift */,
 				595235ECDB4F46931FB17CFE /* WeekHeatmapWidget.swift */,
+				E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */,
 				7A577561DDD909B3DE3C9D34 /* Info.plist */,
 			);
 			path = HabitTrackerWidget;
@@ -446,6 +449,7 @@
 			files = (
 				11AF7B7973072E7498F5AABB /* HabitTrackerWidgetBundle.swift in Sources */,
 				CFB2128E784919F59752CF31 /* WeekHeatmapWidget.swift in Sources */,
+				E5A1B2C3D4E5F60718293A01 /* YearHeatmapWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

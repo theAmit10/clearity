@@ -4,13 +4,13 @@ import SwiftUI
 // MARK: - Neumorphic Colors
 
 struct NeumorphicColors {
-  static let background = Color(hex: "#E6E9EF")!
-  static let backgroundDeep = Color(hex: "#DDE1E8")!
-  static let insetFill = Color(hex: "#DADFE7")!
-  static let shadowLight = Color.white
-  static let shadowDark = Color(hex: "#B3BBC9")!
-  static let textPrimary = Color(hex: "#3A4250")!
-  static let textMuted = Color(hex: "#96A0B2")!
+  static let background = Color(hex: "#1E1E1E")!
+  static let backgroundDeep = Color(hex: "#181818")!
+  static let insetFill = Color(hex: "#252525")!
+  static let shadowLight = Color(hex: "#2C2C2C")!
+  static let shadowDark = Color(hex: "#0F0F0F")!
+  static let textPrimary = Color(hex: "#E8E8E8")!
+  static let textMuted = Color(hex: "#9E9E9E")!
 }
 
 // MARK: - Shared Data
@@ -19,7 +19,7 @@ struct WidgetHabitData: Codable {
   let id: String
   let name: String
   let color: String
-  let completions: [String: Bool]
+  let completions: [String: Int]
 }
 
 struct WidgetDataPayload: Codable {
@@ -170,10 +170,10 @@ struct SmallWidgetView: View {
   var entry: Provider.Entry
 
   var body: some View {
-    VStack(spacing: 5) {
+    VStack(spacing: 3) {
       HStack(spacing: 4) {
-        Text("This Week")
-          .font(.system(size: 13, weight: .semibold))
+        Text(todayProgressText)
+          .font(.system(size: 12, weight: .semibold, design: .rounded))
           .foregroundColor(NeumorphicColors.textPrimary)
         Spacer()
       }
@@ -182,10 +182,10 @@ struct SmallWidgetView: View {
         Spacer()
         VStack(spacing: 4) {
           Image(systemName: "square.grid.3x3.topleft.filled")
-            .font(.system(size: 14))
+            .font(.system(size: 15))
             .foregroundColor(NeumorphicColors.textMuted)
           Text("No habit selected")
-            .font(.system(size: 9))
+            .font(.system(size: 10, design: .rounded))
             .foregroundColor(NeumorphicColors.textMuted)
         }
         Spacer()
@@ -199,8 +199,15 @@ struct SmallWidgetView: View {
         }
       }
     }
-    .padding(6)
+    .padding(.horizontal, 8)
+    .padding(.vertical, 4)
     .containerBackground(NeumorphicColors.background, for: .widget)
+  }
+
+  private var todayProgressText: String {
+    let selected = Array(entry.habits.prefix(3))
+    let done = selected.filter { ($0.completions[entry.todayKey] ?? 0) > 0 }.count
+    return "\(done)/\(selected.count) today"
   }
 }
 
@@ -210,26 +217,27 @@ struct SmallHabitRow: View {
   let todayKey: String
 
   var body: some View {
-    VStack(spacing: 3) {
+    VStack(spacing: 4) {
       HStack(spacing: 4) {
         Circle()
           .fill(Color(hex: habit.color) ?? NeumorphicColors.textPrimary)
           .frame(width: 8, height: 8)
         Text(habit.name)
-          .font(.system(size: 11, weight: .medium))
+          .font(.system(size: 11, weight: .medium, design: .rounded))
           .foregroundColor(NeumorphicColors.textPrimary)
           .lineLimit(1)
         Spacer()
       }
       HStack(spacing: 2) {
         ForEach(weekDates, id: \.self) { dateKey in
-          let completed = habit.completions[dateKey] ?? false
+          let completed = (habit.completions[dateKey] ?? 0) > 0
           let isToday = dateKey == todayKey
           SmallDayCell(
             completed: completed,
             isToday: isToday,
             color: Color(hex: habit.color) ?? NeumorphicColors.textPrimary
           )
+          .frame(maxWidth: .infinity)
         }
       }
     }
@@ -242,11 +250,11 @@ struct SmallDayCell: View {
   let color: Color
 
   var body: some View {
-    RoundedRectangle(cornerRadius: 2)
+    RoundedRectangle(cornerRadius: 2.5)
       .fill(completed ? color : NeumorphicColors.insetFill)
-      .frame(width: 9, height: 9)
+      .aspectRatio(1, contentMode: .fit)
       .overlay(
-        RoundedRectangle(cornerRadius: 2)
+        RoundedRectangle(cornerRadius: 2.5)
           .stroke(isToday ? NeumorphicColors.textPrimary.opacity(0.5) : .clear, lineWidth: 1)
       )
   }
@@ -259,12 +267,12 @@ struct MediumWidgetView: View {
 
   var body: some View {
     VStack(spacing: 6) {
-      HStack(spacing: 5) {
+      HStack(spacing: 6) {
         Circle()
           .fill(Color(hex: "#34C759")!)
           .frame(width: 10, height: 10)
-        Text("This Week")
-          .font(.system(size: 14, weight: .semibold))
+        Text(todayProgressText)
+          .font(.system(size: 15, weight: .semibold, design: .rounded))
           .foregroundColor(NeumorphicColors.textPrimary)
         Spacer()
       }
@@ -273,17 +281,17 @@ struct MediumWidgetView: View {
         Spacer()
         VStack(spacing: 6) {
           ZStack {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 9)
               .fill(NeumorphicColors.insetFill)
-              .frame(width: 28, height: 28)
+              .frame(width: 34, height: 34)
               .shadow(color: NeumorphicColors.shadowDark.opacity(0.3), radius: 2, x: 2, y: 2)
               .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 2, x: -2, y: -2)
             Image(systemName: "square.grid.3x3.topleft.filled")
-              .font(.system(size: 14))
+              .font(.system(size: 16))
               .foregroundColor(NeumorphicColors.textMuted)
           }
           Text("No habit selected")
-            .font(.caption2)
+            .font(.system(size: 12, weight: .medium, design: .rounded))
             .foregroundColor(NeumorphicColors.textMuted)
         }
         Spacer()
@@ -297,8 +305,15 @@ struct MediumWidgetView: View {
         }
       }
     }
-    .padding(8)
+    .padding(.horizontal, 12)
+    .padding(.vertical, 10)
     .containerBackground(NeumorphicColors.background, for: .widget)
+  }
+
+  private var todayProgressText: String {
+    let selected = Array(entry.habits.prefix(3))
+    let done = selected.filter { ($0.completions[entry.todayKey] ?? 0) > 0 }.count
+    return "\(done)/\(selected.count) today"
   }
 }
 
@@ -308,21 +323,22 @@ struct MediumHabitRow: View {
   let todayKey: String
 
   var body: some View {
-    HStack(spacing: 5) {
+    HStack(spacing: 6) {
       Circle()
         .fill(Color(hex: habit.color) ?? NeumorphicColors.textPrimary)
         .frame(width: 11, height: 11)
 
       Text(habit.name)
-        .font(.system(size: 13, weight: .medium))
+        .font(.system(size: 14, weight: .semibold, design: .rounded))
         .foregroundColor(NeumorphicColors.textPrimary)
         .lineLimit(1)
+        .layoutPriority(1)
 
       Spacer()
 
       HStack(spacing: 2.5) {
         ForEach(weekDates, id: \.self) { dateKey in
-          let completed = habit.completions[dateKey] ?? false
+          let completed = (habit.completions[dateKey] ?? 0) > 0
           let isToday = dateKey == todayKey
           MediumDayCell(
             completed: completed,
@@ -333,9 +349,9 @@ struct MediumHabitRow: View {
       }
     }
     .padding(.vertical, 3)
-    .padding(.horizontal, 5)
+    .padding(.horizontal, 6)
     .background(
-      RoundedRectangle(cornerRadius: 8)
+      RoundedRectangle(cornerRadius: 10)
         .fill(NeumorphicColors.background)
         .shadow(color: NeumorphicColors.shadowDark.opacity(0.4), radius: 2, x: 2, y: 2)
         .shadow(color: NeumorphicColors.shadowLight.opacity(0.8), radius: 2, x: -2, y: -2)
@@ -350,17 +366,17 @@ struct MediumDayCell: View {
 
   var body: some View {
     ZStack {
-      RoundedRectangle(cornerRadius: 3)
+      RoundedRectangle(cornerRadius: 4)
         .fill(completed ? color : NeumorphicColors.insetFill)
-        .frame(width: 16, height: 16)
+        .frame(width: 20, height: 20)
         .overlay(
-          RoundedRectangle(cornerRadius: 3)
-            .stroke(isToday ? NeumorphicColors.textPrimary.opacity(0.4) : .clear, lineWidth: isToday ? 1 : 0)
+          RoundedRectangle(cornerRadius: 4)
+            .stroke(isToday ? NeumorphicColors.textPrimary.opacity(0.4) : .clear, lineWidth: isToday ? 1.5 : 0)
         )
 
       if completed {
         Image(systemName: "checkmark")
-          .font(.system(size: 8, weight: .bold))
+          .font(.system(size: 9, weight: .bold))
           .foregroundColor(.white)
       }
     }
