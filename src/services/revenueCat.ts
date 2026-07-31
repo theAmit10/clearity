@@ -165,6 +165,15 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
   }
 }
 
+export async function getAppUserId(): Promise<string | null> {
+  try {
+    return await Purchases.getAppUserID();
+  } catch (err) {
+    logEvent('error', 'Failed to get app user id', err);
+    return null;
+  }
+}
+
 export function isPro(customerInfo: CustomerInfo | null): boolean {
   if (!customerInfo) return false;
   return customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_ID]?.isActive ?? false;
