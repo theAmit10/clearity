@@ -30,13 +30,11 @@ import {
 import { useTheme } from '../theme/ThemeProvider';
 import { restorePurchases } from '../services/revenueCat';
 import { logEvent } from '../services/logger';
-import { useTranslation, useI18nStore, LANGUAGES } from '../i18n';
-import type { Language } from '../i18n';
+import { useTranslation, useI18nStore } from '../i18n';
 
 export default function SettingsScreen({ navigation }: any) {
   const { t } = useTranslation();
   const language = useI18nStore(s => s.language);
-  const setLanguage = useI18nStore(s => s.setLanguage);
   const { theme, themeName, setTheme, availableThemes } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
@@ -445,16 +443,10 @@ export default function SettingsScreen({ navigation }: any) {
           >
             {t('languageSettings.description')}
           </Text>
-          {LANGUAGES.map((code: Language) => {
-            const active = language === code;
-            return (
-              <Row
-                key={code}
-                label={`${active ? '✓ ' : '   '}${t(`languages.${code}`)}`}
-                onPress={() => setLanguage(code)}
-              />
-            );
-          })}
+          <Row
+            label={t(`languages.${language}`)}
+            onPress={() => navigation.navigate('Language')}
+          />
         </Section>
 
         <Section title={t('settings.themeSection')}>

@@ -4,9 +4,9 @@
   },
   "languages": {
     "en": "English",
-    "es": "Español",
-    "fr": "Français",
-    "de": "Deutsch"
+    "es": "Spanish (Español)",
+    "fr": "French (Français)",
+    "de": "German (Deutsch)"
   },
   "languageSettings": {
     "title": "Langue",

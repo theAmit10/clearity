@@ -12,6 +12,7 @@ import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import NewCategoryScreen from '../screens/NewCategoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import LanguageScreen from '../screens/LanguageScreen';
 import GeneralScreen from '../screens/GeneralScreen';
 import ReorderHabitsScreen from '../screens/ReorderHabitsScreen';
 import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
@@ -88,6 +89,11 @@ function SettingsStack() {
       <Stack.Screen
         name="General"
         component={GeneralScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Language"
+        component={LanguageScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
