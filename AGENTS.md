@@ -120,3 +120,21 @@ trackEvent('event_name', {
 - **Do not fire events inside loops** — each call is a network request.
 - **Do not hardcode the Mixpanel project token** — it's in `.env` (never committed). Copy `.env.example` to `.env` and fill in the value.
 - **Do not add PII** such as habit names that could identify a person.
+
+---
+
+## Changelog
+
+After creating a feature and once the user has published the code to GitHub, add that feature's details to `src/feature/changelog.md`.
+
+### Mandatory workflow
+
+1. When a feature is completed, prepare the changelog entry — do not write it yet.
+2. After the user pushes/merges the code to GitHub, add the entry to `src/feature/changelog.md`.
+3. Include:
+   - **Version** — bump `package.json` version if the release warrants it.
+   - **Date** — the publish date (`YYYY-MM-DD`).
+   - **Feature details** — what was added/changed, relevant file paths.
+   - **New languages** (if any) — language code + name, from the localization changelog table.
+   - **Bug fixes / notes** — anything tracked or deferred.
+4. Use the template at the bottom of `changelog.md`; keep entries ordered newest-first.
