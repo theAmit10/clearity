@@ -551,10 +551,10 @@ function CircularRing({
             y={half + 6}
             textAnchor="middle"
             fill={cs.textPrimary}
-            fontSize={20}
+            fontSize={18}
             fontWeight="800"
           >
-            {rate}%
+            {rate}
           </SvgText>
         </Svg>
       </View>
@@ -1097,7 +1097,9 @@ function HabitPerformanceRow({
                   {habit.currentStreak > 0 ? (
                     <FlameStreak streak={habit.currentStreak} />
                   ) : (
-                    <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
+                    <Text
+                      style={[styles.habitMetaText, { color: cs.textMuted }]}
+                    >
                       No streak
                     </Text>
                   )}
