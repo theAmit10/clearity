@@ -69,10 +69,52 @@ Make the app usable by more people by translating every user-facing string into 
 
 ## Adding a new language
 
-1. Copy `en.json` to `src/i18n/locales/<code>.json` and translate every value.
-2. In `src/i18n/index.ts`, add the code to `LANGUAGES`, the `Language` union, and the `translations` map.
-3. Add a `languages.<code>` label entry to every locale file (shown in the Settings switcher).
-4. Run `tsc --noEmit` — the types will fail until every key is present.
+Example: adding Italian (`it`). Every step is manual and intentional — nothing auto-generates.
+
+### 1. Create the translation file
+
+Copy `src/i18n/locales/en.json` → `src/i18n/locales/it.json` and translate every value.
+**Start from `en.json`** — it is the source of truth, so its structure guarantees the key set matches.
+
+### 2. Register it in `src/i18n/index.ts`
+
+Three one-line edits:
+
+- **Import** (with the other locale imports, ~line 7):
+  `import it from './locales/it.json';`
+- **Add to `LANGUAGES`** (~line 9):
+  `export const LANGUAGES = ['en', 'es', 'fr', 'de', 'it'] as const;`
+  Order in this array = order shown in the Settings switcher.
+- **Add to `translations`** (~line 15):
+  `const translations: Record<Language, typeof en> = { en, es, fr, de, it };`
+
+### 3. Add its native label to every locale file
+
+The switcher renders `t('languages.${code}')` (`SettingsScreen.tsx:453`), and the label is looked
+up in the **active** language's file. So add `"it": "Italiano"` inside the `languages` section of
+**all** locale files (`en`, `es`, `fr`, `de`, and the new `it`). The name stays in Italian in every
+file so users recognize it no matter the current UI language.
+
+### 4. Verify
+
+Run `npx tsc --noEmit`. Because `translations` is typed `Record<Language, typeof en>`, TypeScript
+will fail until `it.json` has **every** key `en.json` has — no missing-key bugs possible. `Language`
+and `TranslationKey` update automatically, so device detection (`getDeviceLanguage()` checks
+`code in translations`), the persisted override, English fallback, and the switcher all just work.
+
+### Caveat: languages with complex plurals
+
+Plurals currently only support English-style `_one` / `_other` (`pluralKey` at `src/i18n/index.ts:51`).
+That is correct for `es` / `fr` / `de` / `it`. But **Polish, Russian, Czech, Arabic**, etc. need 3–4
+plural forms (`_few`, `_many`, `_zero`). For those, extend `pluralKey` with per-language rules before
+adding the language, and add the extra `_<form>` keys to the locale file.
+
+### Optional: native Settings localization
+
+`RNLocalize` reads the device locale, so auto-detection works without any native config. If you also
+want the app listed under the system Settings language list, declare the supported localizations in
+`Info.plist` (`CFBundleDevelopmentRegion` + `CFBundleLocalizations`) and Android `res/values-*`
+folders. This is cosmetic and not required.
 
 ## Adding a new string
 
