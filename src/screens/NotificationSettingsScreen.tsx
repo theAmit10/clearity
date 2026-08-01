@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { getHabitIcon } from '../constants/habitIcons';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 
 const NOTIF_COLORS = [
   '#007AFF',
@@ -26,6 +27,7 @@ const REVEAL_TAPS = 15;
 
 export default function NotificationSettingsScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const habits = useHabitStore(s => s.habits);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
@@ -64,12 +66,12 @@ export default function NotificationSettingsScreen({ navigation }: any) {
             ←
           </Text>
           <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>
-            Settings
+            {t('common.settings')}
           </Text>
         </Pressable>
 
         <Text style={[styles.title, { color: theme.colors.iosLabel }]}>
-          Notifications
+          {t('common.notifications')}
         </Text>
 
         <View style={styles.section}>
@@ -80,7 +82,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                 { color: theme.colors.iosSecondaryLabel },
               ]}
             >
-              PER-HABIT REMINDERS
+              {t('notificationSettings.perHabitReminders')}
             </Text>
           </Pressable>
           <View
@@ -96,15 +98,15 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                   { color: theme.colors.iosSecondaryLabel },
                 ]}
               >
-                No habits yet. Create one first.
+                {t('notificationSettings.noHabitsYet')}
               </Text>
             )}
             {habits.map((h, i) => {
               const notifs = habitNotifications.filter(n => n.habitId === h.id);
               const enabledCount = notifs.filter(n => n.enabled).length;
               const label = notifs.length === 0
-                ? 'No reminders'
-                : `${enabledCount}/${notifs.length} active`;
+                ? t('notificationSettings.noReminders')
+                : t('notificationSettings.activeCount', { enabled: enabledCount, total: notifs.length });
               const IconComp = getHabitIcon(h.icon);
 
               return (
@@ -170,7 +172,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                   { color: theme.colors.iosSecondaryLabel },
                 ]}
               >
-                DAILY REMINDERS (ADMIN)
+                {t('notificationSettings.dailyRemindersAdmin')}
               </Text>
               <View
                 style={[
@@ -183,7 +185,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                     ? `${String(n.hour).padStart(2, '0')}:${String(
                         n.minute,
                       ).padStart(2, '0')}`
-                    : 'Off';
+                    : t('common.off');
 
                   return (
                     <View
@@ -250,7 +252,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                     { color: theme.colors.iosBlue },
                   ]}
                 >
-                  Edit Admin Notifications
+                  {t('notificationSettings.editAdminNotifications')}
                 </Text>
               </Pressable>
             </View>

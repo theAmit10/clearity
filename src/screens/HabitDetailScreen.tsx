@@ -17,9 +17,11 @@ import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
+import { useTranslation } from '../i18n';
 
 export default function HabitDetailScreen({ route, navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { id } = route.params;
   const habit = useHabitStore(s => s.habits.find(h => h.id === id));
   const deleteHabit = useHabitStore(s => s.deleteHabit);
@@ -40,10 +42,10 @@ export default function HabitDetailScreen({ route, navigation }: any) {
   }));
 
   const confirmDelete = useCallback(() => {
-    Alert.alert('Habit Settings', undefined, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('detail.settings'), undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete Habit',
+        text: t('detail.deleteHabit'),
         style: 'destructive',
         onPress: async () => {
           await deleteHabit(id);
@@ -51,7 +53,7 @@ export default function HabitDetailScreen({ route, navigation }: any) {
         },
       },
     ]);
-  }, [id, deleteHabit, navigation]);
+  }, [id, deleteHabit, navigation, t]);
 
   if (!habit) return null;
   const stats = computeStats(habit);

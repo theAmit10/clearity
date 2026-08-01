@@ -3,6 +3,7 @@ import Share from 'react-native-share';
 import { pick, keepLocalCopy, types } from '@react-native-documents/picker';
 import { ExportPayload, Habit, LogEntry } from '../types/habit';
 import { logEvent } from './logger';
+import { t } from '../i18n';
 
 const EXPORT_FILENAME = 'habit-tracker-backup.json';
 const LOGS_EXPORT_FILENAME = 'habit-tracker-logs.json';
@@ -64,7 +65,7 @@ export async function pickAndParseImportFile(): Promise<ExportPayload> {
   });
 
   if (localCopy.status !== 'success') {
-    throw new Error('Failed to copy the selected file for import.');
+    throw new Error(t('importExport.copyFailed'));
   }
 
   const raw = await RNFS.readFile(
@@ -74,7 +75,7 @@ export async function pickAndParseImportFile(): Promise<ExportPayload> {
   const parsed = JSON.parse(raw);
 
   if (!parsed || !Array.isArray(parsed.habits)) {
-    throw new Error('Selected file is not a valid Habit Tracker backup.');
+    throw new Error(t('importExport.invalidBackup'));
   }
 
   logEvent('info', 'Import file parsed', { count: parsed.habits.length });

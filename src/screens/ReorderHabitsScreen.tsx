@@ -11,9 +11,11 @@ import { getHabitIcon } from '../constants/habitIcons';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 import ScreenHeader from '../components/ScreenHeader';
+import { useTranslation } from '../i18n';
 
 export default function ReorderHabitsScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const allHabits = useHabitStore(s => s.habits);
   const reorderHabits = useHabitStore(s => s.reorderHabits);
   const habits = useMemo(() => allHabits.filter(h => !h.archived), [allHabits]);
@@ -51,10 +53,10 @@ export default function ReorderHabitsScreen({ navigation }: any) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.headerWrap}>
-        <ScreenHeader navigation={navigation} title="Reorder Habits" />
+        <ScreenHeader navigation={navigation} title={t('reorder.title')} />
       </View>
       <Text style={[styles.helpText, { color: theme.colors.textMuted }]}>
-        Hold the drag handle ⋮⋮ to reorder your habits
+        {t('reorder.help')}
       </Text>
       <DraggableFlatList
         data={habits}

@@ -24,6 +24,7 @@ import { Raised, Inset } from './neumorphic/NeumorphicView';
 import CalendarIcon from './CalendarIcon';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 import Svg, { Path } from 'react-native-svg';
 
 interface Props {
@@ -33,22 +34,6 @@ interface Props {
    * caller doesn't pass the habit's own color. */
   color?: string;
 }
-
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 function getMonthDays(year: number, month: number): (number | null)[] {
   const firstDay = new Date(year, month, 1).getDay();
@@ -86,8 +71,13 @@ export default function MonthlyCalendar({
   color: colorProp,
 }: Props) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { colors, radii } = theme;
   const color = colorProp ?? colors.accent;
+  const [weekdays, monthNames] = [
+    t('calendar.weekdaysNarrow'),
+    t('calendar.monthsLong'),
+  ] as unknown as [string[], string[]];
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const addMissedNote = useHabitStore(s => s.addMissedNote);
   const removeMissedNote = useHabitStore(s => s.removeMissedNote);
@@ -197,7 +187,7 @@ export default function MonthlyCalendar({
       return (
         <View style={{ width: containerWidth }}>
           <View style={styles.weekdayRow}>
-            {WEEKDAYS.map((d, i) => (
+            {weekdays.map((d, i) => (
               <Text key={i} style={CS.weekdayText}>
                 {d}
               </Text>
@@ -333,10 +323,11 @@ export default function MonthlyCalendar({
       todayStr,
       color,
       circleSize,
+      weekdays,
     ],
   );
 
-  const monthLabel = `${MONTHS[visibleMonth.month]} ${visibleMonth.year}`;
+  const monthLabel = `${monthNames[visibleMonth.month]} ${visibleMonth.year}`;
 
   // Once we know the real width, snap straight to the current month with
   // no animation — this replaces relying on `initialScrollIndex` against
@@ -441,7 +432,7 @@ export default function MonthlyCalendar({
             <Pressable onPress={() => {}}>
               <Raised radius={16} distance={8} style={styles.modalCard}>
                 <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-                  {missedNotes[missedModal?.dateKey ?? ''] ? 'Edit missed note' : 'Mark as missed'}
+                  {missedNotes[missedModal?.dateKey ?? ''] ? t('calendarModal.editNote') : t('calendarModal.markMissed')}
                 </Text>
                 <Text style={[styles.modalDate, { color: colors.textMuted }]}>
                   {missedModal?.dateKey}
@@ -451,7 +442,7 @@ export default function MonthlyCalendar({
                     style={[styles.modalInput, { color: colors.textPrimary }]}
                     value={missedNoteText}
                     onChangeText={setMissedNoteText}
-                    placeholder="Explain why you missed it…"
+                    placeholder={t('calendarModal.notePlaceholder')}
                     placeholderTextColor={colors.textMuted}
                     multiline
                     autoFocus
@@ -470,7 +461,7 @@ export default function MonthlyCalendar({
                         }
                       }}
                     >
-                      <Text style={[styles.modalDeleteText, { color: '#FF3B30' }]}>Remove</Text>
+                      <Text style={[styles.modalDeleteText, { color: '#FF3B30' }]}>{t('common.remove')}</Text>
                     </NeumorphicButton>
                   )}
                   <NeumorphicButton
@@ -479,7 +470,7 @@ export default function MonthlyCalendar({
                     style={[styles.modalCancelBtn]}
                     onPress={() => setMissedModal(null)}
                   >
-                    <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>Cancel</Text>
+                    <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
                   </NeumorphicButton>
                   <NeumorphicButton
                     radius={12}
@@ -490,11 +481,11 @@ export default function MonthlyCalendar({
                         addMissedNote(habitId, missedModal.dateKey, missedNoteText.trim());
                         setMissedModal(null);
                       } else if (missedModal && !missedNoteText.trim()) {
-                        Alert.alert('Please enter an explanation');
+                        Alert.alert(t('calendarModal.pleaseEnterExplanation'));
                       }
                     }}
                   >
-                    <Text style={[styles.modalSaveText, { color: '#FFFFFF' }]}>Save</Text>
+                    <Text style={[styles.modalSaveText, { color: '#FFFFFF' }]}>{t('common.save')}</Text>
                   </NeumorphicButton>
                 </View>
               </Raised>

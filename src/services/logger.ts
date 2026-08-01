@@ -56,7 +56,7 @@ function safeStringify(val: unknown): string {
 // Global JS error handler — catches uncaught exceptions so they
 // land in the exportable log instead of just crashing silently.
 export function installGlobalErrorHandler(): void {
-  const g = global as any;
+  const g = globalThis as any;
   const defaultHandler = g.ErrorUtils?.getGlobalHandler?.();
   g.ErrorUtils?.setGlobalHandler?.((error: Error, isFatal?: boolean) => {
     logEvent('error', error.message, {

@@ -15,9 +15,11 @@ import { useHabitStore } from '../store/habitStore';
 import { WidgetModule } from '../native/WidgetModule';
 import { useTheme } from '../theme/ThemeProvider';
 import ProGate from '../components/ProGate';
+import { useTranslation } from '../i18n';
 
 export default function WidgetSettingsScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const habits = useHabitStore(s => s.habits);
   const isPro = useHabitStore(s => s.isPro);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -49,8 +51,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
     if (next.length > 3) {
       Alert.alert(
-        'Limit reached',
-        'You can select up to 3 habits for the widget.',
+        t('widgetSettings.limitTitle'),
+        t('widgetSettings.limitBody'),
       );
       return;
     }
@@ -87,22 +89,21 @@ export default function WidgetSettingsScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
           <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
-          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>Settings</Text>
+          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>{t('common.settings')}</Text>
         </Pressable>
 
-        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>Widget</Text>
+        <Text style={[styles.title, { color: theme.colors.iosLabel }]}>{t('widgetSettings.title')}</Text>
 
         <Text style={[styles.description, { color: theme.colors.iosSecondaryLabel }]}>
-          Customize your home screen widgets. Pick up to 3 habits for the weekly
-          heatmap widget.
+          {t('widgetSettings.description')}
         </Text>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>SELECTED HABITS</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('widgetSettings.selectedHabits')}</Text>
           <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
             {activeHabits.length === 0 && (
               <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>
-                No active habits. Create some habits first!
+                {t('widgetSettings.noActiveHabits')}
               </Text>
             )}
             {activeHabits.map((habit, i) => {
@@ -122,7 +123,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                     <View>
                       <Text style={[styles.habitName, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
                       <Text style={[styles.habitMeta, { color: theme.colors.iosSecondaryLabel }]}>
-                        {Object.keys(habit.completions).length} days tracked
+                        {t('widgetSettings.daysTracked', { count: Object.keys(habit.completions).length })}
                       </Text>
                     </View>
                   </View>
@@ -139,13 +140,11 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         </View>
 
         <View style={[styles.infoBox, { backgroundColor: theme.colors.iosBlue + '1A' }]}>
-          <Text style={[styles.infoTitle, { color: theme.colors.iosLabel }]}>How it works</Text>
+          <Text style={[styles.infoTitle, { color: theme.colors.iosLabel }]}>{t('widgetSettings.howItWorks')}</Text>
           <Text style={[styles.infoText, { color: theme.colors.iosLabel + '99' }]}>
-            After selecting habits, add the widgets to your home screen:
+            {t('widgetSettings.howItWorksBody')}
             {'\n\n'}
-            {Platform.OS === 'ios'
-              ? `1. Touch and hold an empty area on your Home Screen\n2. Tap the + button in the top-left corner\n3. Search for "Habitic Widget"\n4. Pick "Week Heatmap" (small/medium)\n5. Choose a size\n6. Tap "Add Widget"`
-              : `1. Touch and hold an empty area on your Home Screen\n2. Tap "Widgets"\n3. Find "Habit Tracker" in the list\n4. Drag the widget to your Home Screen`}
+            {t(Platform.OS === 'ios' ? 'widgetSettings.iosSteps' : 'widgetSettings.androidSteps')}
           </Text>
         </View>
       </ScrollView>

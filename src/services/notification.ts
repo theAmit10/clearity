@@ -4,14 +4,14 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import type { HabitNotificationConfig, AdminNotificationConfig } from '../types/notification';
+import { t } from '../i18n';
 
 const CHANNEL_ID = 'habit_reminders';
-const CHANNEL_NAME = 'Habit Reminders';
 
 export async function setupChannel() {
   await notifee.createChannel({
     id: CHANNEL_ID,
-    name: CHANNEL_NAME,
+    name: t('notificationChannel.name'),
     importance: AndroidImportance.HIGH,
   });
 }
@@ -67,7 +67,33 @@ export async function cancelAdminNotification(adminId: string) {
   await notifee.cancelNotification(`admin-${adminId}`);
 }
 
+export function localizeAdminNotification(config: AdminNotificationConfig) {
+  switch (config.id) {
+    case 'admin-morning':
+      return {
+        ...config,
+        title: t('defaultAdminNotifications.morningTitle'),
+        body: t('defaultAdminNotifications.morningBody'),
+      };
+    case 'admin-afternoon':
+      return {
+        ...config,
+        title: t('defaultAdminNotifications.afternoonTitle'),
+        body: t('defaultAdminNotifications.afternoonBody'),
+      };
+    case 'admin-evening':
+      return {
+        ...config,
+        title: t('defaultAdminNotifications.eveningTitle'),
+        body: t('defaultAdminNotifications.eveningBody'),
+      };
+    default:
+      return config;
+  }
+}
+
 export async function scheduleAdminNotification(config: AdminNotificationConfig) {
+  const localized = localizeAdminNotification(config);
   const id = `admin-${config.id}`;
   await notifee.cancelNotification(id);
   if (!config.enabled) return;
@@ -82,8 +108,8 @@ export async function scheduleAdminNotification(config: AdminNotificationConfig)
   await notifee.createTriggerNotification(
     {
       id,
-      title: config.title,
-      body: config.body,
+      title: localized.title,
+      body: localized.body,
       android: { channelId: CHANNEL_ID },
     },
     {

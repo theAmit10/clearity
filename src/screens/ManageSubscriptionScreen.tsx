@@ -35,20 +35,23 @@ import {
 import { useHabitStore } from '../store/habitStore';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 
 const FEATURES = [
-  { icon: ChartBarIcon, label: 'Full analytics dashboard' },
-  { icon: Squares2X2Icon, label: 'iOS home screen widget' },
-  { icon: SparklesIcon, label: 'Unlimited habits' },
-  { icon: TagIcon, label: 'Custom categories' },
-  { icon: PaintBrushIcon, label: 'Premium themes' },
-  { icon: BellAlertIcon, label: 'Multiple reminders per habit' },
-  { icon: ArrowUpTrayIcon, label: 'Export & import data' },
-  { icon: RocketLaunchIcon, label: 'Early access to new features' },
+  { icon: ChartBarIcon, key: 'Analytics' },
+  { icon: Squares2X2Icon, key: 'Widget' },
+  { icon: SparklesIcon, key: 'Unlimited' },
+  { icon: TagIcon, key: 'Categories' },
+  { icon: PaintBrushIcon, key: 'Themes' },
+  { icon: BellAlertIcon, key: 'Reminders' },
+  { icon: ArrowUpTrayIcon, key: 'ImportExport' },
+  { icon: RocketLaunchIcon, key: 'EarlyAccess' },
 ];
 
 export default function ManageSubscriptionScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [proExpiration, setProExpiration] = useState<string | null>(null);
@@ -100,10 +103,10 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
       if (info) {
         useHabitStore.setState({ isPro: isPro(info), proExpired: false });
         if (isPro(info)) {
-          Alert.alert('Restore Complete', 'Your Pro subscription has been restored.');
+          Alert.alert(t('common.restoreComplete'), t('common.restoreCompleteBody'));
           setProExpiration(getProExpirationDate(info));
         } else {
-          Alert.alert('No Purchases Found', 'No previous purchases could be restored.');
+          Alert.alert(t('common.noPurchasesFound'), t('common.noPurchasesFoundBody'));
         }
       }
     } finally {
@@ -140,7 +143,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
           <Raised radius={theme.radii.card} distance={10} style={styles.card}>
             <View style={styles.header}>
               <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-                Habitic Pro
+                {t('paywall.title')}
               </Text>
               <NeumorphicButton
                 radius={16}
@@ -158,17 +161,17 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
 
             <View style={styles.proBadgeContainer}>
               <View style={[styles.proBadge, { backgroundColor: theme.colors.accent }]}>
-                <Text style={styles.proBadgeText}>ACTIVE</Text>
+                <Text style={styles.proBadgeText}>{t('paywall.active')}</Text>
               </View>
               <Text style={[styles.proTitle, { color: theme.colors.textPrimary }]}>
-                You're a Pro user!
+                {t('paywall.youArePro')}
               </Text>
               <Text style={[styles.proSubtitle, { color: theme.colors.textMuted }]}>
-                You have access to all premium features.
+                {t('paywall.youHaveAccess')}
               </Text>
               {proExpiration && (
                 <Text style={[styles.proExpiration, { color: theme.colors.textMuted }]}>
-                  Expires: {new Date(proExpiration).toLocaleDateString()}
+                  {t('paywall.expires', { date: new Date(proExpiration).toLocaleDateString() })}
                 </Text>
               )}
             </View>
@@ -191,7 +194,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
                         { color: theme.colors.textPrimary },
                       ]}
                     >
-                      {feat.label}
+                      {t(`paywall.feature${feat.key}` as TranslationKey)}
                     </Text>
                   </View>
                 );
@@ -213,7 +216,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
               onPress={handleManage}
             >
               <Text style={styles.ctaText}>
-                {loading ? 'Opening…' : 'Manage in App Store'}
+                {t(loading ? 'manageSubscription.opening' : 'manageSubscription.manageInStore')}
               </Text>
             </NeumorphicButton>
 
@@ -222,7 +225,7 @@ export default function ManageSubscriptionScreen({ navigation }: any) {
                 <Text
                   style={[styles.footerLink, { color: theme.colors.textMuted }]}
                 >
-                  Restore Purchases
+                  {t('common.restorePurchases')}
                 </Text>
               </Pressable>
             </View>

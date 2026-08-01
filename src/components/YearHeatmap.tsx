@@ -12,6 +12,7 @@ import { useHabitStore } from '../store/habitStore';
 import { computeEffectiveDateSet } from '../store/habitStore';
 import { Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 
 interface Props {
   habitId: string;
@@ -21,7 +22,6 @@ interface Props {
 const CELL = 10;
 const GAP = 2;
 const SIDE = CELL + GAP;
-const WEEKDAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 function yearWeeks(year: number): Date[][] {
   const start = new Date(year, 0, 1);
@@ -42,11 +42,8 @@ function yearWeeks(year: number): Date[][] {
 
 function weekMonthLabels(
   weeks: Date[][],
+  names: string[],
 ): { label: string; col: number; key: string }[] {
-  const names = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
   const labels: { label: string; col: number; key: string }[] = [];
   let lastMonth = -1;
   let lastYear = 0;
@@ -65,6 +62,7 @@ function weekMonthLabels(
 
 export default function YearHeatmap({ habitId, color }: Props) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { colors, radii } = theme;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
@@ -77,7 +75,11 @@ export default function YearHeatmap({ habitId, color }: Props) {
 
   const year = new Date().getFullYear();
   const weeks = useMemo(() => yearWeeks(year), [year]);
-  const monthLabels = useMemo(() => weekMonthLabels(weeks), [weeks]);
+  const weekdayLabels = (t('calendar.weekdaysShort') as unknown as string[]).map(
+    (d, i) => (i % 2 === 1 ? d : ''),
+  );
+  const monthNames = t('calendar.monthsShort') as unknown as string[];
+  const monthLabels = useMemo(() => weekMonthLabels(weeks, monthNames), [weeks, monthNames]);
   const scrollRef = useRef<ScrollView>(null);
 
   const todayWeekIndex = useMemo(() => {
@@ -108,7 +110,7 @@ export default function YearHeatmap({ habitId, color }: Props) {
     <Inset radius={radii.panel} style={styles.container}>
       <View style={{ flexDirection: 'row' }}>
         <View style={styles.weekdayCol}>
-          {WEEKDAYS.map((day, i) => (
+          {weekdayLabels.map((day, i) => (
             <Text
               key={i}
               style={[styles.weekdayLabel, { height: SIDE, lineHeight: SIDE, color: colors.textMuted }]}

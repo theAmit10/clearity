@@ -102,28 +102,14 @@ import { getHabitIcon } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import FlameStreak from '../components/FlameStreak';
 import ProGate from '../components/ProGate';
+import { useTranslation } from '../i18n';
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const MONTHS_SHORT = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-function shortMonthDay(dateStr: string): string {
+function shortMonthDay(dateStr: string, monthsShort: string[]): string {
   const d = new Date(dateStr + 'T00:00:00');
-  return MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate();
+  return monthsShort[d.getMonth()] + ' ' + d.getDate();
 }
 
 function TrendArrow({
@@ -144,6 +130,7 @@ function TrendArrow({
 }
 
 export default function AnalyticsScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const habits = useHabitStore(s => s.habits);
@@ -221,12 +208,14 @@ export default function AnalyticsScreen({ navigation }: any) {
       >
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
           <Text style={[styles.backArrow, { color: cs.iosBlue }]}>←</Text>
-          <Text style={[styles.backText, { color: cs.iosBlue }]}>Settings</Text>
+          <Text style={[styles.backText, { color: cs.iosBlue }]}>
+            {t('analytics.back')}
+          </Text>
         </Pressable>
         <View style={styles.emptyWrap}>
           <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
             <Text style={[styles.emptyText, { color: cs.textMuted }]}>
-              No habits yet.{'\n'}Add some habits to see analytics and insights!
+              {t('analytics.empty')}
             </Text>
           </Raised>
         </View>
@@ -254,10 +243,12 @@ export default function AnalyticsScreen({ navigation }: any) {
         {/* Header — matching Notifications screen style */}
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
           <Text style={[styles.backArrow, { color: cs.iosBlue }]}>←</Text>
-          <Text style={[styles.backText, { color: cs.iosBlue }]}>Settings</Text>
+          <Text style={[styles.backText, { color: cs.iosBlue }]}>
+            {t('analytics.back')}
+          </Text>
         </Pressable>
         <Text style={[styles.pageTitle, { color: cs.textPrimary }]}>
-          Analytics
+          {t('analytics.title')}
         </Text>
 
         {/* Summary Cards + Circular Ring */}
@@ -267,7 +258,7 @@ export default function AnalyticsScreen({ navigation }: any) {
           <View style={styles.summaryRow}>
             <View style={styles.summaryGrid}>
               <SummaryCard
-                label="Total Habits"
+                label={t('analytics.totalHabits')}
                 value={stats.overall.totalHabits}
                 cs={cs}
                 radii={theme.radii}
@@ -275,7 +266,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                 entered={entered['summary']}
               />
               <SummaryCard
-                label="Best Streak"
+                label={t('analytics.bestStreak')}
                 value={stats.overall.bestStreak}
                 suffix="d"
                 cs={cs}
@@ -284,7 +275,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                 entered={entered['summary']}
               />
               <SummaryCard
-                label="Perfect Days"
+                label={t('analytics.perfectDays')}
                 value={stats.overall.perfectDays}
                 cs={cs}
                 radii={theme.radii}
@@ -292,7 +283,7 @@ export default function AnalyticsScreen({ navigation }: any) {
                 entered={entered['summary']}
               />
               <SummaryCard
-                label="Check-Ins"
+                label={t('analytics.checkIns')}
                 value={stats.overall.totalCheckIns}
                 cs={cs}
                 radii={theme.radii}
@@ -305,7 +296,7 @@ export default function AnalyticsScreen({ navigation }: any) {
               size={100}
               strokeWidth={10}
               color={cs.accent}
-              label="Avg Consistency"
+              label={t('analytics.avgConsistency')}
               cs={cs}
               entered={entered['summary']}
             />
@@ -333,10 +324,10 @@ export default function AnalyticsScreen({ navigation }: any) {
           onLayout={e => registerSection('habitRings', e.nativeEvent.layout.y)}
         >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
-            Completion Rings
+            {t('analytics.completionRings')}
           </Text>
           <Text style={[styles.sectionSubtitleExt, { color: cs.textMuted }]}>
-            At a glance view of each habit's overall consistency.
+            {t('analytics.completionRingsSubtitle')}
           </Text>
           <ScrollView
             horizontal
@@ -384,18 +375,22 @@ export default function AnalyticsScreen({ navigation }: any) {
         {/* Habit Scorecard */}
         <View onLayout={e => registerSection('habits', e.nativeEvent.layout.y)}>
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
-            Habit Scorecard
+            {t('analytics.habitScorecard')}
           </Text>
           <Text style={[styles.sectionSubtitleExt, { color: cs.textMuted }]}>
-            Your habits ranked by consistency, with recent trend.
+            {t('analytics.habitScorecardSubtitle')}
           </Text>
           {stats.habitStats.length > 0 && (
             <Text style={[styles.hintRow, { color: cs.textMuted }]}>
-              {improvingCount > 0 ? `↑ ${improvingCount} improving` : ''}
+              {improvingCount > 0
+                ? t('analytics.improving', { count: improvingCount })
+                : ''}
               {improvingCount > 0 && decliningCount > 0 ? ' · ' : ''}
-              {decliningCount > 0 ? `↓ ${decliningCount} declining` : ''}
+              {decliningCount > 0
+                ? t('analytics.declining', { count: decliningCount })
+                : ''}
               {improvingCount === 0 && decliningCount === 0
-                ? '→ All stable'
+                ? t('analytics.allStable')
                 : ''}
             </Text>
           )}
@@ -429,10 +424,10 @@ export default function AnalyticsScreen({ navigation }: any) {
           onLayout={e => registerSection('journey', e.nativeEvent.layout.y)}
         >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
-            Habit Timeline
+            {t('analytics.habitTimeline')}
           </Text>
           <Text style={[styles.sectionSubtitleExt, { color: cs.textMuted }]}>
-            How long you've kept each habit and how often you've done it.
+            {t('analytics.habitTimelineSubtitle')}
           </Text>
           {stats.habitStats
             .slice()
@@ -454,10 +449,10 @@ export default function AnalyticsScreen({ navigation }: any) {
           onLayout={e => registerSection('insights', e.nativeEvent.layout.y)}
         >
           <Text style={[styles.sectionTitleExt, { color: cs.textPrimary }]}>
-            Insights
+            {t('analytics.insights')}
           </Text>
           <Text style={[styles.sectionSubtitleExt, { color: cs.textMuted }]}>
-            Smart observations about your habit patterns.
+            {t('analytics.insightsSubtitle')}
           </Text>
           {stats.insights.map((item, i) => (
             <InsightItem
@@ -743,6 +738,8 @@ function WeeklyChart({
   radii: any;
   entered?: boolean;
 }) {
+  const { t } = useTranslation();
+  const monthsShort = t('calendar.monthsShort') as unknown as string[];
   const progress = useAnimateOnEnter(entered, 300);
 
   const bestWeek = data.reduce(
@@ -757,10 +754,10 @@ function WeeklyChart({
   return (
     <Raised radius={radii.panel} distance={6} style={styles.chartContainer}>
       <Text style={[styles.sectionTitle, { color: cs.textPrimary }]}>
-        Weekly Overview
+        {t('analytics.weeklyOverview')}
       </Text>
       <Text style={[styles.sectionSubtitle, { color: cs.textMuted }]}>
-        Are you staying consistent? Each bar is one week.
+        {t('analytics.weeklyOverviewSubtitle')}
       </Text>
       <Svg width={chartWidth} height={chartHeight}>
         <Defs>
@@ -834,15 +831,19 @@ function WeeklyChart({
                 fontSize={8}
                 textAnchor="middle"
               >
-                {shortMonthDay(point.weekStart)}
+                {shortMonthDay(point.weekStart, monthsShort)}
               </SvgText>
             );
           })}
         </G>
       </Svg>
       <Text style={[styles.chartHint, { color: cs.textMuted }]}>
-        ● Best week: {bestWeek.rate}% ({shortMonthDay(bestWeek.weekStart)}) ·
-        Lowest: {worstWeek.rate}% ({shortMonthDay(worstWeek.weekStart)})
+        {t('analytics.bestAndLowestWeek', {
+          best: bestWeek.rate,
+          bestDate: shortMonthDay(bestWeek.weekStart, monthsShort),
+          lowest: worstWeek.rate,
+          lowestDate: shortMonthDay(worstWeek.weekStart, monthsShort),
+        })}
       </Text>
     </Raised>
   );
@@ -908,18 +909,32 @@ function WeekdayChart({
   radii: any;
   entered?: boolean;
 }) {
+  const { t } = useTranslation();
+  const weekdaysShort = t('calendar.weekdaysShort') as unknown as string[];
   const progress = useAnimateOnEnter(entered, 400);
   const sorted = [...data].sort((a, b) => b.rate - a.rate);
   const bestDay = sorted[0];
   const worstDay = sorted[sorted.length - 1];
 
+  const daySunIndex: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  const localDay = (day: string) =>
+    weekdaysShort[(daySunIndex[day] + 6) % 7] ?? day;
+
   return (
     <Raised radius={radii.panel} distance={6} style={styles.chartContainer}>
       <Text style={[styles.sectionTitle, { color: cs.textPrimary }]}>
-        Your Best Days
+        {t('analytics.yourBestDays')}
       </Text>
       <Text style={[styles.sectionSubtitle, { color: cs.textMuted }]}>
-        Which weekdays you're most likely to follow through.
+        {t('analytics.yourBestDaysSubtitle')}
       </Text>
       <Svg width={chartWidth} height={chartHeight}>
         <Defs>
@@ -955,7 +970,7 @@ function WeekdayChart({
                   fontSize={11}
                   textAnchor="end"
                 >
-                  {item.day}
+                  {localDay(item.day)}
                 </SvgText>
                 <Rect
                   x={0}
@@ -983,8 +998,13 @@ function WeekdayChart({
       {bestDay && bestDay.rate > 0 && (
         <Text style={[styles.chartHint, { color: cs.textMuted }]}>
           {worstDay && worstDay.rate > 0 && worstDay.day !== bestDay.day
-            ? `● Most consistent on ${bestDay.day}s. ${worstDay.day}s need the most work.`
-            : `● Most consistent on ${bestDay.day}s.`}
+            ? t('analytics.mostAndLeastConsistentHint', {
+                bestDay: localDay(bestDay.day),
+                worstDay: localDay(worstDay.day),
+              })
+            : t('analytics.mostConsistentHint', {
+                day: localDay(bestDay.day),
+              })}
         </Text>
       )}
     </Raised>
@@ -1038,6 +1058,7 @@ function HabitPerformanceRow({
   entered?: boolean;
   index: number;
 }) {
+  const { t } = useTranslation();
   const progress = useAnimateOnEnter(entered, 500 + index * 80);
   const Icon = getHabitIcon(habit.icon);
 
@@ -1100,7 +1121,7 @@ function HabitPerformanceRow({
                     <Text
                       style={[styles.habitMetaText, { color: cs.textMuted }]}
                     >
-                      No streak
+                      {t('stats.noStreak')}
                     </Text>
                   )}
                   <View style={[styles.trendTag, { backgroundColor: trendBg }]}>
@@ -1139,10 +1160,13 @@ function HabitPerformanceRow({
           </View>
           <View style={styles.habitRowBottom}>
             <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
-              {habit.totalCompletions} done · {habit.totalMisses} missed
+              {t('stats.doneMissed', {
+                done: habit.totalCompletions,
+                missed: habit.totalMisses,
+              })}
             </Text>
             <Text style={[styles.habitMetaText, { color: cs.textMuted }]}>
-              {habit.avgPerWeek}/wk avg
+              {t('stats.perWeekAvg', { avg: habit.avgPerWeek })}
             </Text>
           </View>
         </Raised>
@@ -1239,6 +1263,7 @@ function StreakSection({
   radii: any;
   entered?: boolean;
 }) {
+  const { t } = useTranslation();
   const p1 = useAnimateOnEnter(entered, 200);
   const p2 = useAnimateOnEnter(entered, 300);
   const p3 = useAnimateOnEnter(entered, 400);
@@ -1246,11 +1271,11 @@ function StreakSection({
   return (
     <Raised radius={radii.panel} distance={6} style={styles.streakContainer}>
       <Text style={[styles.sectionTitle, { color: cs.textPrimary }]}>
-        Streak Analytics
+        {t('analytics.streakAnalytics')}
       </Text>
       <View style={styles.streakRow}>
         <StatPill
-          label="Best Streak"
+          label={t('analytics.bestStreak')}
           value={stats.overall.bestStreak}
           suffix="d"
           cs={cs}
@@ -1258,7 +1283,7 @@ function StreakSection({
           progress={p1}
         />
         <StatPill
-          label="Avg Streak"
+          label={t('analytics.avgStreak')}
           value={stats.averageStreak}
           suffix="d"
           cs={cs}
@@ -1266,7 +1291,7 @@ function StreakSection({
           progress={p2}
         />
         <StatPill
-          label="Broken"
+          label={t('analytics.broken')}
           value={stats.streaksBroken}
           cs={cs}
           radii={radii}
@@ -1325,6 +1350,8 @@ function HabitJourneyCard({
   entered?: boolean;
   index: number;
 }) {
+  const { t } = useTranslation();
+  const monthsShort = t('calendar.monthsShort') as unknown as string[];
   const progress = useAnimateOnEnter(entered, 400 + index * 100);
   const Icon = getHabitIcon(habit.icon);
 
@@ -1356,7 +1383,10 @@ function HabitJourneyCard({
                 {habit.name}
               </Text>
               <Text style={[styles.journeyMeta, { color: cs.textMuted }]}>
-                {habit.totalCompletions} done · {habit.totalMisses} missed
+                {t('stats.doneMissed', {
+                  done: habit.totalCompletions,
+                  missed: habit.totalMisses,
+                })}
               </Text>
             </View>
             <Text style={[styles.journeyPct, { color: cs.accent }]}>
@@ -1377,7 +1407,10 @@ function HabitJourneyCard({
 
           <View style={styles.journeyBottom}>
             <Text style={[styles.journeyMeta, { color: cs.textMuted }]}>
-              Started {formatCreatedDate(habit.id)} · {habit.habitAge} days ago
+              {t('analytics.startedDaysAgo', {
+                date: formatCreatedDate(habit.id, monthsShort, t('analytics.unknown')),
+                count: habit.habitAge,
+              })}
             </Text>
           </View>
         </Raised>
@@ -1387,13 +1420,17 @@ function HabitJourneyCard({
 }
 
 /** Look up the habit's createdAt from the store and format it */
-function formatCreatedDate(habitId: string): string {
+function formatCreatedDate(
+  habitId: string,
+  monthsShort: string[],
+  unknown: string,
+): string {
   const habits = useHabitStore.getState().habits;
   const h = habits.find(x => x.id === habitId);
-  if (!h) return 'Unknown';
+  if (!h) return unknown;
   const d = new Date(h.createdAt);
   return (
-    MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear()
+    monthsShort[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear()
   );
 }
 

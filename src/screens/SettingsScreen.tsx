@@ -30,8 +30,13 @@ import {
 import { useTheme } from '../theme/ThemeProvider';
 import { restorePurchases } from '../services/revenueCat';
 import { logEvent } from '../services/logger';
+import { useTranslation, useI18nStore, LANGUAGES } from '../i18n';
+import type { Language } from '../i18n';
 
 export default function SettingsScreen({ navigation }: any) {
+  const { t } = useTranslation();
+  const language = useI18nStore(s => s.language);
+  const setLanguage = useI18nStore(s => s.setLanguage);
   const { theme, themeName, setTheme, availableThemes } = useTheme();
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
@@ -46,7 +51,7 @@ export default function SettingsScreen({ navigation }: any) {
     try {
       await exportHabits(habits);
     } catch (e: any) {
-      Alert.alert('Export failed', e?.message ?? 'Unknown error');
+      Alert.alert(t('settings.exportFailed'), e?.message ?? t('settings.unknownError'));
     } finally {
       setBusy(false);
     }
@@ -57,16 +62,16 @@ export default function SettingsScreen({ navigation }: any) {
     try {
       const payload = await pickAndParseImportFile();
       Alert.alert(
-        'Import data',
-        `Found ${payload.habits.length} habit(s) in the file. How do you want to import?`,
+        t('settings.importDataTitle'),
+        t('settings.importDataBody', { count: payload.habits.length }),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Merge with current',
+            text: t('settings.mergeWithCurrent'),
             onPress: () => mergeHabits(payload.habits),
           },
           {
-            text: 'Replace everything',
+            text: t('settings.replaceEverything'),
             style: 'destructive',
             onPress: () => replaceAllHabits(payload.habits),
           },
@@ -74,7 +79,7 @@ export default function SettingsScreen({ navigation }: any) {
       );
     } catch (e: any) {
       if (e?.message !== undefined && e?.code !== 'DOCUMENT_PICKER_CANCELED') {
-        Alert.alert('Import failed', e?.message ?? 'Could not read that file.');
+        Alert.alert(t('settings.importFailed'), e?.message ?? t('settings.couldNotReadFile'));
       }
     } finally {
       setBusy(false);
@@ -83,7 +88,7 @@ export default function SettingsScreen({ navigation }: any) {
 
   const handleFollowX = () => {
     Linking.openURL(`https://x.com/${X_HANDLE}`).catch(() => {
-      Alert.alert('Could not open X', `Find us at @${X_HANDLE} on X.`);
+      Alert.alert(t('settings.couldNotOpenX'), t('settings.findUsOnX', { handle: X_HANDLE }));
     });
   };
 
@@ -102,8 +107,8 @@ export default function SettingsScreen({ navigation }: any) {
       `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`,
     ).catch(() => {
       Alert.alert(
-        'Could not open Mail',
-        `No mail app is set up on this device. You can reach us directly at ${FEEDBACK_EMAIL}.`,
+        t('settings.couldNotOpenMail'),
+        t('settings.noMailApp', { email: FEEDBACK_EMAIL }),
       );
     });
   };
@@ -130,24 +135,24 @@ export default function SettingsScreen({ navigation }: any) {
       const nowPro = useHabitStore.getState().isPro;
       if (!info) {
         Alert.alert(
-          'Restore Failed',
-          'Could not restore purchases. Please try again.',
+          t('common.restoreFailed'),
+          t('common.restoreFailedBody'),
         );
       } else if (nowPro) {
         Alert.alert(
-          'Restore Complete',
-          'Your Pro subscription has been restored.',
+          t('common.restoreComplete'),
+          t('common.restoreCompleteBody'),
         );
       } else {
         Alert.alert(
-          'No Purchases Found',
-          'No previous purchases could be restored.',
+          t('common.noPurchasesFound'),
+          t('common.noPurchasesFoundBody'),
         );
       }
     } catch {
       Alert.alert(
-        'Restore Failed',
-        'Could not restore purchases. Please try again.',
+        t('common.restoreFailed'),
+        t('common.restoreFailedBody'),
       );
     } finally {
       setRestoring(false);
@@ -169,8 +174,8 @@ export default function SettingsScreen({ navigation }: any) {
       if (url) {
         Linking.openURL(url).catch(() => {
           Alert.alert(
-            'Could not open the store',
-            'Please search for the app manually to leave a review.',
+            t('settings.couldNotOpenStore'),
+            t('settings.searchManually'),
           );
         });
       }
@@ -179,12 +184,12 @@ export default function SettingsScreen({ navigation }: any) {
 
   const handleResetApp = () => {
     Alert.alert(
-      'Reset app?',
-      'This deletes ALL habits and history. This cannot be undone.',
+      t('settings.resetAppTitle'),
+      t('settings.resetAppBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('common.reset'),
           style: 'destructive',
           onPress: async () => {
             replaceAllHabits([]);
@@ -192,10 +197,10 @@ export default function SettingsScreen({ navigation }: any) {
               await clearAll();
             } catch (e: any) {
               Alert.alert(
-                'Partial reset',
-                `Your habits were cleared, but local storage couldn't be fully wiped: ${
-                  e?.message ?? 'unknown error'
-                }`,
+                t('settings.partialReset'),
+                t('settings.partialResetBody', {
+                  error: e?.message ?? t('settings.unknownError'),
+                }),
               );
             }
           },
@@ -277,40 +282,39 @@ export default function SettingsScreen({ navigation }: any) {
     >
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Text style={[styles.title, { color: theme.colors.iosLabel }]}>
-          Settings
+          {t('settings.title')}
         </Text>
 
-        <Section title="General">
+        <Section title={t('settings.generalSection')}>
           <Text
             style={[
               styles.description,
               { color: theme.colors.iosSecondaryLabel },
             ]}
           >
-            Customize the home screen layout and default behavior.
+            {t('settings.generalDescription')}
           </Text>
           <Row
-            label="General settings"
+            label={t('settings.generalSettings')}
             onPress={() => navigation.navigate('General')}
           />
         </Section>
 
-        <Section title="Habits">
+        <Section title={t('settings.habitsSection')}>
           <Text
             style={[
               styles.description,
               { color: theme.colors.iosSecondaryLabel },
             ]}
           >
-            Reorder your habits by long-pressing them on the home screen, or use
-            the dedicated reorder screen below.
+            {t('settings.habitsDescription')}
           </Text>
           <Row
-            label="Reorder habits"
+            label={t('settings.reorderHabits')}
             onPress={() => navigation.navigate('ReorderHabits')}
           />
           <Row
-            label={`Export data (${habits.length} habits)`}
+            label={t('settings.exportData', { count: habits.length })}
             rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
@@ -322,7 +326,7 @@ export default function SettingsScreen({ navigation }: any) {
             disabled={busy}
           />
           <Row
-            label="Import data from file"
+            label={t('settings.importData')}
             rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
@@ -335,7 +339,7 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title="Habitic Pro">
+        <Section title={t('settings.proSection')}>
           <Text
             style={[
               styles.description,
@@ -343,26 +347,26 @@ export default function SettingsScreen({ navigation }: any) {
             ]}
           >
             {isPro
-              ? 'You have Habitic Pro. Thank you for supporting the app!'
+              ? t('settings.proActive')
               : proExpired
-              ? 'Your Pro plan has expired. Renew to keep using analytics, widget, unlimited habits, custom categories, and premium themes.'
-              : `Upgrade to unlock analytics, widget, unlimited habits (${FREE_HABIT_LIMIT}+), custom categories, and premium themes.`}
+              ? t('settings.proExpired')
+              : t('settings.proUpgrade', { count: FREE_HABIT_LIMIT })}
           </Text>
           {isPro ? (
             <Row
-              label="Manage subscription"
+              label={t('common.manageSubscription')}
               onPress={handleCustomerCenter}
               disabled={busy}
             />
           ) : (
             <Row
-              label={proExpired ? 'Renew Pro' : 'Upgrade to Pro'}
+              label={proExpired ? t('common.renewPro') : t('common.upgradeToPro')}
               onPress={() => navigation.navigate('Paywall', paywallParams)}
               disabled={busy}
             />
           )}
           <Row
-            label={restoring ? 'Restoring…' : 'Restore purchases'}
+            label={restoring ? t('settings.restoring') : t('common.restorePurchases')}
             onPress={handleRestore}
             disabled={busy || restoring}
             rightContent={
@@ -373,18 +377,17 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title="Widget (Pro)">
+        <Section title={t('settings.widgetSection')}>
           <Text
             style={[
               styles.description,
               { color: theme.colors.iosSecondaryLabel },
             ]}
           >
-            Select habits to display on your iOS home screen widget with a
-            weekly heatmap.
+            {t('settings.widgetDescription')}
           </Text>
           <Row
-            label="Widget settings"
+            label={t('settings.widgetSettings')}
             rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
@@ -396,18 +399,17 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title="Analytics (Pro)">
+        <Section title={t('settings.analyticsSection')}>
           <Text
             style={[
               styles.description,
               { color: theme.colors.iosSecondaryLabel },
             ]}
           >
-            View detailed stats, charts, and insights about your habit
-            performance.
+            {t('settings.analyticsDescription')}
           </Text>
           <Row
-            label="View analytics"
+            label={t('settings.viewAnalytics')}
             rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {
@@ -419,37 +421,57 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title="Notifications & Reminders">
+        <Section title={t('settings.notificationsSection')}>
           <Text
             style={[
               styles.description,
               { color: theme.colors.iosSecondaryLabel },
             ]}
           >
-            Set daily reminders for each habit and configure admin-level
-            scheduled notifications.
+            {t('settings.notificationsDescription')}
           </Text>
           <Row
-            label="Notification settings"
+            label={t('settings.notificationSettings')}
             onPress={() => navigation.navigate('NotificationSettings')}
           />
         </Section>
 
-        <Section title="Theme">
-          {availableThemes.map(t => {
-            const active = themeName === t.name;
-            const isPremium = !FREE_THEMES.includes(t.name);
+        <Section title={t('languageSettings.section')}>
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            {t('languageSettings.description')}
+          </Text>
+          {LANGUAGES.map((code: Language) => {
+            const active = language === code;
+            return (
+              <Row
+                key={code}
+                label={`${active ? '✓ ' : '   '}${t(`languages.${code}`)}`}
+                onPress={() => setLanguage(code)}
+              />
+            );
+          })}
+        </Section>
+
+        <Section title={t('settings.themeSection')}>
+          {availableThemes.map(themeOption => {
+            const active = themeName === themeOption.name;
+            const isPremium = !FREE_THEMES.includes(themeOption.name);
             const locked = isPremium && !isPro;
             return (
               <Row
-                key={t.name}
-                label={`${active ? '✓ ' : '   '}${t.label}`}
+                key={themeOption.name}
+                label={`${active ? '✓ ' : '   '}${t(`themes.${themeOption.name}`)}`}
                 rightContent={locked ? proBadge : null}
                 onPress={() => {
                   if (locked) {
                     navigation.navigate('Paywall', paywallParams);
                   } else {
-                    setTheme(t.name);
+                    setTheme(themeOption.name);
                   }
                 }}
               />
@@ -457,10 +479,10 @@ export default function SettingsScreen({ navigation }: any) {
           })}
         </Section>
 
-        <Section title="Community & Feedback">
-          <Row label="Let's build together" onPress={handleRateApp} />
-          <Row label="Send feedback" onPress={handleSendFeedback} />
-          <Row label={`Follow @${X_HANDLE} on X`} onPress={handleFollowX} />
+        <Section title={t('settings.communitySection')}>
+          <Row label={t('settings.buildTogether')} onPress={handleRateApp} />
+          <Row label={t('settings.sendFeedback')} onPress={handleSendFeedback} />
+          <Row label={t('settings.followOnX', { handle: X_HANDLE })} onPress={handleFollowX} />
         </Section>
 
         {/* <Section title="Diagnostics (stored locally only)">
@@ -476,9 +498,9 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section> */}
 
-        <Section title="Danger Zone">
+        <Section title={t('settings.dangerZone')}>
           <Row
-            label="Reset app (delete everything)"
+            label={t('settings.resetApp')}
             onPress={handleResetApp}
             destructive
           />

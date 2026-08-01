@@ -51,21 +51,23 @@ import { useHabitStore } from '../store/habitStore';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { logEvent } from '../services/logger';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 
 interface Feature {
   icon: React.ComponentType<{ size: number; color: string }>;
-  label: string;
+  key: string;
 }
 
 const FEATURES: Feature[] = [
-  { icon: ChartBarIcon, label: 'Full analytics dashboard' },
-  { icon: Squares2X2Icon, label: 'iOS home screen widget' },
-  { icon: SparklesIcon, label: 'Unlimited habits' },
-  { icon: TagIcon, label: 'Custom categories' },
-  { icon: PaintBrushIcon, label: 'Premium themes' },
-  { icon: BellAlertIcon, label: 'Multiple reminders per habit' },
-  { icon: ArrowUpTrayIcon, label: 'Export & import data' },
-  { icon: RocketLaunchIcon, label: 'Early access to new features' },
+  { icon: ChartBarIcon, key: 'Analytics' },
+  { icon: Squares2X2Icon, key: 'Widget' },
+  { icon: SparklesIcon, key: 'Unlimited' },
+  { icon: TagIcon, key: 'Categories' },
+  { icon: PaintBrushIcon, key: 'Themes' },
+  { icon: BellAlertIcon, key: 'Reminders' },
+  { icon: ArrowUpTrayIcon, key: 'ImportExport' },
+  { icon: RocketLaunchIcon, key: 'EarlyAccess' },
 ];
 
 const PRIVACY_URL = 'https://theamit10.github.io/habitic-legal/privacy-policy';
@@ -179,6 +181,7 @@ function FeatureRow({
   accent: string;
   textPrimary: string;
 }) {
+  const { t } = useTranslation();
   const Icon = feature.icon;
   return (
     <Animated.View
@@ -191,7 +194,7 @@ function FeatureRow({
         <Icon size={16} color={accent} />
       </Raised>
       <Text style={[styles.featureText, { color: textPrimary }]}>
-        {feature.label}
+        {t(`paywall.feature${feature.key}` as TranslationKey)}
       </Text>
     </Animated.View>
   );
@@ -233,6 +236,7 @@ function PlanCard({
   theme: any;
   index: number;
 }) {
+  const { t } = useTranslation();
   const shownPrice = displayPrice || price;
   const { style: pressStyle, onPressIn, onPressOut } = usePressScale(0.95);
 
@@ -269,7 +273,7 @@ function PlanCard({
           <View
             style={[styles.bestBadge, { backgroundColor: theme.colors.accent }]}
           >
-            <Text style={styles.bestText}>BEST VALUE</Text>
+            <Text style={styles.bestText}>{t('paywall.bestValue')}</Text>
           </View>
         )}
 
@@ -283,7 +287,7 @@ function PlanCard({
             <Text
               style={[styles.saveBadgeText, { color: theme.colors.accent }]}
             >
-              SAVE {savingsPct}%
+              {t('paywall.save', { count: savingsPct })}
             </Text>
           </View>
         )}
@@ -331,7 +335,7 @@ function PlanCard({
         </Text>
         {perWeek && (
           <Text style={[styles.planPerWeek, { color: theme.colors.textMuted }]}>
-            {perWeek}/wk
+            {`${perWeek} ${t('paywall.perWeek')}`}
           </Text>
         )}
       </Wrapper>
@@ -341,6 +345,7 @@ function PlanCard({
 
 export default function PaywallScreen({ navigation, route }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const storeIsPro = useHabitStore(s => s.isPro);
   const storeProExpired = useHabitStore(s => s.proExpired);
@@ -459,20 +464,20 @@ export default function PaywallScreen({ navigation, route }: any) {
         setRemoteIsPro(nowPro);
         setProExpiration(getProExpirationDate(result.customerInfo));
         Alert.alert(
-          'Welcome to Pro!',
-          'You now have access to all premium features.',
+          t('paywall.welcomeTitle'),
+          t('paywall.welcomeBody'),
         );
         navigation.goBack();
       } else {
         Alert.alert(
-          'Purchase Failed',
-          'The transaction could not be completed. Please try again.',
+          t('paywall.purchaseFailed'),
+          t('paywall.purchaseFailedBody'),
         );
       }
     } finally {
       setLoading(false);
     }
-  }, [selectedPackage, loading, navigation]);
+  }, [selectedPackage, loading, navigation, t]);
 
   const handleRestore = useCallback(async () => {
     setLoading(true);
@@ -485,21 +490,21 @@ export default function PaywallScreen({ navigation, route }: any) {
         setProExpiration(getProExpirationDate(info));
         if (nowPro) {
           Alert.alert(
-            'Restore Complete',
-            'Your Pro subscription has been restored.',
+            t('common.restoreComplete'),
+            t('common.restoreCompleteBody'),
           );
           navigation.goBack();
         } else {
           Alert.alert(
-            'No Purchases Found',
-            'No previous purchases could be restored.',
+            t('common.noPurchasesFound'),
+            t('common.noPurchasesFoundBody'),
           );
         }
       }
     } finally {
       setLoading(false);
     }
-  }, [navigation]);
+  }, [navigation, t]);
 
   const handleDismiss = useCallback(async () => {
     try {
@@ -558,7 +563,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                 <Text
                   style={[styles.title, { color: theme.colors.textPrimary }]}
                 >
-                  Habitic Pro
+                  {t('paywall.title')}
                 </Text>
                 <AnimatedPressable
                   onPress={handleDismiss}
@@ -594,12 +599,12 @@ export default function PaywallScreen({ navigation, route }: any) {
                     { backgroundColor: theme.colors.accent },
                   ]}
                 >
-                  <Text style={styles.proBadgeText}>ACTIVE</Text>
+                  <Text style={styles.proBadgeText}>{t('paywall.active')}</Text>
                 </View>
                 <Text
                   style={[styles.proTitle, { color: theme.colors.textPrimary }]}
                 >
-                  You're a Pro user!
+                  {t('paywall.youArePro')}
                 </Text>
                 <Text
                   style={[
@@ -607,7 +612,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                     { color: theme.colors.textMuted },
                   ]}
                 >
-                  You have access to all premium features.
+                  {t('paywall.youHaveAccess')}
                 </Text>
                 {proExpiration && (
                   <Text
@@ -616,7 +621,9 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    Expires: {new Date(proExpiration).toLocaleDateString()}
+                    {t('paywall.expires', {
+                      date: new Date(proExpiration).toLocaleDateString(),
+                    })}
                   </Text>
                 )}
                 {fetchError && (
@@ -626,8 +633,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    (Showing cached status — couldn't refresh from the store
-                    just now)
+                    {t('paywall.cachedStatus')}
                   </Text>
                 )}
               </Animated.View>
@@ -664,7 +670,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                   style={styles.ctaButton}
                   onPress={handleManageSubscription}
                 >
-                  <Text style={styles.ctaText}>Manage Subscription</Text>
+                  <Text style={styles.ctaText}>{t('common.manageSubscription')}</Text>
                 </NeumorphicButton>
               </AnimatedPressable>
 
@@ -676,7 +682,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    Restore Purchases
+                    {t('common.restorePurchases')}
                   </Text>
                 </Pressable>
               </View>
@@ -719,7 +725,9 @@ export default function PaywallScreen({ navigation, route }: any) {
     annualSavingsPct = pct;
     // Disclose the renewal price after the intro period — required by
     // Apple's guidelines and just good practice for a genuine offer.
-    annualIntroNote = `then ${annualPkg.product.priceString}/yr`;
+    annualIntroNote = t('paywall.thenPerYear', {
+      price: annualPkg.product.priceString,
+    });
   } else if (annualPkg && weeklyPkg) {
     const weeklyPrice = weeklyPkg.product.price;
     const annualPrice = annualPkg.product.price;
@@ -755,14 +763,14 @@ export default function PaywallScreen({ navigation, route }: any) {
     weeklyPkg && {
       key: 'weekly',
       pkg: weeklyPkg,
-      title: 'Weekly',
-      subtitle: 'per week',
+      title: t('paywall.planWeekly'),
+      subtitle: t('paywall.perWeek'),
     },
     annualPkg && {
       key: 'annual',
       pkg: annualPkg,
-      title: 'Yearly',
-      subtitle: annualIntroNote || 'per year',
+      title: t('paywall.planYearly'),
+      subtitle: annualIntroNote || t('paywall.perYear'),
       best: true,
       displayPrice: annualDisplayPrice,
       strikePrice: annualStrike,
@@ -771,8 +779,8 @@ export default function PaywallScreen({ navigation, route }: any) {
     lifetimePkg && {
       key: 'lifetime',
       pkg: lifetimePkg,
-      title: 'Lifetime',
-      subtitle: 'one-time',
+      title: t('paywall.planLifetime'),
+      subtitle: t('paywall.oneTime'),
       strikePrice: lifetimeStrike,
       savingsPct: lifetimeSavingsPct,
     },
@@ -798,7 +806,7 @@ export default function PaywallScreen({ navigation, route }: any) {
           <Raised radius={theme.radii.card} distance={10} style={styles.card}>
             <View style={styles.header}>
               <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-                Habitic Pro
+                {t('paywall.title')}
               </Text>
               <AnimatedPressable
                 onPress={handleDismiss}
@@ -829,8 +837,8 @@ export default function PaywallScreen({ navigation, route }: any) {
               style={[styles.subtitle, { color: theme.colors.textMuted }]}
             >
               {expiredMode
-                ? 'Your Pro plan has expired. Renew to keep using unlimited habits, analytics, widgets, and all your premium features.'
-                : 'Unlock the full Habitic experience. Support development and get powerful features to supercharge your habit tracking.'}
+                ? t('paywall.expiredSubtitle')
+                : t('paywall.subtitle')}
             </Animated.Text>
 
             {expiredMode && proExpiration && (
@@ -841,7 +849,9 @@ export default function PaywallScreen({ navigation, route }: any) {
                   { color: theme.colors.textMuted, marginTop: -8 },
                 ]}
               >
-                Expired on {new Date(proExpiration).toLocaleDateString()}.
+                {t('paywall.expiredOn', {
+                  date: new Date(proExpiration).toLocaleDateString(),
+                })}
               </Animated.Text>
             )}
 
@@ -852,8 +862,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                   { color: theme.colors.textMuted, marginTop: -12 },
                 ]}
               >
-                We couldn't refresh your subscription status just now. If you're
-                already Pro, try again shortly or restore purchases below.
+                {t('paywall.fetchError')}
               </Text>
             )}
 
@@ -880,7 +889,7 @@ export default function PaywallScreen({ navigation, route }: any) {
               entering={FadeInDown.delay(120).duration(300)}
               style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}
             >
-              Choose your plan
+              {t('paywall.choosePlan')}
             </Animated.Text>
 
             <View style={styles.plansRow}>
@@ -893,7 +902,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    Loading plans…
+                    {t('paywall.loadingPlans')}
                   </Text>
                 </View>
               )}
@@ -906,8 +915,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    We couldn't load pricing right now. Check your connection
-                    and try again.
+                    {t('paywall.pricingError')}
                   </Text>
                   <NeumorphicButton
                     radius={14}
@@ -916,7 +924,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                     style={styles.retryButton}
                     onPress={loadPricing}
                   >
-                    <Text style={styles.ctaText}>Try Again</Text>
+                    <Text style={styles.ctaText}>{t('paywall.tryAgain')}</Text>
                   </NeumorphicButton>
                 </View>
               )}
@@ -980,9 +988,9 @@ export default function PaywallScreen({ navigation, route }: any) {
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <Text style={styles.ctaText}>
-                    {`${expiredMode ? 'Renew' : 'Continue'}${
-                      selectedPackage ? ` — ${selectedPkg}` : ''
-                    }`}
+                    {`${
+                      expiredMode ? t('paywall.renew') : t('paywall.continue')
+                    }${selectedPackage ? ` — ${selectedPkg}` : ''}`}
                   </Text>
                 )}
               </NeumorphicButton>
@@ -993,7 +1001,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                 <Text
                   style={[styles.footerLink, { color: theme.colors.textMuted }]}
                 >
-                  Restore Purchases
+                  {t('common.restorePurchases')}
                 </Text>
               </Pressable>
               <View style={styles.footerRow}>
@@ -1004,7 +1012,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    Privacy
+                    {t('paywall.privacy')}
                   </Text>
                 </Pressable>
                 <Text
@@ -1019,7 +1027,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       { color: theme.colors.textMuted },
                     ]}
                   >
-                    Terms
+                    {t('paywall.terms')}
                   </Text>
                 </Pressable>
               </View>

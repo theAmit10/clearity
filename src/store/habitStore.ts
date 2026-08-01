@@ -10,6 +10,7 @@ import { WidgetModule } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
 import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import type { CustomerInfo } from 'react-native-purchases';
+import { t } from '../i18n';
 
 interface HabitState {
   habits: Habit[];
@@ -180,7 +181,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const activeCount = state.habits.filter(h => !h.archived).length;
     if (!state.isPro && activeCount >= FREE_HABIT_LIMIT) {
       logEvent('info', 'Habit creation blocked — free limit reached');
-      throw new Error(`Free tier is limited to ${FREE_HABIT_LIMIT} habits. Upgrade to Pro for unlimited.`);
+      throw new Error(t('habitStore.habitLimitBody', { count: FREE_HABIT_LIMIT }));
     }
     const habit: Habit = {
       ...data,
@@ -327,7 +328,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const existingCount = state.habitNotifications.filter(n => n.habitId === habitId).length;
     if (!state.isPro && existingCount >= FREE_NOTIF_LIMIT) {
       logEvent('info', 'Notification creation blocked — free limit reached');
-      throw new Error(`Free tier is limited to ${FREE_NOTIF_LIMIT} reminder per habit. Upgrade to Pro for unlimited.`);
+      throw new Error(t('habitStore.notifLimitBody', { count: FREE_NOTIF_LIMIT }));
     }
     const config: HabitNotificationConfig = {
       id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,

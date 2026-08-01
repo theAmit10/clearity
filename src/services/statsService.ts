@@ -1,5 +1,6 @@
 import { Habit } from '../types/habit';
 import { toDateKey, addDays } from './dateUtils';
+import { t } from '../i18n';
 
 export interface OverallStats {
   totalHabits: number;
@@ -322,57 +323,57 @@ export function computeStats(habits: Habit[]): StatsData {
   if (bestHabit && worstHabit && bestHabit.id !== worstHabit.id) {
     insights.push({
       type: 'positive',
-      text: `Best habit: "${bestHabit.name}" at ${bestHabit.completionRateAll}% completion`,
+      text: t('analytics.bestHabitInsight', { name: bestHabit.name, rate: bestHabit.completionRateAll }),
     });
     insights.push({
       type: 'negative',
-      text: `Needs attention: "${worstHabit.name}" at ${worstHabit.completionRateAll}%`,
+      text: t('analytics.worstHabitInsight', { name: worstHabit.name, rate: worstHabit.completionRateAll }),
     });
   }
   if (overall.currentStreak >= 7) {
     insights.push({
       type: 'positive',
-      text: `🔥 ${overall.currentStreak}-day streak! You're on fire!`,
+      text: t('analytics.streakFireInsight', { count: overall.currentStreak }),
     });
   }
   if (overall.perfectDays >= 5) {
     insights.push({
       type: 'positive',
-      text: `${overall.perfectDays} perfect days — all habits completed!`,
+      text: t('analytics.perfectDaysInsight', { count: overall.perfectDays }),
     });
   }
   const bestWeekDay = [...weekdayBreakdown].sort((a, b) => b.rate - a.rate)[0];
   if (bestWeekDay && bestWeekDay.rate > 0) {
     insights.push({
       type: 'neutral',
-      text: `Most consistent on ${bestWeekDay.day}s (${bestWeekDay.rate}%)`,
+      text: t('analytics.consistentDayInsight', { day: bestWeekDay.day, rate: bestWeekDay.rate }),
     });
   }
   const worstWeekDay = [...weekdayBreakdown].sort((a, b) => a.rate - b.rate)[0];
   if (worstWeekDay && worstWeekDay.rate > 0 && worstWeekDay.day !== bestWeekDay?.day) {
     insights.push({
       type: 'neutral',
-      text: `${worstWeekDay.day}s need a boost (${worstWeekDay.rate}% completion)`,
+      text: t('analytics.weakDayInsight', { day: worstWeekDay.day, rate: worstWeekDay.rate }),
     });
   }
   const trendingDown = habitStats.filter(h => h.trend === 'declining');
   if (trendingDown.length > 0) {
     insights.push({
       type: 'negative',
-      text: `${trendingDown.length} habit${trendingDown.length > 1 ? 's' : ''} trending down this week`,
+      text: t('analytics.trendingDownInsight', { count: trendingDown.length }),
     });
   }
   const trendingUp = habitStats.filter(h => h.trend === 'improving');
   if (trendingUp.length > 0) {
     insights.push({
       type: 'positive',
-      text: `${trendingUp.length} habit${trendingUp.length > 1 ? 's' : ''} improving this week!`,
+      text: t('analytics.trendingUpInsight', { count: trendingUp.length }),
     });
   }
   if (active.length === 0) {
     insights.push({
       type: 'neutral',
-      text: 'Add some habits to see analytics and insights!',
+      text: t('analytics.emptyInsight'),
     });
   }
 

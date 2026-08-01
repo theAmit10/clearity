@@ -5,12 +5,18 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 
+jest.mock('react-native-worklets', () =>
+  require('react-native-worklets/lib/module/mock'),
+);
+jest.mock('react-native-reanimated', () =>
+  require('react-native-reanimated/mock'),
+);
+
 jest.mock('react-native-draggable-flatlist', () => {
   const View = require('react-native').View;
   return { default: View, ScaleDecorator: ({ children }: any) => children };
 });
 jest.mock('react-native-shadow-2', () => ({ Shadow: ({ children }: any) => children }));
-jest.mock('react-native-heroicons', () => ({}));
 
 jest.mock('react-native-gesture-handler', () => ({
   GestureHandlerRootView: 'View',
@@ -49,6 +55,48 @@ jest.mock('@notifee/react-native', () => ({
   EventType: { PRESS: 'press', ACTION_PRESS: 'action_press' },
   RepeatFrequency: { DAILY: 'daily' },
   TriggerType: { TIMESTAMP: 'timestamp' },
+}));
+
+jest.mock('react-native-localize', () => ({
+  getLocales: () => [{ languageCode: 'en', countryCode: 'US' }],
+  getCalendars: () => [{ calendar: 'gregorian' }],
+}));
+
+jest.mock('react-native-config', () => ({
+  MIXPANEL_TOKEN: '',
+  REVENUECAT_API_KEY: '',
+}));
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  removeItem: jest.fn().mockResolvedValue(undefined),
+  multiRemove: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('react-native-fs', () => ({
+  CachesDirectoryPath: '/tmp',
+  writeFile: jest.fn().mockResolvedValue(true),
+  readFile: jest.fn().mockResolvedValue(''),
+}));
+
+jest.mock('react-native-share', () => ({ open: jest.fn().mockResolvedValue(undefined) }));
+
+jest.mock('@react-native-documents/picker', () => ({
+  pick: jest.fn().mockResolvedValue([]),
+  keepLocalCopy: jest.fn().mockResolvedValue([]),
+  types: { allFiles: 'application/json' },
+}));
+
+jest.mock('@react-native-firebase/crashlytics', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    setCrashlyticsCollectionEnabled: jest.fn().mockResolvedValue(undefined),
+    isCrashlyticsCollectionEnabled: jest.fn().mockResolvedValue(false),
+    log: jest.fn(),
+    recordError: jest.fn(),
+    crash: jest.fn(),
+  })),
 }));
 
 import App from '../App';

@@ -8,18 +8,19 @@ import {
 } from 'react-native-heroicons/solid';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation, type TranslationKey } from '../i18n';
 
 type IconComponent = React.ComponentType<{ size?: number; color?: string }>;
 
 const TAB_META: Record<
   string,
-  { outline: IconComponent; solid: IconComponent; label: string }
+  { outline: IconComponent; solid: IconComponent; labelKey: TranslationKey }
 > = {
-  Home: { outline: HomeIcon, solid: HomeIconSolid, label: 'Home' },
+  Home: { outline: HomeIcon, solid: HomeIconSolid, labelKey: 'tabs.home' },
   Settings: {
     outline: Cog6ToothIcon,
     solid: Cog6ToothIconSolid,
-    label: 'Settings',
+    labelKey: 'tabs.settings',
   },
 };
 
@@ -32,6 +33,7 @@ const TAB_META: Record<
 export default function NeumorphicTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View
@@ -89,7 +91,7 @@ export default function NeumorphicTabBar({ state, navigation }: any) {
                         color: theme.colors.accent,
                       }}
                     >
-                      {meta.label}
+                      {t(meta.labelKey)}
                     </Text>
                   </Inset>
                 ) : (
@@ -112,7 +114,7 @@ export default function NeumorphicTabBar({ state, navigation }: any) {
                         color: theme.colors.textMuted,
                       }}
                     >
-                      {meta.label}
+                      {t(meta.labelKey)}
                     </Text>
                   </View>
                 )}

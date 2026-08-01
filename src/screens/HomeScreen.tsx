@@ -10,15 +10,19 @@ import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import {
-  getCategoryName,
   getCategoryIcon,
   BUILT_IN_CATEGORIES,
 } from '../constants/habitCategories';
 import { getHabitIcon } from '../constants/habitIcons';
 import type { HabitCategory } from '../types/habit';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
+
+const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
 
 export default function HomeScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   // IMPORTANT: select the raw array (stable reference) from the store, then
   // derive the filtered list with useMemo. Never return a freshly-created
   // array/object directly from a Zustand selector — a new reference on every
@@ -34,6 +38,11 @@ export default function HomeScreen({ navigation }: any) {
     [allHabits],
   );
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const localizedCategoryName = (key: string, meta?: HabitCategory): string =>
+    BUILT_IN_KEYS.has(key)
+      ? t(`categories.${key}` as TranslationKey)
+      : meta?.name ?? key;
 
   const categoryMeta = useMemo(() => {
     const map = new Map<string, HabitCategory>();
@@ -121,7 +130,9 @@ export default function HomeScreen({ navigation }: any) {
               const IconComp = isAll
                 ? null
                 : getHabitIcon(meta?.icon ?? getCategoryIcon(cat));
-              const label = isAll ? 'All' : meta?.name ?? getCategoryName(cat);
+              const label = isAll
+                ? t('home.all')
+                : localizedCategoryName(cat, meta);
               return (
                 <NeumorphicButton
                   key={cat}
@@ -175,8 +186,8 @@ export default function HomeScreen({ navigation }: any) {
                 style={[styles.emptyText, { color: theme.colors.textMuted }]}
               >
                 {selectedCategory === 'all'
-                  ? 'No habits yet.\nTap + to add your first one.'
-                  : 'No habits in this category.'}
+                  ? t('home.empty')
+                  : t('home.emptyCategory')}
               </Text>
             </Raised>
           </View>

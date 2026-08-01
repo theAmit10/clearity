@@ -11,9 +11,13 @@ import HeatmapGrid from './HeatmapGrid';
 import { todayKey } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 import { getHabitIcon } from '../constants/habitIcons';
-import { getCategoryMeta } from '../constants/habitCategories';
+import { getCategoryMeta, BUILT_IN_CATEGORIES } from '../constants/habitCategories';
 import Svg, { Path } from 'react-native-svg';
+
+const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
 
 interface Props {
   habit: Habit;
@@ -31,13 +35,16 @@ export default function HabitCard({
   isDragging,
 }: Props) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const showStreaks = useHabitStore(s => s.showStreaks);
   const showCategoryBadges = useHabitStore(s => s.showCategoryBadges);
   const showFrequency = useHabitStore(s => s.showFrequency);
   const customCategories = useHabitStore(s => s.customCategories);
   const categoryName =
     habit.category && habit.category !== 'none'
-      ? getCategoryMeta(habit.category, customCategories)?.name ?? habit.category
+      ? BUILT_IN_KEYS.has(habit.category)
+        ? t(`categories.${habit.category}` as TranslationKey)
+        : getCategoryMeta(habit.category, customCategories)?.name ?? habit.category
       : '';
   const stats = computeStats(habit);
   const count = habit.completions[todayKey()] || 0;
@@ -87,19 +94,18 @@ export default function HabitCard({
             <View style={styles.streakRow}>
               {showStreaks && (
                 <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
-                  {stats.currentStreak} day{stats.currentStreak === 1 ? '' : 's'}{' '}
-                  Streak
+                  {t('stats.dayStreak', { count: stats.currentStreak })}
                 </Text>
               )}
               {showFrequency && (
                 <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}>
                   {habit.frequency === 'n_times_per_week'
-                    ? `${habit.frequencyValue ?? 3}x / week`
+                    ? t('stats.freqPerWeek', { count: habit.frequencyValue ?? 3 })
                     : habit.frequency === 'n_times_per_month'
-                    ? `${habit.frequencyValue ?? 1}x / month`
+                    ? t('stats.freqPerMonth', { count: habit.frequencyValue ?? 1 })
                     : habit.frequency === 'n_times_in_m_days'
-                    ? `${habit.frequencyValue ?? 1}x / ${habit.frequencyWindow ?? 7} days`
-                    : 'Daily'}
+                    ? t('stats.freqInDays', { count: habit.frequencyValue ?? 1, window: habit.frequencyWindow ?? 7 })
+                    : t('frequency.daily')}
                 </Text>
               )}
             </View>

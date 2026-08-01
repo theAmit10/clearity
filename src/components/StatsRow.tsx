@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { HabitStats } from '../types/habit';
 import { Raised } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 
 interface Props {
   stats: HabitStats;
@@ -47,24 +48,25 @@ function AnimatedNumber({
 
 export default function StatsRow({ stats, goal }: Props) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   return (
     <View style={styles.row}>
       <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
         <AnimatedNumber value={stats.currentStreak} suffix="d" color={theme.colors.textPrimary} />
-        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Streak</Text>
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>{t('stats.streak')}</Text>
       </Raised>
       <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
         <AnimatedNumber value={stats.bestStreak} suffix="d" color={theme.colors.textPrimary} />
-        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Best</Text>
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>{t('stats.best')}</Text>
       </Raised>
       <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
         <AnimatedNumber value={stats.completionRate30d} suffix="%" color={theme.colors.textPrimary} />
-        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>30d</Text>
+        <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>{t('stats.last30d')}</Text>
       </Raised>
       {goal && (
         <Raised radius={theme.radii.pill} distance={5} style={styles.chip}>
           <Text style={[styles.statValue, { color: theme.colors.textPrimary }]}>{goal}</Text>
-          <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>Goal</Text>
+          <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>{t('stats.goal')}</Text>
         </Raised>
       )}
     </View>

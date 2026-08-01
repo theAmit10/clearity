@@ -25,9 +25,11 @@ import type { HabitCategory } from '../types/habit';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 
 export default function NewCategoryScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const addCustomCategory = useHabitStore(s => s.addCustomCategory);
   const cardScale = useSharedValue(0.95);
   const cardOpacity = useSharedValue(0);
@@ -65,11 +67,11 @@ export default function NewCategoryScreen({ navigation }: any) {
   const handleCancel = () => {
     if (name.trim()) {
       Alert.alert(
-        'Discard new category?',
-        'Your category name and icon will not be saved.',
+        t('newCategory.discardTitle'),
+        t('newCategory.discardBody'),
         [
-          { text: 'Keep editing', style: 'cancel' },
-          { text: 'Discard', style: 'destructive', onPress: () => navigation.goBack() },
+          { text: t('newCategory.keepEditing'), style: 'cancel' },
+          { text: t('newCategory.discard'), style: 'destructive', onPress: () => navigation.goBack() },
         ],
       );
       return;
@@ -102,7 +104,7 @@ export default function NewCategoryScreen({ navigation }: any) {
                       { color: theme.colors.textPrimary },
                     ]}
                   >
-                    New Category
+                    {t('newCategory.title')}
                   </Text>
                   <NeumorphicButton
                     radius={16}
@@ -122,13 +124,13 @@ export default function NewCategoryScreen({ navigation }: any) {
                 </View>
 
                 <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-                  Name
+                  {t('common.name')}
                 </Text>
                 <Inset radius={14} style={styles.inputWrap}>
                   <TextInput
                     value={name}
                     onChangeText={setName}
-                    placeholder="e.g. Reading"
+                    placeholder={t('newCategory.namePlaceholder')}
                     placeholderTextColor={theme.colors.textMuted}
                     style={[styles.input, { color: theme.colors.textPrimary }]}
                     autoFocus
@@ -136,7 +138,7 @@ export default function NewCategoryScreen({ navigation }: any) {
                 </Inset>
 
                 <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-                  Icon
+                  {t('addHabit.icon')}
                 </Text>
                 <View style={styles.row}>
                   {HABIT_ICONS.map(({ key, Icon }) => {
@@ -178,7 +180,7 @@ export default function NewCategoryScreen({ navigation }: any) {
                         { color: theme.colors.textMuted },
                       ]}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Text>
                   </NeumorphicButton>
                   <NeumorphicButton
@@ -192,7 +194,7 @@ export default function NewCategoryScreen({ navigation }: any) {
                     onPress={handleCreate}
                   >
                     <Text style={[styles.actionButtonText, { color: '#FFFFFF' }]}>
-                      Create
+                      {t('common.create')}
                     </Text>
                   </NeumorphicButton>
                 </View>

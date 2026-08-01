@@ -14,9 +14,11 @@ import CheckIcon from 'react-native-heroicons/outline/CheckIcon';
 import { useHabitStore } from '../store/habitStore';
 import { getAppUserId } from '../services/revenueCat';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 import ScreenHeader from '../components/ScreenHeader';
 
 export default function GeneralScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const isPro = useHabitStore(s => s.isPro);
   const showCategories = useHabitStore(s => s.showCategories);
@@ -54,17 +56,17 @@ export default function GeneralScreen({ navigation }: any) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <ScreenHeader navigation={navigation} title="General" />
+        <ScreenHeader navigation={navigation} title={t('general.title')} />
 
         {isPro && (
           <View style={[styles.sectionBody, styles.idSection, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
               <View style={styles.rowText}>
                 <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                  User ID
+                  {t('general.userId')}
                 </Text>
                 <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                  Your support identifier. Share it with support if you ever need help.
+                  {t('general.userIdHint')}
                 </Text>
               </View>
             </View>
@@ -92,7 +94,7 @@ export default function GeneralScreen({ navigation }: any) {
                     { color: copied ? theme.colors.iosGreen : theme.colors.iosBlue },
                   ]}
                 >
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('common.copied') : t('common.copy')}
                 </Text>
               </Pressable>
             </View>
@@ -103,10 +105,10 @@ export default function GeneralScreen({ navigation }: any) {
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                Show category filters
+                {t('general.showCategories')}
               </Text>
               <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                Display category filter bar on the home screen
+                {t('general.showCategoriesHint')}
               </Text>
             </View>
             <Switch
@@ -120,10 +122,10 @@ export default function GeneralScreen({ navigation }: any) {
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                Show streaks
+                {t('general.showStreaks')}
               </Text>
               <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                Display streak count on each habit card
+                {t('general.showStreaksHint')}
               </Text>
             </View>
             <Switch
@@ -137,10 +139,10 @@ export default function GeneralScreen({ navigation }: any) {
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                Show category badges
+                {t('general.showCategoryBadges')}
               </Text>
               <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                Display category label on each habit card
+                {t('general.showCategoryBadgesHint')}
               </Text>
             </View>
             <Switch
@@ -154,10 +156,10 @@ export default function GeneralScreen({ navigation }: any) {
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                Show frequency labels
+                {t('general.showFrequency')}
               </Text>
               <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                Display Daily / 3x per week label on each habit card
+                {t('general.showFrequencyHint')}
               </Text>
             </View>
             <Switch
@@ -171,10 +173,10 @@ export default function GeneralScreen({ navigation }: any) {
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
-                Crash reporting
+                {t('general.crashReporting')}
               </Text>
               <Text style={[styles.rowHint, { color: theme.colors.iosSecondaryLabel }]}>
-                Send crash reports to help improve the app
+                {t('general.crashReportingHint')}
               </Text>
             </View>
             <Switch

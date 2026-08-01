@@ -7,9 +7,11 @@ import { useTheme } from '../theme/ThemeProvider';
 import { useHabitStore } from '../store/habitStore';
 import { Raised } from './neumorphic/NeumorphicView';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
+import { useTranslation } from '../i18n';
 
 export default function ProGate({ children }: { children?: React.ReactNode }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation() as any;
   const isPro = useHabitStore(s => s.isPro);
   const proExpired = useHabitStore(s => s.proExpired);
@@ -26,12 +28,10 @@ export default function ProGate({ children }: { children?: React.ReactNode }) {
           <Icon size={32} color={theme.colors.accent} />
         </View>
         <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-          {expired ? 'Your plan has expired' : 'Pro feature'}
+          {expired ? t('proGate.planExpired') : t('proGate.proFeature')}
         </Text>
         <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-          {expired
-            ? 'Renew your Pro subscription to keep using this feature.'
-            : 'This is a Pro feature. Upgrade to unlock it.'}
+          {expired ? t('proGate.renewBody') : t('proGate.upgradeBody')}
         </Text>
         <NeumorphicButton
           radius={16}
@@ -46,7 +46,7 @@ export default function ProGate({ children }: { children?: React.ReactNode }) {
           }
         >
           <Text style={styles.buttonText}>
-            {expired ? 'Renew Pro' : 'Upgrade to Pro'}
+            {expired ? t('common.renewPro') : t('common.upgradeToPro')}
           </Text>
         </NeumorphicButton>
       </Raised>

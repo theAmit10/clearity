@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
+import { useTranslation } from '../../i18n';
 import Pressed from './Pressed';
 
 type CellState = 'empty' | 'faint' | 'filled';
@@ -9,8 +10,8 @@ interface StreakHeatmapProps {
   completions: Record<string, number>;
 }
 
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const ROWS = ['Tue', 'Thu', 'Sat'] as const;
+const ROW_WEEKDAY_INDEX: Record<(typeof ROWS)[number], number> = { Tue: 2, Thu: 4, Sat: 6 };
 const CELL_SIZE = 8;
 const CELL_GAP = 3;
 
@@ -21,7 +22,7 @@ function toDateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function buildHeatmapData(completions: Record<string, number>) {
+function buildHeatmapData(completions: Record<string, number>, monthNames: string[]) {
   const now = new Date();
   return [5, 4, 3, 2, 1, 0].map(i => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -46,7 +47,7 @@ function buildHeatmapData(completions: Record<string, number>) {
     }
 
     return {
-      label: MONTH_NAMES[month].toUpperCase(),
+      label: monthNames[month].toUpperCase(),
       tue, thu, sat,
     };
   });
@@ -62,8 +63,11 @@ function Cell({ state, accent, backgroundDeep }: { state: CellState; accent: str
 
 export default function StreakHeatmap({ completions }: StreakHeatmapProps) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { colors, radii, spacing, typography } = theme;
-  const data = useMemo(() => buildHeatmapData(completions), [completions]);
+  const monthNames = t('calendar.monthsShort') as unknown as string[];
+  const weekdays = t('calendar.weekdaysShort') as unknown as string[];
+  const data = useMemo(() => buildHeatmapData(completions, monthNames), [completions, monthNames]);
 
   const maxCells = Math.max(...data.flatMap(m => [m.tue.length, m.thu.length, m.sat.length]));
   const monthContentWidth = maxCells * (CELL_SIZE + CELL_GAP);
@@ -111,7 +115,7 @@ export default function StreakHeatmap({ completions }: StreakHeatmapProps) {
                   { color: colors.textMuted, width: labelWidth },
                 ]}
               >
-                {row}
+                {weekdays[ROW_WEEKDAY_INDEX[row]]}
               </Text>
               <View style={{ flexDirection: 'row' }}>
                 {cells.map((monthCells, mi) => (

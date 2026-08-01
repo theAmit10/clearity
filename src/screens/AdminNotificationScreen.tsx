@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHabitStore } from '../store/habitStore';
 import { useTheme } from '../theme/ThemeProvider';
+import { useTranslation } from '../i18n';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
@@ -24,6 +25,7 @@ function TimePickerRow({ hour, minute, onHourChange, onMinuteChange }: {
   onMinuteChange: (m: number) => void;
 }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const hourScale = useRef(new Animated.Value(1)).current;
   const minuteScale = useRef(new Animated.Value(1)).current;
 
@@ -53,7 +55,7 @@ function TimePickerRow({ hour, minute, onHourChange, onMinuteChange }: {
         </Animated.Text>
       </View>
 
-      <Text style={[admStyles.pickerLabel, { color: theme.colors.iosSecondaryLabel }]}>HOUR</Text>
+      <Text style={[admStyles.pickerLabel, { color: theme.colors.iosSecondaryLabel }]}>{t('common.hour').toUpperCase()}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={admStyles.pickerScroll}>
         {HOURS.map(h => (
           <Pressable
@@ -68,7 +70,7 @@ function TimePickerRow({ hour, minute, onHourChange, onMinuteChange }: {
         ))}
       </ScrollView>
 
-      <Text style={[admStyles.pickerLabel, { color: theme.colors.iosSecondaryLabel, marginTop: 8 }]}>MIN</Text>
+      <Text style={[admStyles.pickerLabel, { color: theme.colors.iosSecondaryLabel, marginTop: 8 }]}>{t('common.minute').toUpperCase()}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={admStyles.pickerScroll}>
         {MINUTES.map(m => (
           <Pressable
@@ -88,6 +90,7 @@ function TimePickerRow({ hour, minute, onHourChange, onMinuteChange }: {
 
 export default function AdminNotificationScreen({ navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const adminNotifications = useHabitStore(s => s.adminNotifications);
   const updateAdminNotification = useHabitStore(s => s.updateAdminNotification);
   const addAdminNotification = useHabitStore(s => s.addAdminNotification);
@@ -101,7 +104,7 @@ export default function AdminNotificationScreen({ navigation }: any) {
 
   const handleAdd = async () => {
     if (!newTitle.trim()) {
-      Alert.alert('Validation', 'Please enter a title.');
+      Alert.alert(t('adminNotifications.validationTitle'), t('adminNotifications.pleaseEnterTitle'));
       return;
     }
     const id = `admin-${Date.now()}`;
@@ -121,10 +124,10 @@ export default function AdminNotificationScreen({ navigation }: any) {
   };
 
   const handleRemove = (id: string) => {
-    Alert.alert('Remove notification?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('adminNotifications.removeTitle'), t('adminNotifications.removeBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Remove',
+        text: t('adminNotifications.remove'),
         style: 'destructive',
         onPress: () => removeAdminNotification(id),
       },
@@ -136,12 +139,12 @@ export default function AdminNotificationScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Pressable onPress={() => navigation.goBack()} style={admStyles.backRow}>
           <Text style={[admStyles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
-          <Text style={[admStyles.backText, { color: theme.colors.iosBlue }]}>Notifications</Text>
+          <Text style={[admStyles.backText, { color: theme.colors.iosBlue }]}>{t('common.notifications')}</Text>
         </Pressable>
 
-        <Text style={[admStyles.title, { color: theme.colors.iosLabel }]}>Admin Notifications</Text>
+        <Text style={[admStyles.title, { color: theme.colors.iosLabel }]}>{t('adminNotifications.title')}</Text>
         <Text style={[admStyles.subtitle, { color: theme.colors.iosSecondaryLabel }]}>
-          Configure hardcoded daily reminders sent to all users at specified times.
+          {t('adminNotifications.subtitle')}
         </Text>
 
         {adminNotifications.map((n, i) => (
@@ -157,40 +160,40 @@ export default function AdminNotificationScreen({ navigation }: any) {
                       : { backgroundColor: theme.colors.iosBg, color: theme.colors.iosSecondaryLabel },
                   ]}
                 >
-                  {n.enabled ? 'Active' : 'Paused'}
+                  {t(n.enabled ? 'common.active' : 'common.paused')}
                 </Text>
                 <Pressable onPress={() => handleRemove(n.id)}>
-                  <Text style={[admStyles.deleteBtn, { color: theme.colors.iosRed }]}>Delete</Text>
+                  <Text style={[admStyles.deleteBtn, { color: theme.colors.iosRed }]}>{t('common.delete')}</Text>
                 </Pressable>
               </View>
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Title</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.notificationTitle')}</Text>
               <TextInput
                 style={[admStyles.input, { color: theme.colors.iosLabel, borderColor: theme.colors.iosSeparator }]}
                 value={n.title}
                 onChangeText={val => updateAdminNotification(n.id, { title: val })}
-                placeholder="Notification title"
+                placeholder={t('adminNotifications.titlePlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
               />
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Body</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.body')}</Text>
               <TextInput
                 style={[admStyles.input, { color: theme.colors.iosLabel, borderColor: theme.colors.iosSeparator }]}
                 value={n.body}
                 onChangeText={val => updateAdminNotification(n.id, { body: val })}
-                placeholder="Notification message"
+                placeholder={t('adminNotifications.bodyPlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
               />
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Enabled</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('common.enabled')}</Text>
               <View style={admStyles.toggleRow}>
-                <Text style={[admStyles.toggleLabel, { color: theme.colors.iosLabel }]}>{n.enabled ? 'On' : 'Off'}</Text>
+                <Text style={[admStyles.toggleLabel, { color: theme.colors.iosLabel }]}>{t(n.enabled ? 'common.on' : 'common.off')}</Text>
                 <Pressable
                   style={[admStyles.toggleBtn, { backgroundColor: n.enabled ? theme.colors.iosGreen : theme.colors.iosSeparator }]}
                   onPress={() => updateAdminNotification(n.id, { enabled: !n.enabled })}
@@ -201,7 +204,7 @@ export default function AdminNotificationScreen({ navigation }: any) {
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Time</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.time')}</Text>
               <TimePickerRow
                 hour={n.hour}
                 minute={n.minute}
@@ -214,32 +217,32 @@ export default function AdminNotificationScreen({ navigation }: any) {
 
         {showAddForm ? (
           <View style={[admStyles.addCard, { backgroundColor: theme.colors.surface }]}>
-            <Text style={[admStyles.addTitle, { color: theme.colors.iosLabel }]}>Add Notification</Text>
+            <Text style={[admStyles.addTitle, { color: theme.colors.iosLabel }]}>{t('adminNotifications.addTitle')}</Text>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Title</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.notificationTitle')}</Text>
               <TextInput
                 style={[admStyles.input, { color: theme.colors.iosLabel, borderColor: theme.colors.iosSeparator }]}
                 value={newTitle}
                 onChangeText={setNewTitle}
-                placeholder="Notification title"
+                placeholder={t('adminNotifications.titlePlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
               />
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Body</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.body')}</Text>
               <TextInput
                 style={[admStyles.input, { color: theme.colors.iosLabel, borderColor: theme.colors.iosSeparator }]}
                 value={newBody}
                 onChangeText={setNewBody}
-                placeholder="Notification message"
+                placeholder={t('adminNotifications.bodyPlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
               />
             </View>
 
             <View style={admStyles.field}>
-              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>Time</Text>
+              <Text style={[admStyles.label, { color: theme.colors.iosSecondaryLabel }]}>{t('adminNotifications.time')}</Text>
               <TimePickerRow
                 hour={newHour}
                 minute={newMinute}
@@ -250,16 +253,16 @@ export default function AdminNotificationScreen({ navigation }: any) {
 
             <View style={admStyles.addBtnRow}>
               <Pressable style={admStyles.cancelBtn} onPress={() => setShowAddForm(false)}>
-                <Text style={[admStyles.cancelBtnText, { color: theme.colors.iosSecondaryLabel }]}>Cancel</Text>
+                <Text style={[admStyles.cancelBtnText, { color: theme.colors.iosSecondaryLabel }]}>{t('common.cancel')}</Text>
               </Pressable>
               <Pressable style={[admStyles.addBtn, { backgroundColor: theme.colors.iosBlue }]} onPress={handleAdd}>
-                <Text style={[admStyles.addBtnText, { color: theme.colors.surface }]}>Add</Text>
+                <Text style={[admStyles.addBtnText, { color: theme.colors.surface }]}>{t('common.add')}</Text>
               </Pressable>
             </View>
           </View>
         ) : (
           <Pressable style={[admStyles.addCardBtn, { backgroundColor: theme.colors.surface }]} onPress={() => setShowAddForm(true)}>
-            <Text style={[admStyles.addCardBtnText, { color: theme.colors.iosBlue }]}>+ Add Notification</Text>
+            <Text style={[admStyles.addCardBtnText, { color: theme.colors.iosBlue }]}>{t('adminNotifications.addButton')}</Text>
           </Pressable>
         )}
       </ScrollView>

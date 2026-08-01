@@ -18,11 +18,13 @@ import { TrashIcon } from 'react-native-heroicons/outline';
 import { useTheme } from '../theme/ThemeProvider';
 import { FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import { requestPermission } from '../services/notification';
+import { useTranslation } from '../i18n';
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
 export default function HabitNotificationConfigScreen({ route, navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   function TimePickerItem({ value, selected, onPress, label }: {
     value: number;
@@ -134,7 +136,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   if (!habit) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.iosBg }]}>
-        <Text style={[styles.notFoundText, { color: theme.colors.iosRed }]}>Habit not found</Text>
+        <Text style={[styles.notFoundText, { color: theme.colors.iosRed }]}>{t('habitNotifications.habitNotFound')}</Text>
       </SafeAreaView>
     );
   }
@@ -142,12 +144,12 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
   const validate = () => {
     const errs: { title?: string; description?: string } = {};
     if (!title.trim()) {
-      errs.title = 'Title is required';
+      errs.title = t('habitNotifications.titleRequired');
     } else if (title.trim().length > 50) {
-      errs.title = 'Title must be 50 characters or fewer';
+      errs.title = t('habitNotifications.titleTooLong');
     }
     if (description.trim().length > 120) {
-      errs.description = 'Description must be 120 characters or fewer';
+      errs.description = t('habitNotifications.descriptionTooLong');
     }
     setErrors(errs);
     setTitleTouched(true);
@@ -166,8 +168,8 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
         await addHabitNotification(habitId, data);
       } catch (err: any) {
         Alert.alert(
-          'Reminder limit reached',
-          err?.message ?? `Free tier is limited to ${FREE_NOTIF_LIMIT} reminder per habit. Upgrade to Pro for unlimited.`,
+          t('habitNotifications.limitTitle'),
+          err?.message ?? t('habitNotifications.limitBody', { count: FREE_NOTIF_LIMIT }),
         );
         return;
       }
@@ -190,7 +192,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           <Pressable onPress={handleCancel} style={styles.backRow}>
             <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
             <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>
-              {editingId ? 'Edit Reminder' : 'New Reminder'}
+              {t(editingId ? 'habitNotifications.editReminder' : 'habitNotifications.newReminder')}
             </Text>
           </Pressable>
 
@@ -201,20 +203,20 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
             <View style={styles.headerTextCol}>
               <Text style={[styles.title, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
               <Text style={[styles.subtitle, { color: theme.colors.iosSecondaryLabel }]}>
-                {editingId ? 'Edit your reminder' : 'Create a new reminder'}
+                {t(editingId ? 'habitNotifications.editReminderSubtitle' : 'habitNotifications.newReminderSubtitle')}
               </Text>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>NOTIFICATION TITLE</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('habitNotifications.notificationTitle')}</Text>
             <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
               <TextInput
                 style={[styles.input, { color: theme.colors.iosLabel }]}
                 value={title}
                 onChangeText={t => { setTitle(t); setTitleTouched(true); }}
                 onBlur={() => setTitleTouched(true)}
-                placeholder="e.g. Time for your habit!"
+                placeholder={t('habitNotifications.titlePlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
                 maxLength={50}
               />
@@ -225,14 +227,14 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>NOTIFICATION DESCRIPTION</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('habitNotifications.notificationDescription')}</Text>
             <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
               <TextInput
                 style={[styles.input, { color: theme.colors.iosLabel, minHeight: 60 }]}
                 value={description}
                 onChangeText={t => { setDescription(t); setDescriptionTouched(true); }}
                 onBlur={() => setDescriptionTouched(true)}
-                placeholder="e.g. Don't forget to stretch today!"
+                placeholder={t('habitNotifications.descriptionPlaceholder')}
                 placeholderTextColor={theme.colors.iosGray}
                 multiline
                 maxLength={120}
@@ -248,7 +250,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>TIME</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('habitNotifications.time')}</Text>
             <View style={[styles.timeCard, { backgroundColor: theme.colors.surface }]}>
               <View style={styles.timeDisplay}>
                 <Text style={[styles.timeDigits, { color: theme.colors.iosLabel }]}>
@@ -260,7 +262,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
                 </Text>
               </View>
 
-              <Text style={[styles.unitLabel, { color: theme.colors.iosSecondaryLabel }]}>Hour</Text>
+              <Text style={[styles.unitLabel, { color: theme.colors.iosSecondaryLabel }]}>{t('common.hour')}</Text>
               <ScrollView
                 ref={hourScrollRef}
                 horizontal
@@ -278,7 +280,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
                 ))}
               </ScrollView>
 
-              <Text style={[styles.unitLabel, { marginTop: 12, color: theme.colors.iosSecondaryLabel }]}>Minute</Text>
+              <Text style={[styles.unitLabel, { marginTop: 12, color: theme.colors.iosSecondaryLabel }]}>{t('common.minute')}</Text>
               <ScrollView
                 ref={minuteScrollRef}
                 horizontal
@@ -297,23 +299,23 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
               </ScrollView>
 
               <Text style={[styles.timezoneNote, { color: theme.colors.iosSecondaryLabel }]}>
-                Fires daily at this time based on your device timezone.
+                {t('habitNotifications.timezoneNote')}
               </Text>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>STATUS</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('habitNotifications.status')}</Text>
             <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
               <View style={styles.statusRow}>
                 <View>
                   <Text style={[styles.statusLabel, { color: theme.colors.iosLabel }]}>
-                    {enabled ? 'Notifications on' : 'Notifications off'}
+                    {t(enabled ? 'habitNotifications.notificationsOn' : 'habitNotifications.notificationsOff')}
                   </Text>
                   <Text style={[styles.statusHint, { color: theme.colors.iosSecondaryLabel }]}>
                     {enabled
-                      ? `Daily at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-                      : 'Tap to enable reminders'}
+                      ? t('habitNotifications.dailyAt', { time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}` })
+                      : t('habitNotifications.tapToEnable')}
                   </Text>
                 </View>
                 <Pressable
@@ -330,12 +332,12 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
 
           <Pressable style={[styles.saveButton, { backgroundColor: theme.colors.iosBlue }]} onPress={handleSave}>
             <Text style={[styles.saveButtonText, { color: theme.colors.surface }]}>
-              {editingId ? 'Update Reminder' : 'Add Reminder'}
+              {t(editingId ? 'habitNotifications.updateReminder' : 'habitNotifications.addReminder')}
             </Text>
           </Pressable>
 
           <Pressable style={[styles.cancelButton, { backgroundColor: theme.colors.surface }]} onPress={handleCancel}>
-            <Text style={[styles.cancelButtonText, { color: theme.colors.iosSecondaryLabel }]}>Cancel</Text>
+            <Text style={[styles.cancelButtonText, { color: theme.colors.iosSecondaryLabel }]}>{t('common.cancel')}</Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
@@ -347,7 +349,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backRow}>
           <Text style={[styles.backArrow, { color: theme.colors.iosBlue }]}>←</Text>
-          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>Notifications</Text>
+          <Text style={[styles.backText, { color: theme.colors.iosBlue }]}>{t('common.notifications')}</Text>
         </Pressable>
 
         <View style={styles.headerRow}>
@@ -357,7 +359,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           <View style={styles.headerTextCol}>
             <Text style={[styles.title, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
             <Text style={[styles.subtitle, { color: theme.colors.iosSecondaryLabel }]}>
-              {myNotifs.length}/{maxNotifs} reminders configured
+              {t('habitNotifications.remindersConfigured', { current: myNotifs.length, max: maxNotifs })}
             </Text>
           </View>
         </View>
@@ -365,7 +367,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
         {myNotifs.length === 0 ? (
           <View style={[styles.emptyCard, { backgroundColor: theme.colors.surface }]}>
             <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>
-              No reminders yet. Tap below to add one.
+              {t('habitNotifications.noRemindersYet')}
             </Text>
           </View>
         ) : (
@@ -410,7 +412,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
             onPress={() => openForm()}
           >
             <Text style={[styles.addButtonText, { color: theme.colors.iosBlue }]}>
-              + Add Reminder
+              {t('habitNotifications.addReminderButton')}
             </Text>
           </Pressable>
         ) : !isPro ? (
@@ -424,7 +426,7 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
             }
           >
             <Text style={[styles.addButtonText, { color: theme.colors.iosBlue }]}>
-              {proExpired ? 'Renew Pro for more reminders' : 'Upgrade to Pro for more reminders'}
+              {t(proExpired ? 'habitNotifications.renewProMore' : 'habitNotifications.upgradeProMore')}
             </Text>
           </Pressable>
         ) : null}

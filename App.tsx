@@ -15,11 +15,13 @@ import {
 } from './src/services/notification';
 import { initAnalytics } from './src/services/analytics';
 import { initRevenueCat } from './src/services/revenueCat';
+import { initI18n, useI18nStore } from './src/i18n';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
   const init = useHabitStore(s => s.init);
   const loaded = useHabitStore(s => s.loaded);
+  const i18nLoaded = useI18nStore(s => s.loaded);
   const crashlyticsEnabled = useHabitStore(s => s.crashlyticsEnabled);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
@@ -29,6 +31,7 @@ function AppContent() {
     installGlobalErrorHandler();
     initAnalytics();
     initRevenueCat();
+    initI18n();
     init();
   }, []);
 
@@ -50,7 +53,7 @@ function AppContent() {
     })();
   }, [loaded]);
 
-  if (!loaded) {
+  if (!loaded || !i18nLoaded) {
     return (
       <View
         style={[styles.loading, { backgroundColor: theme.colors.background }]}

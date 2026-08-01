@@ -10,6 +10,18 @@ jest.mock('../src/services/logger', () => ({
   logEvent: jest.fn(),
 }));
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  multiRemove: jest.fn(),
+}));
+
+jest.mock('react-native-localize', () => ({
+  getLocales: () => [{ languageCode: 'en', countryCode: 'US' }],
+  getCalendars: () => [{ calendar: 'gregorian' }],
+}));
+
 import { Habit } from '../src/types/habit';
 import {
   computeStats,

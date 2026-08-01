@@ -21,6 +21,8 @@ import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import type { FrequencyType } from '../types/habit';
 import { FREE_HABIT_LIMIT } from '../constants/appInfo';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n';
 
 const COLORS = [
   '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
@@ -32,15 +34,16 @@ const COLORS = [
   '#8E8E93', '#6E6E73', '#1C1C1E',
 ];
 
-const FREQUENCY_OPTIONS: { key: FrequencyType; label: string }[] = [
-  { key: 'daily', label: 'Daily' },
-  { key: 'n_times_per_week', label: 'Weekly' },
-  { key: 'n_times_per_month', label: 'Monthly' },
-  { key: 'n_times_in_m_days', label: 'Custom' },
+const FREQUENCY_OPTIONS: { key: FrequencyType; label: TranslationKey }[] = [
+  { key: 'daily', label: 'frequency.daily' },
+  { key: 'n_times_per_week', label: 'frequency.weekly' },
+  { key: 'n_times_per_month', label: 'frequency.monthly' },
+  { key: 'n_times_in_m_days', label: 'frequency.custom' },
 ];
 
 export default function AddEditHabitScreen({ route, navigation }: any) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const editId = route.params?.id;
   const existing = useHabitStore(s => s.habits.find(h => h.id === editId));
   const addHabit = useHabitStore(s => s.addHabit);
@@ -113,12 +116,12 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
       } catch (err: any) {
         if (proExpired) {
           Alert.alert(
-            'Your plan has expired',
-            'Renew your Pro subscription to keep creating unlimited habits.',
+            t('addHabit.planExpiredTitle'),
+            t('addHabit.planExpiredBody'),
             [
-              { text: 'Not now', style: 'cancel' },
+              { text: t('common.notNow'), style: 'cancel' },
               {
-                text: 'Renew Pro',
+                text: t('common.renewPro'),
                 onPress: () =>
                   navigation.navigate('Paywall', { mode: 'expired' }),
               },
@@ -127,8 +130,8 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           return;
         }
         Alert.alert(
-          'Habit limit reached',
-          err?.message ?? `Free tier is limited to ${FREE_HABIT_LIMIT} habits. Upgrade to Pro for unlimited.`,
+          t('addHabit.habitLimitTitle'),
+          err?.message ?? t('addHabit.habitLimitBody', { count: FREE_HABIT_LIMIT }),
         );
       }
     }
@@ -146,30 +149,30 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           keyboardDismissMode="on-drag"
         >
           <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-            {existing ? 'Edit Habit' : 'New Habit'}
+            {t(existing ? 'addHabit.titleEdit' : 'addHabit.titleNew')}
           </Text>
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Name
+            {t('addHabit.name')}
           </Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="e.g. Drink water"
+              placeholder={t('addHabit.namePlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               style={[styles.input, { color: theme.colors.textPrimary }]}
             />
           </Inset>
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Description
+            {t('addHabit.description')}
           </Text>
           <Inset radius={14} style={styles.inputWrap}>
             <TextInput
               value={description}
               onChangeText={setDescription}
-              placeholder="e.g. 8 glasses per day"
+              placeholder={t('addHabit.descriptionPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               style={[
                 styles.input,
@@ -193,7 +196,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           </Inset> */}
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Icon
+            {t('addHabit.icon')}
           </Text>
           <View style={styles.row}>
             {HABIT_ICONS.map(({ key, Icon }) => {
@@ -220,7 +223,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           </View>
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Color
+            {t('addHabit.color')}
           </Text>
           <View style={styles.row}>
             {COLORS.map(c => {
@@ -245,7 +248,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           </View>
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Frequency
+            {t('addHabit.frequency')}
           </Text>
           <View style={styles.freqRow}>
             {FREQUENCY_OPTIONS.map(opt => {
@@ -268,7 +271,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                       { color: selected ? color : theme.colors.textMuted },
                     ]}
                   >
-                    {opt.label}
+                    {t(opt.label)}
                   </Text>
                 </NeumorphicButton>
               );
@@ -287,7 +290,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                   placeholderTextColor={theme.colors.textMuted}
                 />
               </Inset>
-              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times per week</Text>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>{t('addHabit.timesPerWeek')}</Text>
             </View>
           )}
 
@@ -303,7 +306,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                   placeholderTextColor={theme.colors.textMuted}
                 />
               </Inset>
-              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times per month</Text>
+              <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>{t('addHabit.timesPerMonth')}</Text>
             </View>
           )}
 
@@ -320,7 +323,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     placeholderTextColor={theme.colors.textMuted}
                   />
                 </Inset>
-                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>times every</Text>
+                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>{t('addHabit.timesEvery')}</Text>
                 <Inset radius={10} style={styles.freqInset}>
                   <TextInput
                     style={[styles.freqInput, { color: theme.colors.textPrimary }]}
@@ -331,14 +334,14 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     placeholderTextColor={theme.colors.textMuted}
                   />
                 </Inset>
-                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>days</Text>
+                <Text style={[styles.freqInputLabel, { color: theme.colors.textPrimary }]}>{t('addHabit.days')}</Text>
               </View>
-              <Text style={[styles.freqHint, { color: theme.colors.textMuted }]}>Max 12 times in 30 days</Text>
+              <Text style={[styles.freqHint, { color: theme.colors.textMuted }]}>{t('addHabit.maxFreqHint')}</Text>
             </>
           )}
 
           <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            Category
+            {t('addHabit.category')}
           </Text>
           <View style={styles.row}>
             {[...BUILT_IN_CATEGORIES.filter(c => c.key !== 'none'), ...customCategories].map(cat => {
@@ -363,7 +366,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                       { color: selected ? color : theme.colors.textMuted },
                     ]}
                   >
-                    {cat.name}
+                    {cat.isCustom ? cat.name : t(`categories.${cat.key}` as TranslationKey)}
                   </Text>
                 </NeumorphicButton>
               );
@@ -376,12 +379,12 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                 if (!isPro) {
                   if (proExpired) {
                     Alert.alert(
-                      'Your plan has expired',
-                      'Renew your Pro subscription to keep using custom categories.',
+                      t('addHabit.planExpiredTitle'),
+                      t('addHabit.planExpiredBody'),
                       [
-                        { text: 'Not now', style: 'cancel' },
+                        { text: t('common.notNow'), style: 'cancel' },
                         {
-                          text: 'Renew Pro',
+                          text: t('common.renewPro'),
                           onPress: () =>
                             navigation.navigate('Paywall', { mode: 'expired' }),
                         },
@@ -390,8 +393,8 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                     return;
                   }
                   Alert.alert(
-                    'Custom Categories (Pro)',
-                    'Create custom categories with a Pro subscription.',
+                    t('addHabit.customCategoriesProTitle'),
+                    t('addHabit.customCategoriesProBody'),
                   );
                   return;
                 }
@@ -399,7 +402,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               }}
             >
               <Text style={[styles.catPillText, { color: theme.colors.textMuted }]}>
-                {isPro ? '+ Create' : '+ Create — Pro'}
+                {t(isPro ? 'addHabit.createCategory' : 'addHabit.createCategoryPro')}
               </Text>
             </NeumorphicButton>
           </View>
@@ -418,7 +421,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                 !canSave && { color: theme.colors.textMuted },
               ]}
             >
-              {existing ? 'Save Changes' : 'Create Habit'}
+              {t(existing ? 'addHabit.saveChanges' : 'addHabit.createHabit')}
             </Text>
           </NeumorphicButton>
         </ScrollView>

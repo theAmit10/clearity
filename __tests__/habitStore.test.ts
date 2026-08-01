@@ -23,6 +23,16 @@ jest.mock('@notifee/react-native', () => ({
   TriggerType: { TIMESTAMP: 'timestamp' },
 }));
 
+jest.mock('react-native-localize', () => ({
+  getLocales: () => [{ languageCode: 'en', countryCode: 'US' }],
+  getCalendars: () => [{ calendar: 'gregorian' }],
+}));
+
+jest.mock('react-native-config', () => ({
+  MIXPANEL_TOKEN: '',
+  REVENUECAT_API_KEY: '',
+}));
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useHabitStore } from '../src/store/habitStore';
 import { Habit } from '../src/types/habit';
