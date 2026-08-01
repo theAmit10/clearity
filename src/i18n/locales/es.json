@@ -6,7 +6,9 @@
     "en": "English",
     "es": "Spanish (Español)",
     "fr": "French (Français)",
-    "de": "German (Deutsch)"
+    "de": "German (Deutsch)",
+    "it": "Italian (Italiano)",
+    "pt": "Portuguese (Português)"
   },
   "languageSettings": {
     "title": "Idioma",
