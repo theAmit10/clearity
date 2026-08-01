@@ -8,7 +8,14 @@
     "fr": "French (Français)",
     "de": "German (Deutsch)",
     "it": "Italian (Italiano)",
-    "pt": "Portuguese (Português)"
+    "pt": "Portuguese (Português)",
+    "nl": "Dutch (Nederlands)",
+    "ru": "Russian (Русский)",
+    "hi": "Hindi (हिन्दी)",
+    "ar": "Arabic (العربية)",
+    "ko": "Korean (한국어)",
+    "ja": "Japanese (日本語)",
+    "zh": "Chinese (简体中文)"
   },
   "languageSettings": {
     "title": "Language",
@@ -84,10 +91,52 @@
     "custom": "Custom"
   },
   "calendar": {
-    "weekdaysNarrow": ["S", "M", "T", "W", "T", "F", "S"],
-    "weekdaysShort": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    "monthsShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    "monthsLong": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    "weekdaysNarrow": [
+      "S",
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S"
+    ],
+    "weekdaysShort": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "monthsShort": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "monthsLong": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ]
   },
   "home": {
     "empty": "No habits yet.\nTap + to add your first one.",

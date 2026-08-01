@@ -8,7 +8,14 @@
     "fr": "French (Français)",
     "de": "German (Deutsch)",
     "it": "Italian (Italiano)",
-    "pt": "Portuguese (Português)"
+    "pt": "Portuguese (Português)",
+    "nl": "Dutch (Nederlands)",
+    "ru": "Russian (Русский)",
+    "hi": "Hindi (हिन्दी)",
+    "ar": "Arabic (العربية)",
+    "ko": "Korean (한국어)",
+    "ja": "Japanese (日本語)",
+    "zh": "Chinese (简体中文)"
   },
   "languageSettings": {
     "title": "Lingua",
@@ -84,10 +91,52 @@
     "custom": "Personalizzata"
   },
   "calendar": {
-    "weekdaysNarrow": ["D", "L", "M", "M", "G", "V", "S"],
-    "weekdaysShort": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"],
-    "monthsShort": ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"],
-    "monthsLong": ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
+    "weekdaysNarrow": [
+      "D",
+      "L",
+      "M",
+      "M",
+      "G",
+      "V",
+      "S"
+    ],
+    "weekdaysShort": [
+      "lun",
+      "mar",
+      "mer",
+      "gio",
+      "ven",
+      "sab",
+      "dom"
+    ],
+    "monthsShort": [
+      "gen",
+      "feb",
+      "mar",
+      "apr",
+      "mag",
+      "giu",
+      "lug",
+      "ago",
+      "set",
+      "ott",
+      "nov",
+      "dic"
+    ],
+    "monthsLong": [
+      "gennaio",
+      "febbraio",
+      "marzo",
+      "aprile",
+      "maggio",
+      "giugno",
+      "luglio",
+      "agosto",
+      "settembre",
+      "ottobre",
+      "novembre",
+      "dicembre"
+    ]
   },
   "home": {
     "empty": "Ancora nessuna abitudine.\nTocca + per aggiungere la prima.",

@@ -7,14 +7,49 @@ import fr from './locales/fr.json';
 import de from './locales/de.json';
 import it from './locales/it.json';
 import pt from './locales/pt.json';
+import nl from './locales/nl.json';
+import ru from './locales/ru.json';
+import hi from './locales/hi.json';
+import ar from './locales/ar.json';
+import ko from './locales/ko.json';
+import ja from './locales/ja.json';
+import zh from './locales/zh.json';
 
-export const LANGUAGES = ['en', 'es', 'fr', 'de', 'it', 'pt'] as const;
+export const LANGUAGES = [
+  'en',
+  'es',
+  'fr',
+  'de',
+  'it',
+  'pt',
+  'nl',
+  'ru',
+  'hi',
+  'ar',
+  'ko',
+  'ja',
+  'zh',
+] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = 'en';
 
 const STORAGE_KEY = '@habit_tracker/language';
 
-const translations: Record<Language, typeof en> = { en, es, fr, de, it, pt };
+const translations: Record<Language, typeof en> = {
+  en,
+  es,
+  fr,
+  de,
+  it,
+  pt,
+  nl,
+  ru,
+  hi,
+  ar,
+  ko,
+  ja,
+  zh,
+};
 
 type Leaf = string | string[];
 type Paths<T, Prefix extends string = ''> = {
