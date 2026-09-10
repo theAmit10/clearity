@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomeIcon, Cog6ToothIcon } from 'react-native-heroicons/outline';
+import { HomeIcon, Cog6ToothIcon, FlagIcon } from 'react-native-heroicons/outline';
 import {
   HomeIcon as HomeIconSolid,
   Cog6ToothIcon as Cog6ToothIconSolid,
+  FlagIcon as FlagIconSolid,
 } from 'react-native-heroicons/solid';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
@@ -17,6 +18,7 @@ const TAB_META: Record<
   { outline: IconComponent; solid: IconComponent; labelKey: TranslationKey }
 > = {
   Home: { outline: HomeIcon, solid: HomeIconSolid, labelKey: 'tabs.home' },
+  Goals: { outline: FlagIcon, solid: FlagIconSolid, labelKey: 'tabs.goals' },
   Settings: {
     outline: Cog6ToothIcon,
     solid: Cog6ToothIconSolid,

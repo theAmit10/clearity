@@ -92,6 +92,10 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import { useHabitStore } from '../store/habitStore';
 import {
   computeStats,
@@ -252,8 +256,10 @@ export default function AnalyticsScreen({ navigation }: any) {
         </Text>
 
         {/* Summary Cards + Circular Ring */}
-        <View
+        <Animated.View
           onLayout={e => registerSection('summary', e.nativeEvent.layout.y)}
+          sharedTransitionTag={SETTINGS_SHARED_TAGS.analytics}
+          sharedTransitionStyle={settingsCardTransition}
         >
           <View style={styles.summaryRow}>
             <View style={styles.summaryGrid}>
@@ -301,7 +307,7 @@ export default function AnalyticsScreen({ navigation }: any) {
               entered={entered['summary']}
             />
           </View>
-        </View>
+        </Animated.View>
 
         {/* Weekly Overview */}
         <View onLayout={e => registerSection('weekly', e.nativeEvent.layout.y)}>

@@ -5,11 +5,20 @@ import {
   TouchableHighlight,
   StyleSheet,
   Alert,
-  ScrollView,
   Linking,
   Platform,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated';
+import {
+  SettingsRevealItem,
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import LockClosedIcon from 'react-native-heroicons/outline/LockClosedIcon';
@@ -43,6 +52,13 @@ export default function SettingsScreen({ navigation }: any) {
   const proExpired = useHabitStore(s => s.proExpired);
   const [busy, setBusy] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const scrollY = useSharedValue(0);
+  const { height: viewportHeight } = useWindowDimensions();
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: e => {
+      scrollY.value = e.contentOffset.y;
+    },
+  });
 
   const handleExport = async () => {
     setBusy(true);
@@ -210,29 +226,46 @@ export default function SettingsScreen({ navigation }: any) {
   function Section({
     title,
     children,
+    sharedTag,
   }: {
     title: string;
     children: React.ReactNode;
+    sharedTag?: string;
   }) {
     return (
-      <View style={styles.section}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: theme.colors.iosSecondaryLabel },
-          ]}
-        >
-          {title}
-        </Text>
-        <View
-          style={[
-            styles.sectionBody,
-            { backgroundColor: theme.colors.surface },
-          ]}
-        >
-          {children}
+      <SettingsRevealItem scrollY={scrollY} viewportHeight={viewportHeight}>
+        <View style={styles.section}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            {title}
+          </Text>
+          {sharedTag ? (
+            <Animated.View
+              sharedTransitionTag={sharedTag}
+              sharedTransitionStyle={settingsCardTransition}
+              style={[
+                styles.sectionBody,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
+              {children}
+            </Animated.View>
+          ) : (
+            <View
+              style={[
+                styles.sectionBody,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
+              {children}
+            </View>
+          )}
         </View>
-      </View>
+      </SettingsRevealItem>
     );
   }
 
@@ -278,12 +311,19 @@ export default function SettingsScreen({ navigation }: any) {
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.iosBg }]}
     >
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ padding: 20 }}
+      >
         <Text style={[styles.title, { color: theme.colors.iosLabel }]}>
           {t('settings.title')}
         </Text>
 
-        <Section title={t('settings.generalSection')}>
+        <Section
+          title={t('settings.generalSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.general}
+        >
           <Text
             style={[
               styles.description,
@@ -298,7 +338,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('settings.habitsSection')}>
+        <Section
+          title={t('settings.habitsSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.habits}
+        >
           <Text
             style={[
               styles.description,
@@ -337,7 +380,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('settings.proSection')}>
+        <Section
+          title={t('settings.proSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.pro}
+        >
           <Text
             style={[
               styles.description,
@@ -375,7 +421,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('settings.widgetSection')}>
+        <Section
+          title={t('settings.widgetSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.widget}
+        >
           <Text
             style={[
               styles.description,
@@ -397,7 +446,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('settings.analyticsSection')}>
+        <Section
+          title={t('settings.analyticsSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.analytics}
+        >
           <Text
             style={[
               styles.description,
@@ -419,7 +471,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('settings.notificationsSection')}>
+        <Section
+          title={t('settings.notificationsSection')}
+          sharedTag={SETTINGS_SHARED_TAGS.notifications}
+        >
           <Text
             style={[
               styles.description,
@@ -434,7 +489,10 @@ export default function SettingsScreen({ navigation }: any) {
           />
         </Section>
 
-        <Section title={t('languageSettings.section')}>
+        <Section
+          title={t('languageSettings.section')}
+          sharedTag={SETTINGS_SHARED_TAGS.language}
+        >
           <Text
             style={[
               styles.description,
@@ -497,7 +555,7 @@ export default function SettingsScreen({ navigation }: any) {
             destructive
           />
         </Section>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }

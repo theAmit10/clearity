@@ -8,6 +8,9 @@ import { trackScreenView } from '../services/analytics';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
+import GoalListScreen from '../screens/GoalListScreen';
+import GoalDetailScreen from '../screens/GoalDetailScreen';
+import AddEditGoalScreen from '../screens/AddEditGoalScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import NewCategoryScreen from '../screens/NewCategoryScreen';
@@ -68,6 +71,32 @@ function HomeStack() {
       <Stack.Screen
         name="NewCategory"
         component={NewCategoryScreen}
+        options={{ ...headerOpts, presentation: 'modal' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function GoalStack() {
+  const { theme } = useTheme();
+  const headerOpts = useNeumorphicHeaderOptions();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
+      <Stack.Screen name="GoalMain" component={GoalListScreen} />
+      <Stack.Screen
+        name="GoalDetail"
+        component={GoalDetailScreen}
+        options={{ ...headerOpts, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="AddEditGoal"
+        component={AddEditGoalScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
       />
     </Stack.Navigator>
@@ -187,6 +216,7 @@ export default function RootNavigator() {
         tabBar={props => <NeumorphicTabBar {...props} />}
       >
         <Tab.Screen name="Home" component={HomeStack} />
+        <Tab.Screen name="Goals" component={GoalStack} />
         <Tab.Screen name="Settings" component={SettingsStack} />
       </Tab.Navigator>
     </NavigationContainer>

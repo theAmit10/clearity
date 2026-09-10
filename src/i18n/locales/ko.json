@@ -60,7 +60,8 @@
   },
   "tabs": {
     "home": "홈",
-    "settings": "설정"
+    "settings": "설정",
+    "goals": "Goal"
   },
   "categories": {
     "none": "없음",
@@ -457,5 +458,38 @@
   "habitStore": {
     "habitLimitBody": "무료 요금제는 최대 {{count}}개의 습관까지 만들 수 있습니다. Pro로 업그레이드하면 무제한으로 이용할 수 있습니다.",
     "notifLimitBody": "무료 요금제는 습관당 리마인더 {{count}}개까지 설정할 수 있습니다. Pro로 업그레이드하면 무제한으로 이용할 수 있습니다."
+  },
+  "goals": {
+    "title": "Goals",
+    "empty": "No goals yet.\nTap + to add your first one.",
+    "active": "Active",
+    "completed": "Completed",
+    "titleNew": "New Goal",
+    "titleEdit": "Edit Goal",
+    "name": "Title",
+    "namePlaceholder": "e.g. Run a marathon",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Train and finish by deadline",
+    "icon": "Icon",
+    "color": "Color",
+    "startTime": "Start time",
+    "endTime": "Deadline",
+    "endAfterStart": "Deadline must be after start time.",
+    "createGoal": "Create Goal",
+    "saveChanges": "Save Changes",
+    "expired": "Expired",
+    "overdueBy": "Deadline reached, {{overdue}} extra taken",
+    "extendTime": "Add more time",
+    "completeGoal": "Mark complete & archive",
+    "completedIn": "Completed in {{duration}}",
+    "timeTaken": "Time taken: {{duration}}",
+    "deleteGoal": "Delete Goal",
+    "goalSettings": "Goal Settings",
+    "pickDate": "Pick date",
+    "pickTime": "Pick time",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Min",
+    "seconds": "Sec"
   }
 }

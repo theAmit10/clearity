@@ -1,6 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import CheckIcon from 'react-native-heroicons/outline/CheckIcon';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation, useI18nStore, LANGUAGES } from '../i18n';
@@ -22,7 +27,9 @@ export default function LanguageScreen({ navigation }: any) {
           title={t('languageSettings.title')}
         />
 
-        <View
+        <Animated.View
+          sharedTransitionTag={SETTINGS_SHARED_TAGS.language}
+          sharedTransitionStyle={settingsCardTransition}
           style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}
         >
           {LANGUAGES.map((code, index) => {
@@ -45,7 +52,7 @@ export default function LanguageScreen({ navigation }: any) {
               </Pressable>
             );
           })}
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

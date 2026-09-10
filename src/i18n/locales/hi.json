@@ -60,7 +60,8 @@
   },
   "tabs": {
     "home": "होम",
-    "settings": "सेटिंग्स"
+    "settings": "सेटिंग्स",
+    "goals": "Goal"
   },
   "categories": {
     "none": "कोई नहीं",
@@ -457,5 +458,38 @@
   "habitStore": {
     "habitLimitBody": "फ्री टियर में अधिकतम {{count}} आदतों की सीमा है। असीमित के लिए Pro में अपग्रेड करें।",
     "notifLimitBody": "फ्री टियर में प्रति आदत केवल {{count}} रिमाइंडर की सीमा है। असीमित के लिए Pro में अपग्रेड करें।"
+  },
+  "goals": {
+    "title": "Goals",
+    "empty": "No goals yet.\nTap + to add your first one.",
+    "active": "Active",
+    "completed": "Completed",
+    "titleNew": "New Goal",
+    "titleEdit": "Edit Goal",
+    "name": "Title",
+    "namePlaceholder": "e.g. Run a marathon",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Train and finish by deadline",
+    "icon": "Icon",
+    "color": "Color",
+    "startTime": "Start time",
+    "endTime": "Deadline",
+    "endAfterStart": "Deadline must be after start time.",
+    "createGoal": "Create Goal",
+    "saveChanges": "Save Changes",
+    "expired": "Expired",
+    "overdueBy": "Deadline reached, {{overdue}} extra taken",
+    "extendTime": "Add more time",
+    "completeGoal": "Mark complete & archive",
+    "completedIn": "Completed in {{duration}}",
+    "timeTaken": "Time taken: {{duration}}",
+    "deleteGoal": "Delete Goal",
+    "goalSettings": "Goal Settings",
+    "pickDate": "Pick date",
+    "pickTime": "Pick time",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Min",
+    "seconds": "Sec"
   }
 }

@@ -60,7 +60,8 @@
   },
   "tabs": {
     "home": "Home",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "goals": "Goal"
   },
   "categories": {
     "none": "Nessuna",
@@ -457,5 +458,38 @@
   "habitStore": {
     "habitLimitBody": "Il piano gratuito è limitato a {{count}} abitudini. Passa a Pro per averle illimitate.",
     "notifLimitBody": "Il piano gratuito è limitato a {{count}} promemoria per abitudine. Passa a Pro per averli illimitati."
+  },
+  "goals": {
+    "title": "Goals",
+    "empty": "No goals yet.\nTap + to add your first one.",
+    "active": "Active",
+    "completed": "Completed",
+    "titleNew": "New Goal",
+    "titleEdit": "Edit Goal",
+    "name": "Title",
+    "namePlaceholder": "e.g. Run a marathon",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Train and finish by deadline",
+    "icon": "Icon",
+    "color": "Color",
+    "startTime": "Start time",
+    "endTime": "Deadline",
+    "endAfterStart": "Deadline must be after start time.",
+    "createGoal": "Create Goal",
+    "saveChanges": "Save Changes",
+    "expired": "Expired",
+    "overdueBy": "Deadline reached, {{overdue}} extra taken",
+    "extendTime": "Add more time",
+    "completeGoal": "Mark complete & archive",
+    "completedIn": "Completed in {{duration}}",
+    "timeTaken": "Time taken: {{duration}}",
+    "deleteGoal": "Delete Goal",
+    "goalSettings": "Goal Settings",
+    "pickDate": "Pick date",
+    "pickTime": "Pick time",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Min",
+    "seconds": "Sec"
   }
 }

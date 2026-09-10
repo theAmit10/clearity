@@ -6,6 +6,16 @@ const REVIEW_KEY = '@habit_tracker/review';
 const NOTIFICATIONS_KEY = '@habit_tracker/notifications';
 const GENERAL_KEY = '@habit_tracker/general';
 const CUSTOM_CATEGORIES_KEY = '@habit_tracker/custom_categories';
+const GOALS_KEY = '@habit_tracker/goals';
+
+export async function loadGoals<T>(): Promise<T | null> {
+  const raw = await AsyncStorage.getItem(GOALS_KEY);
+  return raw ? (JSON.parse(raw) as T) : null;
+}
+
+export async function saveGoals(data: unknown): Promise<void> {
+  await AsyncStorage.setItem(GOALS_KEY, JSON.stringify(data));
+}
 
 export async function loadHabits<T>(): Promise<T | null> {
   const raw = await AsyncStorage.getItem(HABITS_KEY);
@@ -70,5 +80,5 @@ export async function saveCustomCategories(data: unknown): Promise<void> {
 }
 
 export async function clearAll(): Promise<void> {
-  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY, GENERAL_KEY, CUSTOM_CATEGORIES_KEY]);
+  await AsyncStorage.multiRemove([HABITS_KEY, LOGS_KEY, REVIEW_KEY, NOTIFICATIONS_KEY, GENERAL_KEY, CUSTOM_CATEGORIES_KEY, GOALS_KEY]);
 }

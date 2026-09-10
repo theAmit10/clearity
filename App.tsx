@@ -8,6 +8,7 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { useHabitStore } from './src/store/habitStore';
+import { useGoalStore } from './src/store/goalStore';
 import { installGlobalErrorHandler } from './src/services/logger';
 import {
   setupChannel,
@@ -20,7 +21,9 @@ import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
   const init = useHabitStore(s => s.init);
+  const initGoals = useGoalStore(s => s.init);
   const loaded = useHabitStore(s => s.loaded);
+  const goalsLoaded = useGoalStore(s => s.loaded);
   const i18nLoaded = useI18nStore(s => s.loaded);
   const crashlyticsEnabled = useHabitStore(s => s.crashlyticsEnabled);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
@@ -33,6 +36,7 @@ function AppContent() {
     initRevenueCat();
     initI18n();
     init();
+    initGoals();
   }, []);
 
   useEffect(() => {
@@ -53,7 +57,7 @@ function AppContent() {
     })();
   }, [loaded]);
 
-  if (!loaded || !i18nLoaded) {
+  if (!loaded || !goalsLoaded || !i18nLoaded) {
     return (
       <View
         style={[styles.loading, { backgroundColor: theme.colors.background }]}

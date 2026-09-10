@@ -9,6 +9,11 @@ import {
   Clipboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import ClipboardIcon from 'react-native-heroicons/outline/ClipboardDocumentIcon';
 import CheckIcon from 'react-native-heroicons/outline/CheckIcon';
 import { useHabitStore } from '../store/habitStore';
@@ -101,7 +106,11 @@ export default function GeneralScreen({ navigation }: any) {
           </View>
         )}
 
-        <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+        <Animated.View
+          sharedTransitionTag={SETTINGS_SHARED_TAGS.general}
+          sharedTransitionStyle={settingsCardTransition}
+          style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}
+        >
           <View style={[styles.row, { borderBottomColor: theme.colors.iosSeparator }]}>
             <View style={styles.rowText}>
               <Text style={[styles.rowLabel, { color: theme.colors.iosLabel }]}>
@@ -186,7 +195,7 @@ export default function GeneralScreen({ navigation }: any) {
               thumbColor="#FFFFFF"
             />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

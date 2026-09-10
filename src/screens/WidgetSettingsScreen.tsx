@@ -11,6 +11,11 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import { useHabitStore } from '../store/habitStore';
 import { WidgetModule } from '../native/WidgetModule';
 import { useTheme } from '../theme/ThemeProvider';
@@ -100,7 +105,11 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('widgetSettings.selectedHabits')}</Text>
-          <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+          <Animated.View
+            sharedTransitionTag={SETTINGS_SHARED_TAGS.widget}
+            sharedTransitionStyle={settingsCardTransition}
+            style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}
+          >
             {activeHabits.length === 0 && (
               <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>
                 {t('widgetSettings.noActiveHabits')}
@@ -136,7 +145,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                 </View>
               );
             })}
-          </View>
+          </Animated.View>
         </View>
 
         <View style={[styles.infoBox, { backgroundColor: theme.colors.iosBlue + '1A' }]}>

@@ -85,6 +85,10 @@ If auth is added in the future:
 | `habits_reordered` | User reorders habit list | — | `src/store/habitStore.ts` |
 | `habits_imported` | User imports habits (replace or merge) | `count`, `type` | `src/store/habitStore.ts` |
 | `subscription_expired` | Pro subscription lapses (entitlement present but inactive, or active → inactive transition) | — | `src/store/habitStore.ts` |
+| `goal_added` | User creates a new goal | `icon` | `src/store/goalStore.ts` |
+| `goal_deleted` | User deletes a goal | — | `src/store/goalStore.ts` |
+| `goal_completed` | User marks a goal complete and archives it | `overdue` | `src/store/goalStore.ts` |
+| `goal_extended` | User adds more time to a goal deadline | — | `src/store/goalStore.ts` |
 
 ### Value Moment
 

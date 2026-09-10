@@ -10,6 +10,11 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Reanimated from 'react-native-reanimated';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import { useHabitStore } from '../store/habitStore';
 import { getHabitIcon } from '../constants/habitIcons';
 import { useTheme } from '../theme/ThemeProvider';
@@ -85,7 +90,9 @@ export default function NotificationSettingsScreen({ navigation }: any) {
               {t('notificationSettings.perHabitReminders')}
             </Text>
           </Pressable>
-          <View
+          <Reanimated.View
+            sharedTransitionTag={SETTINGS_SHARED_TAGS.notifications}
+            sharedTransitionStyle={settingsCardTransition}
             style={[
               styles.sectionBody,
               { backgroundColor: theme.colors.surface },
@@ -160,7 +167,7 @@ export default function NotificationSettingsScreen({ navigation }: any) {
                 </Pressable>
               );
             })}
-          </View>
+          </Reanimated.View>
         </View>
 
         {adminRevealed && (

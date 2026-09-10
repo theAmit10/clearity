@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
+import {
+  SETTINGS_SHARED_TAGS,
+  settingsCardTransition,
+} from '../components/SettingsRevealItem';
 import DraggableFlatList, {
   ScaleDecorator,
   RenderItemParams,
@@ -52,12 +57,17 @@ export default function ReorderHabitsScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.headerWrap}>
-        <ScreenHeader navigation={navigation} title={t('reorder.title')} />
-      </View>
-      <Text style={[styles.helpText, { color: theme.colors.textMuted }]}>
-        {t('reorder.help')}
-      </Text>
+      <Animated.View
+        sharedTransitionTag={SETTINGS_SHARED_TAGS.habits}
+        sharedTransitionStyle={settingsCardTransition}
+      >
+        <View style={styles.headerWrap}>
+          <ScreenHeader navigation={navigation} title={t('reorder.title')} />
+        </View>
+        <Text style={[styles.helpText, { color: theme.colors.textMuted }]}>
+          {t('reorder.help')}
+        </Text>
+      </Animated.View>
       <DraggableFlatList
         data={habits}
         keyExtractor={h => h.id}

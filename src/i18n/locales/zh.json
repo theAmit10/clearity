@@ -60,7 +60,8 @@
   },
   "tabs": {
     "home": "首页",
-    "settings": "设置"
+    "settings": "设置",
+    "goals": "Goal"
   },
   "categories": {
     "none": "无",
@@ -457,5 +458,38 @@
   "habitStore": {
     "habitLimitBody": "免费版最多可创建 {{count}} 个习惯。升级到 Pro 可无限制创建。",
     "notifLimitBody": "免费版每个习惯最多可设置 {{count}} 个提醒。升级到 Pro 可无限制设置。"
+  },
+  "goals": {
+    "title": "Goals",
+    "empty": "No goals yet.\nTap + to add your first one.",
+    "active": "Active",
+    "completed": "Completed",
+    "titleNew": "New Goal",
+    "titleEdit": "Edit Goal",
+    "name": "Title",
+    "namePlaceholder": "e.g. Run a marathon",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Train and finish by deadline",
+    "icon": "Icon",
+    "color": "Color",
+    "startTime": "Start time",
+    "endTime": "Deadline",
+    "endAfterStart": "Deadline must be after start time.",
+    "createGoal": "Create Goal",
+    "saveChanges": "Save Changes",
+    "expired": "Expired",
+    "overdueBy": "Deadline reached, {{overdue}} extra taken",
+    "extendTime": "Add more time",
+    "completeGoal": "Mark complete & archive",
+    "completedIn": "Completed in {{duration}}",
+    "timeTaken": "Time taken: {{duration}}",
+    "deleteGoal": "Delete Goal",
+    "goalSettings": "Goal Settings",
+    "pickDate": "Pick date",
+    "pickTime": "Pick time",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Min",
+    "seconds": "Sec"
   }
 }
