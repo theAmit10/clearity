@@ -23,6 +23,7 @@ import type { FrequencyType } from '../types/habit';
 import { FREE_HABIT_LIMIT } from '../constants/appInfo';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
+import { openPaywall } from '../services/paywallRouter';
 
 const COLORS = [
   '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
@@ -123,7 +124,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               {
                 text: t('common.renewPro'),
                 onPress: () =>
-                  navigation.navigate('Paywall', { mode: 'expired' }),
+                  openPaywall(navigation, { mode: 'expired' }),
               },
             ],
           );
@@ -386,7 +387,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                         {
                           text: t('common.renewPro'),
                           onPress: () =>
-                            navigation.navigate('Paywall', { mode: 'expired' }),
+                            openPaywall(navigation, { mode: 'expired' }),
                         },
                       ],
                     );

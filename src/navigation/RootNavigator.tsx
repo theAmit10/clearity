@@ -12,6 +12,9 @@ import GoalListScreen from '../screens/GoalListScreen';
 import GoalDetailScreen from '../screens/GoalDetailScreen';
 import AddEditGoalScreen from '../screens/AddEditGoalScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
+import OnboardingScreen, {
+  type OnboardingResult,
+} from '../screens/OnboardingScreen';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import NewCategoryScreen from '../screens/NewCategoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -24,6 +27,8 @@ import AdminNotificationScreen from '../screens/AdminNotificationScreen';
 import WidgetSettingsScreen from '../screens/WidgetSettingsScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import PaywallV2Screen from '../screens/PaywallV2Screen';
+import DiagnosticsScreen from '../screens/DiagnosticsScreen';
 import ManageSubscriptionScreen from '../screens/ManageSubscriptionScreen';
 import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
@@ -129,6 +134,16 @@ function SettingsStack() {
         name="Paywall"
         component={PaywallScreen}
         options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="PaywallV2"
+        component={PaywallV2Screen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="Diagnostics"
+        component={DiagnosticsScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ReorderHabits"

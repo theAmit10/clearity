@@ -19,6 +19,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import { requestPermission } from '../services/notification';
 import { useTranslation } from '../i18n';
+import { openPaywall } from '../services/paywallRouter';
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
@@ -419,8 +420,8 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           <Pressable
             style={[styles.addButton, { backgroundColor: theme.colors.surface }]}
             onPress={() =>
-              navigation.navigate(
-                'Paywall',
+              openPaywall(
+                navigation,
                 proExpired ? { mode: 'expired' } : undefined,
               )
             }

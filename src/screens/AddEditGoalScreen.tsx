@@ -169,6 +169,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
             {t(existing ? 'goals.titleEdit' : 'goals.titleNew')}

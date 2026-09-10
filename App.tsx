@@ -17,6 +17,7 @@ import {
 import { initAnalytics } from './src/services/analytics';
 import { initRevenueCat } from './src/services/revenueCat';
 import { initI18n, useI18nStore } from './src/i18n';
+import { usePaywallVariantStore } from './src/store/paywallVariantStore';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
@@ -35,6 +36,7 @@ function AppContent() {
     initAnalytics();
     initRevenueCat();
     initI18n();
+    usePaywallVariantStore.getState().loadVariant();
     init();
     initGoals();
   }, []);
@@ -45,17 +47,18 @@ function AppContent() {
   }, [crashlyticsEnabled, loaded]);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !goalsLoaded) return;
     (async () => {
       try {
         await setupChannel();
         const habitConfigs = habitNotifications;
         await rescheduleAll(habitConfigs, adminNotifications);
+        await useGoalStore.getState().rescheduleActive();
       } catch (err) {
         // notification setup is non-critical
       }
     })();
-  }, [loaded]);
+  }, [loaded, goalsLoaded]);
 
   if (!loaded || !goalsLoaded || !i18nLoaded) {
     return (

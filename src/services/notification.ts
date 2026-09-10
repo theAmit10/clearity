@@ -3,7 +3,8 @@ import notifee, {
   RepeatFrequency,
   TriggerType,
 } from '@notifee/react-native';
-import type { HabitNotificationConfig, AdminNotificationConfig } from '../types/notification';
+import type { HabitNotificationConfig, AdminNotificationConfig, GoalNotificationConfig, GoalNotificationKind } from '../types/notification';
+import type { Goal } from '../types/goal';
 import { t } from '../i18n';
 
 const CHANNEL_ID = 'habit_reminders';
@@ -122,6 +123,75 @@ export async function scheduleAdminNotification(config: AdminNotificationConfig)
 
 export async function cancelAllNotifications() {
   await notifee.cancelAllNotifications();
+}
+
+export interface GoalAutoTimes {
+  tenSecond: number;
+  halfway: number;
+  almostDue: number;
+}
+
+/** Fire times for the three automated goal reminders. Callers skip any
+ * time that is already in the past (e.g. very short goals). */
+export function computeGoalAutoTimes(goal: Pick<Goal, 'startAt' | 'endAt' | 'createdAt'>): GoalAutoTimes {
+  const start = new Date(goal.startAt).getTime();
+  const end = new Date(goal.endAt).getTime();
+  const created = new Date(goal.createdAt).getTime();
+  const span = Math.max(0, end - start);
+  return {
+    tenSecond: created + 10 * 1000,
+    halfway: start + span * 0.5,
+    almostDue: start + span * 0.95,
+  };
+}
+
+export function buildGoalAutoText(goal: Pick<Goal, 'title'>, kind: GoalNotificationKind): { title: string; body: string } {
+  switch (kind) {
+    case 'ten_second':
+      return { title: t('goalNotifications.createdTitle'), body: t('goalNotifications.createdBody', { title: goal.title }) };
+    case 'halfway':
+      return { title: t('goalNotifications.halfwayTitle'), body: t('goalNotifications.halfwayBody', { title: goal.title }) };
+    case 'almost_due':
+      return { title: t('goalNotifications.almostDueTitle'), body: t('goalNotifications.almostDueBody', { title: goal.title }) };
+    default:
+      return { title: goal.title, body: '' };
+  }
+}
+
+export function goalNotifId(config: Pick<GoalNotificationConfig, 'id'>): string {
+  return `goal-${config.id}`;
+}
+
+export async function scheduleGoalNotification(config: GoalNotificationConfig) {
+  const notifId = goalNotifId(config);
+  await notifee.cancelNotification(notifId);
+  if (!config.enabled) return;
+  if (config.timestamp <= Date.now()) return;
+
+  await notifee.createTriggerNotification(
+    {
+      id: notifId,
+      title: config.title,
+      body: config.body,
+      android: { channelId: CHANNEL_ID },
+    },
+    {
+      type: TriggerType.TIMESTAMP,
+      timestamp: config.timestamp,
+    },
+  );
+}
+
+export async function cancelGoalNotification(id: string) {
+  await notifee.cancelNotification(`goal-${id}`);
+}
+
+export async function cancelAllGoalNotifications(goalId: string, configs: GoalNotificationConfig[]) {
+  await Promise.all(configs.filter(c => c.goalId === goalId).map(c => cancelGoalNotification(c.id)));
+}
+
+export async function rescheduleGoalNotifications(configs: GoalNotificationConfig[]) {
+  await Promise.all(configs.map(c => scheduleGoalNotification(c)));
 }
 
 export async function rescheduleAll(

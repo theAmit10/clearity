@@ -38,6 +38,7 @@ import {
 } from '../constants/appInfo';
 import { useTheme } from '../theme/ThemeProvider';
 import { restorePurchases } from '../services/revenueCat';
+import { openPaywall } from '../services/paywallRouter';
 import { logEvent } from '../services/logger';
 import { useTranslation, useI18nStore } from '../i18n';
 
@@ -361,7 +362,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 handleExport();
               } else {
-                navigation.navigate('Paywall', paywallParams);
+                openPaywall(navigation, paywallParams);
               }
             }}
             disabled={busy}
@@ -373,7 +374,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 handleImport();
               } else {
-                navigation.navigate('Paywall', paywallParams);
+                openPaywall(navigation, paywallParams);
               }
             }}
             disabled={busy}
@@ -405,7 +406,7 @@ export default function SettingsScreen({ navigation }: any) {
           ) : (
             <Row
               label={proExpired ? t('common.renewPro') : t('common.upgradeToPro')}
-              onPress={() => navigation.navigate('Paywall', paywallParams)}
+              onPress={() => openPaywall(navigation, paywallParams)}
               disabled={busy}
             />
           )}
@@ -440,7 +441,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 navigation.navigate('WidgetSettings');
               } else {
-                navigation.navigate('Paywall', paywallParams);
+                openPaywall(navigation, paywallParams);
               }
             }}
           />
@@ -465,7 +466,7 @@ export default function SettingsScreen({ navigation }: any) {
               if (isPro) {
                 navigation.navigate('Analytics');
               } else {
-                navigation.navigate('Paywall', paywallParams);
+                openPaywall(navigation, paywallParams);
               }
             }}
           />
@@ -519,7 +520,7 @@ export default function SettingsScreen({ navigation }: any) {
                 rightContent={locked ? proBadge : null}
                 onPress={() => {
                   if (locked) {
-                    navigation.navigate('Paywall', paywallParams);
+                    openPaywall(navigation, paywallParams);
                   } else {
                     setTheme(themeOption.name);
                   }
@@ -547,6 +548,21 @@ export default function SettingsScreen({ navigation }: any) {
             destructive
           />
         </Section> */}
+
+        <Section title={t('settings.diagnosticsSection')}>
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            {t('settings.diagnosticsDescription')}
+          </Text>
+          <Row
+            label={t('settings.diagnosticsRow')}
+            onPress={() => navigation.navigate('Diagnostics')}
+          />
+        </Section>
 
         <Section title={t('settings.dangerZone')}>
           <Row

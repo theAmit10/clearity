@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   Alert,
   Platform,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -34,10 +37,19 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   const deleteGoal = useGoalStore(s => s.deleteGoal);
   const completeGoal = useGoalStore(s => s.completeGoal);
   const extendGoal = useGoalStore(s => s.extendGoal);
+  const allGoalNotifs = useGoalStore(s => s.goalNotifications);
+  const addGoalReminder = useGoalStore(s => s.addGoalReminder);
+  const updateGoalReminder = useGoalStore(s => s.updateGoalReminder);
+  const removeGoalReminder = useGoalStore(s => s.removeGoalReminder);
 
   const [now, setNow] = useState(Date.now());
   const [showExtend, setShowExtend] = useState(false);
   const [extendDate, setExtendDate] = useState<Date>(new Date());
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [editingReminderId, setEditingReminderId] = useState<string | null>(null);
+  const [rTitle, setRTitle] = useState('');
+  const [rBody, setRBody] = useState('');
+  const [rDate, setRDate] = useState<Date>(new Date(Date.now() + 3600000));
 
   useEffect(() => {
     if (goal?.status === 'completed') return;
@@ -51,6 +63,14 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   }, [goal?.id]);
 
   if (!goal) return null;
+
+  const autoReminders = allGoalNotifs
+    .filter(n => n.goalId === id && n.kind !== 'custom')
+    .sort((a, b) => a.timestamp - b.timestamp);
+  const customReminders = allGoalNotifs
+    .filter(n => n.goalId === id && n.kind === 'custom')
+    .sort((a, b) => a.timestamp - b.timestamp);
+
   const Icon = getHabitIcon(goal.icon);
   const completed = goal.status === 'completed';
   const parts = getCountdownParts(goal.endAt, now);
@@ -75,6 +95,61 @@ export default function GoalDetailScreen({ route, navigation }: any) {
     if (next.getTime() <= new Date(goal.endAt).getTime()) return;
     await extendGoal(id, next.toISOString());
     setShowExtend(false);
+  };
+
+  const openNewReminder = () => {
+    setEditingReminderId(null);
+    setRTitle('');
+    setRBody('');
+    setRDate(new Date(Date.now() + 3600000));
+    setShowReminderModal(true);
+  };
+
+  const openEditReminder = (r: (typeof customReminders)[number]) => {
+    setEditingReminderId(r.id);
+    setRTitle(r.title);
+    setRBody(r.body);
+    setRDate(new Date(r.timestamp));
+    setShowReminderModal(true);
+  };
+
+  const closeReminderModal = () => {
+    setShowReminderModal(false);
+    setEditingReminderId(null);
+  };
+
+  const canSaveReminder =
+    rTitle.trim().length > 0 && rDate.getTime() > Date.now();
+
+  const saveReminder = async () => {
+    if (!canSaveReminder) return;
+    if (editingReminderId) {
+      await updateGoalReminder(editingReminderId, {
+        title: rTitle.trim(),
+        body: rBody.trim(),
+        timestamp: rDate.getTime(),
+      });
+    } else {
+      await addGoalReminder(id, {
+        title: rTitle.trim(),
+        body: rBody.trim(),
+        timestamp: rDate.getTime(),
+      });
+    }
+    closeReminderModal();
+  };
+
+  const confirmRemoveReminder = (reminderId: string) => {
+    Alert.alert(t('goals.removeReminderTitle'), undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          await removeGoalReminder(reminderId);
+        },
+      },
+    ]);
   };
 
   return (
@@ -299,6 +374,247 @@ export default function GoalDetailScreen({ route, navigation }: any) {
             </View>
           )}
 
+          {!completed && (
+            <View style={styles.reminderSection}>
+              <Text
+                style={[
+                  styles.sectionLabel,
+                  { color: theme.colors.textMuted },
+                ]}
+              >
+                {t('goals.reminders')}
+              </Text>
+
+              {autoReminders.length > 0 && (
+                <View style={styles.reminderGroup}>
+                  <Text
+                    style={[
+                      styles.subLabel,
+                      { color: theme.colors.textMuted },
+                    ]}
+                  >
+                    {t('goals.autoReminders')}
+                  </Text>
+                  {autoReminders.map(r => (
+                    <Raised
+                      key={r.id}
+                      radius={12}
+                      distance={4}
+                      style={styles.reminderRow}
+                    >
+                      <View style={styles.reminderTextCol}>
+                        <Text
+                          style={[
+                            styles.reminderTitle,
+                            { color: theme.colors.textPrimary },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {r.title}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.reminderTime,
+                            { color: theme.colors.textMuted },
+                          ]}
+                        >
+                          {new Date(r.timestamp).toLocaleString()}
+                        </Text>
+                      </View>
+                    </Raised>
+                  ))}
+                </View>
+              )}
+
+              <View style={styles.reminderGroup}>
+                <Text
+                  style={[
+                    styles.subLabel,
+                    { color: theme.colors.textMuted },
+                  ]}
+                >
+                  {t('goals.customReminders')}
+                </Text>
+                {customReminders.map(r => (
+                  <Pressable key={r.id} onPress={() => openEditReminder(r)}>
+                    <Raised
+                      radius={12}
+                      distance={4}
+                      style={styles.reminderRow}
+                    >
+                      <View style={styles.reminderTextCol}>
+                        <Text
+                          style={[
+                            styles.reminderTitle,
+                            { color: theme.colors.textPrimary },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {r.title}
+                        </Text>
+                        {r.body ? (
+                          <Text
+                            style={[
+                              styles.reminderBody,
+                              { color: theme.colors.textMuted },
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {r.body}
+                          </Text>
+                        ) : null}
+                        <Text
+                          style={[
+                            styles.reminderTime,
+                            { color: theme.colors.textMuted },
+                          ]}
+                        >
+                          {new Date(r.timestamp).toLocaleString()}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => confirmRemoveReminder(r.id)}
+                        hitSlop={8}
+                        style={styles.reminderTrash}
+                      >
+                        <TrashIcon size={18} color="#FF3B30" />
+                      </Pressable>
+                    </Raised>
+                  </Pressable>
+                ))}
+              </View>
+
+              <NeumorphicButton
+                radius={14}
+                distance={5}
+                style={styles.addReminderBtn}
+                onPress={openNewReminder}
+              >
+                <Text
+                  style={[
+                    styles.secondaryText,
+                    { color: theme.colors.textPrimary },
+                  ]}
+                >
+                  {t('goals.addReminder')}
+                </Text>
+              </NeumorphicButton>
+            </View>
+          )}
+
+          {showReminderModal && (
+            <Modal
+              visible={showReminderModal}
+              transparent
+              animationType="fade"
+              onRequestClose={closeReminderModal}
+            >
+              <Pressable
+                style={styles.modalOverlay}
+                onPress={closeReminderModal}
+              >
+                <Pressable onPress={() => {}} style={styles.modalPressArea}>
+                  <Raised radius={16} distance={8} style={styles.modalCard}>
+                    <Text
+                      style={[
+                        styles.modalTitle,
+                        { color: theme.colors.textPrimary },
+                      ]}
+                    >
+                      {t(
+                        editingReminderId
+                          ? 'goals.editReminder'
+                          : 'goals.newReminder',
+                      )}
+                    </Text>
+                    <Inset radius={12} style={styles.formInputWrap}>
+                      <TextInput
+                        value={rTitle}
+                        onChangeText={setRTitle}
+                        placeholder={t('goals.reminderTitlePlaceholder')}
+                        placeholderTextColor={theme.colors.textMuted}
+                        style={[
+                          styles.formInput,
+                          { color: theme.colors.textPrimary },
+                        ]}
+                        maxLength={50}
+                      />
+                    </Inset>
+                    <Inset radius={12} style={styles.formInputWrap}>
+                      <TextInput
+                        value={rBody}
+                        onChangeText={setRBody}
+                        placeholder={t(
+                          'goals.reminderDescriptionPlaceholder',
+                        )}
+                        placeholderTextColor={theme.colors.textMuted}
+                        style={[
+                          styles.formInput,
+                          { color: theme.colors.textPrimary },
+                        ]}
+                        maxLength={120}
+                      />
+                    </Inset>
+                    <DateTimePicker
+                      value={rDate}
+                      mode="datetime"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      minimumDate={new Date()}
+                      onChange={(e: any, d?: Date) => {
+                        if (e?.type === 'dismissed') return;
+                        if (d) setRDate(d);
+                      }}
+                    />
+                    <View style={styles.formActions}>
+                      <View style={styles.formActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          style={styles.formActionBtn}
+                          onPress={closeReminderModal}
+                        >
+                          <Text
+                            style={[
+                              styles.secondaryText,
+                              { color: theme.colors.textMuted },
+                            ]}
+                          >
+                            {t('common.cancel')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                      <View style={styles.formActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          disabled={!canSaveReminder}
+                          backgroundColor={
+                            canSaveReminder
+                              ? goal.color
+                              : theme.colors.insetFill
+                          }
+                          style={styles.formActionBtn}
+                          onPress={saveReminder}
+                        >
+                          <Text
+                            style={[
+                              styles.primaryText,
+                              !canSaveReminder && {
+                                color: theme.colors.textMuted,
+                              },
+                            ]}
+                          >
+                            {t('common.save')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                    </View>
+                  </Raised>
+                </Pressable>
+              </Pressable>
+            </Modal>
+          )}
+
           <View style={styles.actionRow}>
             <View style={styles.saveWrap}>
               <NeumorphicButton
@@ -414,5 +730,66 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  reminderSection: { marginTop: 18 },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  subLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 6,
+  },
+  reminderGroup: { marginBottom: 10 },
+  reminderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    marginBottom: 8,
+  },
+  reminderTextCol: { flex: 1 },
+  reminderTitle: { fontSize: 15, fontWeight: '700' },
+  reminderBody: { fontSize: 13, fontWeight: '500', marginTop: 1 },
+  reminderTime: { fontSize: 12, fontWeight: '600', marginTop: 2 },
+  reminderTrash: { padding: 6, marginLeft: 8 },
+  addReminderBtn: {
+    paddingVertical: 13,
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  formInputWrap: { paddingHorizontal: 4, marginBottom: 8 },
+  formInput: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  formActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  formActionWrap: { flex: 1 },
+  formActionBtn: {
+    width: '100%',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: { width: '100%', padding: 20 },
+  modalPressArea: { width: '100%' },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 8,
   },
 });

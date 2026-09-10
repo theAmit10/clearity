@@ -8,6 +8,7 @@ import { useHabitStore } from '../store/habitStore';
 import { Raised } from './neumorphic/NeumorphicView';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
 import { useTranslation } from '../i18n';
+import { openPaywall } from '../services/paywallRouter';
 
 export default function ProGate({ children }: { children?: React.ReactNode }) {
   const { theme } = useTheme();
@@ -39,10 +40,7 @@ export default function ProGate({ children }: { children?: React.ReactNode }) {
           backgroundColor={theme.colors.accent}
           style={styles.button}
           onPress={() =>
-            navigation.navigate(
-              'Paywall',
-              expired ? { mode: 'expired' } : undefined,
-            )
+            openPaywall(navigation, expired ? { mode: 'expired' } : undefined)
           }
         >
           <Text style={styles.buttonText}>

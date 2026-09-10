@@ -17,7 +17,20 @@ export interface AdminNotificationConfig {
   minute: number;
 }
 
+export type GoalNotificationKind = 'ten_second' | 'halfway' | 'almost_due' | 'custom';
+
+export interface GoalNotificationConfig {
+  id: string;
+  goalId: string;
+  kind: GoalNotificationKind;
+  enabled: boolean;
+  title: string;
+  body: string;
+  timestamp: number;
+}
+
 export interface NotificationStoreData {
   habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
+  goalNotifications?: GoalNotificationConfig[];
 }

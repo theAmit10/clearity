@@ -89,6 +89,8 @@ If auth is added in the future:
 | `goal_deleted` | User deletes a goal | — | `src/store/goalStore.ts` |
 | `goal_completed` | User marks a goal complete and archives it | `overdue` | `src/store/goalStore.ts` |
 | `goal_extended` | User adds more time to a goal deadline | — | `src/store/goalStore.ts` |
+| `goal_reminder_set` | User sets a custom reminder on a goal | — | `src/store/goalStore.ts` |
+| `goal_reminder_removed` | User deletes a custom goal reminder | — | `src/store/goalStore.ts` |
 
 ### Value Moment
 
