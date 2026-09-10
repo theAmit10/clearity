@@ -91,6 +91,9 @@ If auth is added in the future:
 | `goal_extended` | User adds more time to a goal deadline | — | `src/store/goalStore.ts` |
 | `goal_reminder_set` | User sets a custom reminder on a goal | — | `src/store/goalStore.ts` |
 | `goal_reminder_removed` | User deletes a custom goal reminder | — | `src/store/goalStore.ts` |
+| `onboarding_started` | Onboarding shows on first launch | — | `App.tsx` |
+| `onboarding_completed` | User taps Continue on the last onboarding screen | — | `App.tsx` |
+| `onboarding_skipped` | User taps Skip on an onboarding screen | `at_screen` | `App.tsx` |
 
 ### Value Moment
 

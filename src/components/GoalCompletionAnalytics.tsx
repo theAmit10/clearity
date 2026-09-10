@@ -21,6 +21,7 @@ import Animated, {
 import type { Goal } from '../types/goal';
 import {
   getGoalCompletionStats,
+  getTimelineBounds,
   formatDuration,
 } from '../services/goalUtils';
 import { Raised } from './neumorphic/NeumorphicView';
@@ -64,21 +65,26 @@ function shortDate(ms: number): string {
   });
 }
 
+function fullDateTime(ms: number): string {
+  return new Date(ms).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function GoalCompletionAnalytics({
   goal,
 }: {
-  goal: Pick<Goal, 'color' | 'startAt' | 'endAt' | 'completedAt'>;
+  goal: Pick<Goal, 'color' | 'createdAt' | 'startAt' | 'endAt' | 'completedAt'>;
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { width: screenWidth } = useWindowDimensions();
   const stats = getGoalCompletionStats(goal);
-
-  const start = new Date(goal.startAt).getTime();
-  const end = new Date(goal.endAt).getTime();
-  const done = goal.completedAt
-    ? new Date(goal.completedAt).getTime()
-    : Date.now();
+  const bounds = getTimelineBounds(goal);
+  const { created, start, end, done, t0, t1 } = bounds;
 
   const verdictColor =
     stats.verdict === 'late'
@@ -86,6 +92,8 @@ export default function GoalCompletionAnalytics({
       : stats.verdict === 'on_time'
         ? '#FF9500'
         : goal.color;
+  const deadlineColor =
+    stats.verdict === 'late' ? '#FF3B30' : theme.colors.textPrimary;
   const verdictText =
     stats.verdict === 'late'
       ? t('goals.analytics.late', { duration: formatDuration(stats.delayMs) })
@@ -99,14 +107,15 @@ export default function GoalCompletionAnalytics({
   const W = Math.max(200, screenWidth - 72);
   const PAD = 10;
   const TRACK_Y = 44;
-  const t0 = start;
-  const t1 = Math.max(end, done, start + 1);
   const x = (ms: number) =>
     PAD + ((ms - t0) / (t1 - t0)) * (W - PAD * 2);
+  const xCreated = x(created);
   const xStart = x(start);
   const xEnd = x(end);
   const xDone = x(done);
   const onTimeFillEnd = Math.min(xDone, xEnd);
+  // Hide the Created marker when it would collide with the Start marker.
+  const showCreatedMarker = xStart - xCreated > 18;
 
   const fill = useSharedValue(0);
   const lateFill = useSharedValue(0);
@@ -220,6 +229,17 @@ export default function GoalCompletionAnalytics({
             rx={5}
             fill={theme.colors.insetFill}
           />
+          {showCreatedMarker && (
+            <Rect
+              x={xCreated}
+              y={TRACK_Y}
+              width={Math.max(0, xStart - xCreated)}
+              height={10}
+              rx={5}
+              fill={theme.colors.textMuted}
+              opacity={0.35}
+            />
+          )}
           <AnimatedRect
             x={xStart}
             y={TRACK_Y}
@@ -238,6 +258,16 @@ export default function GoalCompletionAnalytics({
             />
           )}
           <AnimatedG entering={FadeIn.delay(600).duration(400)}>
+            {showCreatedMarker && (
+              <Circle
+                cx={xCreated}
+                cy={TRACK_Y + 5}
+                r={5}
+                fill={theme.colors.background}
+                stroke={theme.colors.textMuted}
+                strokeWidth={2}
+              />
+            )}
             <Line
               x1={xEnd}
               y1={TRACK_Y - 8}
@@ -250,6 +280,13 @@ export default function GoalCompletionAnalytics({
           </AnimatedG>
         </Svg>
         <View style={styles.timelineLabels}>
+          {showCreatedMarker && (
+            <Text
+              style={[styles.timelineLabel, { color: theme.colors.textMuted }]}
+            >
+              {t('goals.analytics.timelineCreated')} · {shortDate(created)}
+            </Text>
+          )}
           <Text
             style={[styles.timelineLabel, { color: theme.colors.textMuted }]}
           >
@@ -269,7 +306,35 @@ export default function GoalCompletionAnalytics({
       </Animated.View>
 
       <Animated.View
-        entering={FadeInDown.duration(400).delay(340)}
+        entering={FadeInDown.duration(400).delay(280)}
+        style={styles.infoRow}
+      >
+        <Raised radius={14} distance={4} style={styles.infoChip}>
+          <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>
+            {t('goals.analytics.createdAt')}
+          </Text>
+          <Text
+            style={[styles.infoValue, { color: theme.colors.textPrimary }]}
+            numberOfLines={1}
+          >
+            {fullDateTime(created)}
+          </Text>
+        </Raised>
+        <Raised radius={14} distance={4} style={styles.infoChip}>
+          <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>
+            {t('goals.analytics.deadlineAt')}
+          </Text>
+          <Text
+            style={[styles.infoValue, { color: deadlineColor }]}
+            numberOfLines={1}
+          >
+            {fullDateTime(end)}
+          </Text>
+        </Raised>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(400)}
         style={styles.chipGrid}
       >
         {chips.map(c => (
@@ -316,10 +381,20 @@ const styles = StyleSheet.create({
   },
   timelineLabels: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 8,
     marginTop: 2,
   },
   timelineLabel: { fontSize: 11, fontWeight: '700' },
+  infoRow: { flexDirection: 'row', gap: 10 },
+  infoChip: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  infoValue: { fontSize: 13, fontWeight: '800', marginTop: 2 },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   chip: {
     flexGrow: 1,

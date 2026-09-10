@@ -21,8 +21,8 @@ import { getHabitIcon } from '../constants/habitIcons';
 import {
   getCountdownParts,
   formatOverdue,
-  getTimeTaken,
 } from '../services/goalUtils';
+import GoalCompletionAnalytics from '../components/GoalCompletionAnalytics';
 import { useTranslation } from '../i18n';
 
 function Pad(n: number): string {
@@ -202,19 +202,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
           {/* Countdown */}
           <Inset radius={18} style={styles.countdownWrap}>
             {completed ? (
-              <>
-                <Text style={[styles.completedMark, { color: goal.color }]}>
-                  ✓
-                </Text>
-                <Text
-                  style={[
-                    styles.countdownLabel,
-                    { color: theme.colors.textMuted },
-                  ]}
-                >
-                  {t('goals.timeTaken', { duration: getTimeTaken(goal) })}
-                </Text>
-              </>
+              <GoalCompletionAnalytics goal={goal} />
             ) : (
               <>
                 <View style={styles.countRow}>

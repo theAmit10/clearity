@@ -533,7 +533,26 @@
     "reminderWhen": "Date and time",
     "reminderInPast": "Reminder must be in the future.",
     "deleteReminder": "Delete Reminder",
-    "removeReminderTitle": "Delete this reminder?"
+    "removeReminderTitle": "Delete this reminder?",
+    "analytics": {
+      "early": "Completed Early",
+      "onTime": "Completed On Time",
+      "late": "Late by {{duration}}",
+      "aheadBy": "{{duration}} ahead",
+      "taken": "Time taken",
+      "allowance": "Allowance",
+      "delay": "Delay",
+      "ahead": "Ahead by",
+      "efficiency": "Efficiency",
+      "deadlineUsed": "Deadline used",
+      "timeline": "Timeline",
+      "timelineStart": "Start",
+      "timelineDeadline": "Deadline",
+      "timelineFinished": "Finished",
+      "timelineCreated": "Created",
+      "createdAt": "Created",
+      "deadlineAt": "Deadline"
+    }
   },
   "goalNotifications": {
     "createdTitle": "Goal created",

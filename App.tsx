@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, LogBox } from 'react-native';
 
 LogBox.ignoreLogs([/InteractionManager has been deprecated/]);
@@ -14,10 +14,15 @@ import {
   setupChannel,
   rescheduleAll,
 } from './src/services/notification';
-import { initAnalytics } from './src/services/analytics';
+import { initAnalytics, trackEvent } from './src/services/analytics';
 import { initRevenueCat } from './src/services/revenueCat';
 import { initI18n, useI18nStore } from './src/i18n';
 import { usePaywallVariantStore } from './src/store/paywallVariantStore';
+import {
+  loadOnboardingSeen,
+  saveOnboardingSeen,
+} from './src/services/storage';
+import type { OnboardingResult } from './src/screens/OnboardingScreen';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
@@ -29,6 +34,9 @@ function AppContent() {
   const crashlyticsEnabled = useHabitStore(s => s.crashlyticsEnabled);
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
+  const [onboardingState, setOnboardingState] = useState<
+    'checking' | 'show' | 'done'
+  >('checking');
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -39,7 +47,37 @@ function AppContent() {
     usePaywallVariantStore.getState().loadVariant();
     init();
     initGoals();
+    loadOnboardingSeen()
+      .then(seen => {
+        setOnboardingState(seen === true ? 'done' : 'show');
+      })
+      .catch(() => {
+        setOnboardingState('show');
+      });
   }, []);
+
+  useEffect(() => {
+    if (onboardingState === 'show') {
+      trackEvent('onboarding_started');
+    }
+  }, [onboardingState]);
+
+  const handleOnboardingFinish = useCallback(
+    async (result: OnboardingResult, atIndex: number) => {
+      try {
+        await saveOnboardingSeen(true);
+      } catch {
+        // non-critical — still let the user into the app
+      }
+      if (result === 'completed') {
+        trackEvent('onboarding_completed');
+      } else {
+        trackEvent('onboarding_skipped', { at_screen: atIndex + 1 });
+      }
+      setOnboardingState('done');
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!loaded) return;
@@ -60,7 +98,7 @@ function AppContent() {
     })();
   }, [loaded, goalsLoaded]);
 
-  if (!loaded || !goalsLoaded || !i18nLoaded) {
+  if (!loaded || !goalsLoaded || !i18nLoaded || onboardingState === 'checking') {
     return (
       <View
         style={[styles.loading, { backgroundColor: theme.colors.background }]}
@@ -70,7 +108,12 @@ function AppContent() {
     );
   }
 
-  return <RootNavigator />;
+  return (
+    <RootNavigator
+      showOnboarding={onboardingState === 'show'}
+      onOnboardingFinish={handleOnboardingFinish}
+    />
+  );
 }
 
 export default function App() {

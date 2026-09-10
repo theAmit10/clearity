@@ -30,7 +30,7 @@ function OptionRow({
       onPress={onSelect}
       style={[
         styles.option,
-        selected && { borderColor: accent, borderWidth: 1.5 },
+        selected && [styles.optionSelected, { borderColor: accent }],
       ]}
     >
       <View style={[styles.radio, selected && { borderColor: accent }]}>
@@ -122,6 +122,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1.5,
     borderColor: 'transparent',
+  },
+  optionSelected: {
+    borderWidth: 1.5,
   },
   radio: {
     width: 22,

@@ -186,7 +186,13 @@ function SettingsStack() {
 
 const navigationRef = createNavigationContainerRef();
 
-export default function RootNavigator() {
+export default function RootNavigator({
+  showOnboarding,
+  onOnboardingFinish,
+}: {
+  showOnboarding?: boolean;
+  onOnboardingFinish?: (result: OnboardingResult, atIndex: number) => void;
+}) {
   const prevScreen = useRef<string | null>(null);
   const { theme } = useTheme();
 
@@ -213,6 +219,14 @@ export default function RootNavigator() {
       prevScreen.current = name;
     }
   }, []);
+
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        onFinish={(result, atIndex) => onOnboardingFinish?.(result, atIndex)}
+      />
+    );
+  }
 
   return (
     <NavigationContainer
