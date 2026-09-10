@@ -141,6 +141,11 @@ function SettingsStack() {
         options={{ headerShown: false, presentation: 'modal' }}
       />
       <Stack.Screen
+        name="OnboardingPreview"
+        component={OnboardingPreviewScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
         name="Diagnostics"
         component={DiagnosticsScreen}
         options={{ headerShown: false }}
@@ -185,6 +190,13 @@ function SettingsStack() {
 }
 
 const navigationRef = createNavigationContainerRef();
+
+// Preview host for Diagnostics — dismisses without persisting the
+// onboarding-seen flag and without firing onboarding analytics (those live
+// in App's real first-launch finish handler, not in the screen itself).
+function OnboardingPreviewScreen({ navigation }: any) {
+  return <OnboardingScreen onFinish={() => navigation.goBack()} />;
+}
 
 export default function RootNavigator({
   showOnboarding,

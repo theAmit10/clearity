@@ -18,10 +18,7 @@ import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
-import {
-  getCountdownParts,
-  formatOverdue,
-} from '../services/goalUtils';
+import { getCountdownParts, formatOverdue } from '../services/goalUtils';
 import GoalCompletionAnalytics from '../components/GoalCompletionAnalytics';
 import { useTranslation } from '../i18n';
 
@@ -46,7 +43,9 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   const [showExtend, setShowExtend] = useState(false);
   const [extendDate, setExtendDate] = useState<Date>(new Date());
   const [showReminderModal, setShowReminderModal] = useState(false);
-  const [editingReminderId, setEditingReminderId] = useState<string | null>(null);
+  const [editingReminderId, setEditingReminderId] = useState<string | null>(
+    null,
+  );
   const [rTitle, setRTitle] = useState('');
   const [rBody, setRBody] = useState('');
   const [rDate, setRDate] = useState<Date>(new Date(Date.now() + 3600000));
@@ -365,10 +364,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
           {!completed && (
             <View style={styles.reminderSection}>
               <Text
-                style={[
-                  styles.sectionLabel,
-                  { color: theme.colors.textMuted },
-                ]}
+                style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
               >
                 {t('goals.reminders')}
               </Text>
@@ -376,10 +372,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
               {autoReminders.length > 0 && (
                 <View style={styles.reminderGroup}>
                   <Text
-                    style={[
-                      styles.subLabel,
-                      { color: theme.colors.textMuted },
-                    ]}
+                    style={[styles.subLabel, { color: theme.colors.textMuted }]}
                   >
                     {t('goals.autoReminders')}
                   </Text>
@@ -416,20 +409,13 @@ export default function GoalDetailScreen({ route, navigation }: any) {
 
               <View style={styles.reminderGroup}>
                 <Text
-                  style={[
-                    styles.subLabel,
-                    { color: theme.colors.textMuted },
-                  ]}
+                  style={[styles.subLabel, { color: theme.colors.textMuted }]}
                 >
                   {t('goals.customReminders')}
                 </Text>
                 {customReminders.map(r => (
                   <Pressable key={r.id} onPress={() => openEditReminder(r)}>
-                    <Raised
-                      radius={12}
-                      distance={4}
-                      style={styles.reminderRow}
-                    >
+                    <Raised radius={12} distance={4} style={styles.reminderRow}>
                       <View style={styles.reminderTextCol}>
                         <Text
                           style={[
@@ -532,9 +518,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                       <TextInput
                         value={rBody}
                         onChangeText={setRBody}
-                        placeholder={t(
-                          'goals.reminderDescriptionPlaceholder',
-                        )}
+                        placeholder={t('goals.reminderDescriptionPlaceholder')}
                         placeholderTextColor={theme.colors.textMuted}
                         style={[
                           styles.formInput,

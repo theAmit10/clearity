@@ -103,6 +103,14 @@ export default function DiagnosticsScreen({ navigation }: any) {
             {t('diagnostics.previewNew')}
           </Text>
         </Pressable>
+        <Pressable
+          style={[styles.button, { backgroundColor: theme.colors.surface }]}
+          onPress={() => navigation.navigate('OnboardingPreview')}
+        >
+          <Text style={[styles.buttonText, { color: theme.colors.iosBlue }]}>
+            {t('diagnostics.previewOnboarding')}
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

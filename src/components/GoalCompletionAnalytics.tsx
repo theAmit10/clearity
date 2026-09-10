@@ -90,25 +90,25 @@ export default function GoalCompletionAnalytics({
     stats.verdict === 'late'
       ? '#FF3B30'
       : stats.verdict === 'on_time'
-        ? '#FF9500'
-        : goal.color;
+      ? '#FF9500'
+      : goal.color;
   const deadlineColor =
     stats.verdict === 'late' ? '#FF3B30' : theme.colors.textPrimary;
   const verdictText =
     stats.verdict === 'late'
       ? t('goals.analytics.late', { duration: formatDuration(stats.delayMs) })
       : stats.verdict === 'on_time'
-        ? t('goals.analytics.onTime')
-        : `${t('goals.analytics.early')} · ${t('goals.analytics.aheadBy', {
-            duration: formatDuration(stats.delayMs),
-          })}`;
+      ? t('goals.analytics.onTime')
+      : `${t('goals.analytics.early')} · ${t('goals.analytics.aheadBy', {
+          duration: formatDuration(stats.delayMs),
+        })}`;
 
-  // Timeline geometry
-  const W = Math.max(200, screenWidth - 72);
+  // Timeline geometry. Available width inside the countdown inset =
+  // screen - scroll padding (16*2) - card padding (20*2) - inset padding (12*2).
+  const W = Math.max(200, screenWidth - 96);
   const PAD = 10;
   const TRACK_Y = 44;
-  const x = (ms: number) =>
-    PAD + ((ms - t0) / (t1 - t0)) * (W - PAD * 2);
+  const x = (ms: number) => PAD + ((ms - t0) / (t1 - t0)) * (W - PAD * 2);
   const xCreated = x(created);
   const xStart = x(start);
   const xEnd = x(end);
@@ -193,14 +193,10 @@ export default function GoalCompletionAnalytics({
           color={verdictColor}
         />
         <View style={styles.ringText}>
-          <Text
-            style={[styles.ringPct, { color: theme.colors.textPrimary }]}
-          >
+          <Text style={[styles.ringPct, { color: theme.colors.textPrimary }]}>
             {Math.round(stats.usedPct)}%
           </Text>
-          <Text
-            style={[styles.ringLabel, { color: theme.colors.textMuted }]}
-          >
+          <Text style={[styles.ringLabel, { color: theme.colors.textMuted }]}>
             {t('goals.analytics.deadlineUsed')}
           </Text>
         </View>
@@ -297,9 +293,7 @@ export default function GoalCompletionAnalytics({
           >
             {t('goals.analytics.timelineDeadline')} · {shortDate(end)}
           </Text>
-          <Text
-            style={[styles.timelineLabel, { color: verdictColor }]}
-          >
+          <Text style={[styles.timelineLabel, { color: verdictColor }]}>
             {t('goals.analytics.timelineFinished')} · {shortDate(done)}
           </Text>
         </View>
@@ -338,16 +332,9 @@ export default function GoalCompletionAnalytics({
         style={styles.chipGrid}
       >
         {chips.map(c => (
-          <Raised
-            key={c.label}
-            radius={14}
-            distance={4}
-            style={styles.chip}
-          >
+          <Raised key={c.label} radius={14} distance={4} style={styles.chip}>
             <CountUp value={c.value} suffix={c.suffix} />
-            <Text
-              style={[styles.chipLabel, { color: theme.colors.textMuted }]}
-            >
+            <Text style={[styles.chipLabel, { color: theme.colors.textMuted }]}>
               {c.label}
             </Text>
           </Raised>
@@ -358,7 +345,7 @@ export default function GoalCompletionAnalytics({
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 14 },
+  wrap: { gap: 14, width: '100%' },
   verdict: {
     flexDirection: 'row',
     alignItems: 'center',

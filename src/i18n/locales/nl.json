@@ -611,6 +611,7 @@
     "newBody": "Long-form test variant",
     "previewClassic": "Preview Classic",
     "previewNew": "Preview New",
-    "saved": "Saved locally"
+    "saved": "Saved locally",
+    "previewOnboarding": "Preview Onboarding"
   }
 }
