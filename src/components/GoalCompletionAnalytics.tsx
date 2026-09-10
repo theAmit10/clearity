@@ -388,6 +388,7 @@ const styles = StyleSheet.create({
     flexBasis: '45%',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 12,
   },
   chipValue: { fontSize: 20, fontWeight: '800' },
   chipLabel: { fontSize: 12, fontWeight: '600', marginTop: 2 },
