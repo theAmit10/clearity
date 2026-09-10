@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   Pressable,
+  Modal,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -81,15 +82,28 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
     field: 'start' | 'end';
     mode: 'date' | 'time';
   }>(null);
+  const [tempDate, setTempDate] = useState<Date | null>(null);
 
   const endValid = endAt.getTime() > startAt.getTime();
   const canSave = title.trim().length > 0 && endValid;
 
+  const openPicker = (field: 'start' | 'end') => {
+    setTempDate(new Date(field === 'start' ? startAt : endAt));
+    setPicker({ field, mode: 'date' });
+  };
+
+  const closePicker = () => {
+    setPicker(null);
+    setTempDate(null);
+  };
+
   const onPickerChange = (event: any, selected?: Date) => {
-    if (Platform.OS === 'android') setPicker(null);
-    if (event?.type === 'dismissed') return;
-    if (!selected || !picker) return;
-    const base = picker.field === 'start' ? new Date(startAt) : new Date(endAt);
+    if (event?.type === 'dismissed') {
+      closePicker();
+      return;
+    }
+    if (!selected || !picker || !tempDate) return;
+    const base = new Date(tempDate);
     let next: Date;
     if (picker.mode === 'date') {
       next = new Date(base);
@@ -102,17 +116,29 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
       next = new Date(base);
       next.setHours(selected.getHours(), selected.getMinutes(), 0, 0);
     }
-    if (picker.field === 'start') setStartAt(next);
-    else setEndAt(next);
-    if (Platform.OS === 'ios') {
-      // keep picker open for time after date on iOS for fast flow
-    } else {
-      setPicker(null);
+    setTempDate(next);
+    if (Platform.OS === 'android' && picker.mode === 'date') {
+      // Chain date -> time on Android so both are set in one flow.
+      setPicker({ field: picker.field, mode: 'time' });
     }
   };
 
-  const openPicker = (field: 'start' | 'end') =>
-    setPicker({ field, mode: 'date' });
+  const pickerTitle = picker
+    ? t(picker.field === 'start' ? 'goals.startTime' : 'goals.endTime')
+    : '';
+  const pickerValue =
+    tempDate ?? (picker?.field === 'start' ? startAt : endAt);
+  const pickerDoneValid =
+    !picker ||
+    picker.field === 'start' ||
+    (tempDate != null && tempDate.getTime() > startAt.getTime());
+
+  const commitPicker = () => {
+    if (!picker || !tempDate || !pickerDoneValid) return;
+    if (picker.field === 'start') setStartAt(tempDate);
+    else setEndAt(tempDate);
+    closePicker();
+  };
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -271,55 +297,143 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
           )}
 
           {picker && (
-            <DateTimePicker
-              value={picker.field === 'start' ? startAt : endAt}
-              mode={picker.mode}
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              minimumDate={picker.field === 'end' ? startAt : undefined}
-              onChange={onPickerChange}
-            />
-          )}
-          {picker && Platform.OS === 'ios' && (
-            <View style={styles.iosPickerRow}>
-              <NeumorphicButton
-                radius={12}
-                distance={4}
-                style={styles.iosPickerBtn}
-                onPress={() =>
-                  setPicker(p =>
-                    p
-                      ? {
-                          field: p.field,
-                          mode: p.mode === 'date' ? 'time' : 'date',
-                        }
-                      : p,
-                  )
-                }
+            <Modal
+              visible={!!picker}
+              transparent
+              animationType="fade"
+              onRequestClose={closePicker}
+            >
+              <Pressable
+                style={styles.modalOverlay}
+                onPress={closePicker}
               >
-                <Text
-                  style={[
-                    styles.iosPickerText,
-                    { color: theme.colors.textPrimary },
-                  ]}
-                >
-                  {picker.mode === 'date'
-                    ? t('goals.pickTime')
-                    : t('goals.pickDate')}
-                </Text>
-              </NeumorphicButton>
-              <NeumorphicButton
-                radius={12}
-                distance={4}
-                style={styles.iosPickerBtn}
-                onPress={() => setPicker(null)}
-              >
-                <Text
-                  style={[styles.iosPickerText, { color: theme.colors.accent }]}
-                >
-                  ✓
-                </Text>
-              </NeumorphicButton>
-            </View>
+                <Pressable onPress={() => {}}>
+                  <Raised
+                    radius={16}
+                    distance={8}
+                    style={styles.modalCard}
+                  >
+                    <Text
+                      style={[
+                        styles.modalTitle,
+                        { color: theme.colors.textPrimary },
+                      ]}
+                    >
+                      {pickerTitle}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.modalPreview,
+                        { color: theme.colors.textMuted },
+                      ]}
+                    >
+                      {formatDateTime(pickerValue)}
+                    </Text>
+                    <DateTimePicker
+                      value={pickerValue}
+                      mode={picker.mode}
+                      display={
+                        Platform.OS === 'ios' ? 'spinner' : 'default'
+                      }
+                      minimumDate={
+                        picker.field === 'end' ? startAt : undefined
+                      }
+                      onChange={onPickerChange}
+                    />
+                    <View style={styles.modalToggleRow}>
+                      <View style={styles.modalActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          forcePressed={picker.mode === 'date'}
+                          style={styles.modalActionBtn}
+                          onPress={() =>
+                            setPicker(p =>
+                              p ? { field: p.field, mode: 'date' } : p,
+                            )
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.modalToggleText,
+                              { color: theme.colors.textPrimary },
+                            ]}
+                          >
+                            {t('goals.pickDate')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                      <View style={styles.modalActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          forcePressed={picker.mode === 'time'}
+                          style={styles.modalActionBtn}
+                          onPress={() =>
+                            setPicker(p =>
+                              p ? { field: p.field, mode: 'time' } : p,
+                            )
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.modalToggleText,
+                              { color: theme.colors.textPrimary },
+                            ]}
+                          >
+                            {t('goals.pickTime')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                    </View>
+                    <View style={styles.modalActions}>
+                      <View style={styles.modalActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          style={styles.modalActionBtn}
+                          onPress={closePicker}
+                        >
+                          <Text
+                            style={[
+                              styles.modalToggleText,
+                              { color: theme.colors.textMuted },
+                            ]}
+                          >
+                            {t('common.cancel')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                      <View style={styles.modalActionWrap}>
+                        <NeumorphicButton
+                          radius={12}
+                          distance={4}
+                          disabled={!pickerDoneValid}
+                          backgroundColor={
+                            pickerDoneValid
+                              ? color
+                              : theme.colors.insetFill
+                          }
+                          style={styles.modalActionBtn}
+                          onPress={commitPicker}
+                        >
+                          <Text
+                            style={[
+                              styles.modalSaveText,
+                              !pickerDoneValid && {
+                                color: theme.colors.textMuted,
+                              },
+                            ]}
+                          >
+                            {t('common.save')}
+                          </Text>
+                        </NeumorphicButton>
+                      </View>
+                    </View>
+                  </Raised>
+                </Pressable>
+              </Pressable>
+            </Modal>
           )}
 
           <NeumorphicButton
@@ -385,9 +499,40 @@ const styles = StyleSheet.create({
   },
   dateText: { fontSize: 16, fontWeight: '700' },
   error: { fontSize: 13, fontWeight: '700', marginTop: 8 },
-  iosPickerRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  iosPickerBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
-  iosPickerText: { fontSize: 14, fontWeight: '700' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+    textAlign: 'center',
+  },
+  modalPreview: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  modalToggleRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  modalToggleText: { fontSize: 14, fontWeight: '700' },
+  modalActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  modalActionWrap: { flex: 1 },
+  modalActionBtn: {
+    width: '100%',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalSaveText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
   saveButton: {
     marginTop: 2,
     paddingVertical: 16,
