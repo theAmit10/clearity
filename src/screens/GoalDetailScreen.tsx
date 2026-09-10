@@ -361,7 +361,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
             </View>
           )}
 
-          {!completed && (
+          {/* {!completed && (
             <View style={styles.reminderSection}>
               <Text
                 style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
@@ -474,7 +474,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 </Text>
               </NeumorphicButton>
             </View>
-          )}
+          )} */}
 
           {showReminderModal && (
             <Modal
@@ -675,13 +675,26 @@ const styles = StyleSheet.create({
   meta: { marginTop: 16, alignItems: 'center' },
   metaText: { fontSize: 13, fontWeight: '600', textAlign: 'center' },
   actionCol: { gap: 10, marginTop: 18 },
-  primaryBtn: { paddingVertical: 15, paddingHorizontal: 12, alignItems: 'center' },
+  primaryBtn: {
+    paddingVertical: 15,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
   primaryText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
-  secondaryBtn: { paddingVertical: 14, paddingHorizontal: 12, alignItems: 'center' },
+  secondaryBtn: {
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
   secondaryText: { fontWeight: '800', fontSize: 14 },
   extendWrap: { marginTop: 12 },
   extendRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  extendBtn: { flex: 1, paddingVertical: 12, paddingHorizontal: 12, alignItems: 'center' },
+  extendBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
   actionRow: {
     flexDirection: 'row',
     gap: 12,

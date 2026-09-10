@@ -141,3 +141,10 @@ export function getTimelineBounds(
   const t1 = Math.max(end, done, t0 + 1);
   return { created, start, end, done, t0, t1 };
 }
+
+/** Position of a timestamp on [t0, t1] as 0-100, clamped. Powers the
+ * milestone pill rings. */
+export function milestonePercent(ms: number, t0: number, t1: number): number {
+  if (t1 <= t0) return 100;
+  return Math.min(100, Math.max(0, ((ms - t0) / (t1 - t0)) * 100));
+}

@@ -325,7 +325,15 @@
     "partialResetBody": "Vos habitudes ont été effacées, mais le stockage local n'a pas pu être entièrement vidé : {{error}}",
     "diagnosticsSection": "Diagnostics",
     "diagnosticsDescription": "Preview screens and choose which paywall new users see. Stored on this device only.",
-    "diagnosticsRow": "Paywall version"
+    "diagnosticsRow": "Paywall version",
+    "proCard": {
+      "titleFree": "You're on a Free Plan",
+      "subtitleFree": "Upgrade to focus better with Habitic Pro",
+      "titleExpired": "Your plan has expired",
+      "subtitleExpired": "Renew to keep your streaks with Habitic Pro",
+      "unlimitedSubtitle": "No limits on habits or rules",
+      "ctaTryFor": "Try for {{price}}"
+    }
   },
   "general": {
     "title": "Général",
@@ -515,6 +523,7 @@
     "overdueBy": "Deadline reached, {{overdue}} extra taken",
     "extendTime": "Add more time",
     "completeGoal": "Mark complete & archive",
+    "completeConfirm": "Complete",
     "completedIn": "Completed in {{duration}}",
     "timeTaken": "Time taken: {{duration}}",
     "deleteGoal": "Delete Goal",

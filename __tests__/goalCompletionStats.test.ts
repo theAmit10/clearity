@@ -1,4 +1,4 @@
-import { getGoalCompletionStats, formatDuration, getTimelineBounds, fitDurationUnit } from '../src/services/goalUtils';
+import { getGoalCompletionStats, formatDuration, getTimelineBounds, fitDurationUnit, milestonePercent } from '../src/services/goalUtils';
 
 const HOUR = 3600_000;
 const DAY = 86400_000;
@@ -126,5 +126,19 @@ describe('fitDurationUnit', () => {
 
   it('keeps zero as zero instead of fabricating 1', () => {
     expect(fitDurationUnit(0)).toEqual({ value: 0, suffix: 'm' });
+  });
+});
+
+describe('milestonePercent', () => {
+  it('maps bounds to 0 and 100 and midpoints proportionally', () => {
+    expect(milestonePercent(0, 0, 100)).toBe(0);
+    expect(milestonePercent(100, 0, 100)).toBe(100);
+    expect(milestonePercent(25, 0, 100)).toBe(25);
+  });
+
+  it('clamps outside values and degenerate ranges', () => {
+    expect(milestonePercent(-50, 0, 100)).toBe(0);
+    expect(milestonePercent(150, 0, 100)).toBe(100);
+    expect(milestonePercent(50, 100, 100)).toBe(100);
   });
 });

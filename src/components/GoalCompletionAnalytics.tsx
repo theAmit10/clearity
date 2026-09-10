@@ -18,12 +18,16 @@ import Animated, {
   FadeInDown,
   FadeIn,
 } from 'react-native-reanimated';
+import FlagIcon from 'react-native-heroicons/outline/FlagIcon';
+import ClockIcon from 'react-native-heroicons/outline/ClockIcon';
+import TrophyIcon from 'react-native-heroicons/outline/TrophyIcon';
 import type { Goal } from '../types/goal';
 import {
   getGoalCompletionStats,
   getTimelineBounds,
   formatDuration,
   fitDurationUnit,
+  milestonePercent,
 } from '../services/goalUtils';
 import { Raised } from './neumorphic/NeumorphicView';
 import ProgressRing from './ProgressRing';
@@ -64,6 +68,111 @@ function shortDate(ms: number): string {
     month: 'short',
     day: 'numeric',
   });
+}
+
+type MilestoneIcon = React.ComponentType<{ size?: number; color?: string }>;
+
+function MilestonePill({
+  Icon,
+  iconColor,
+  day,
+  percent,
+  label,
+  date,
+  delay,
+}: {
+  Icon: MilestoneIcon;
+  iconColor: string;
+  day: number;
+  percent: number;
+  label: string;
+  date: string;
+  delay: number;
+}) {
+  const { theme } = useTheme();
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const ring = useSharedValue(0);
+  const STROKE = 3;
+  const RADIUS = 26;
+  const perim =
+    size.w > 0
+      ? 2 * (size.w - STROKE + size.h - STROKE) -
+        8 * RADIUS +
+        2 * Math.PI * RADIUS
+      : 0;
+
+  useEffect(() => {
+    ring.value = withDelay(
+      delay,
+      withTiming(percent, { duration: 800, easing: Easing.out(Easing.cubic) }),
+    );
+  }, [ring, percent, delay]);
+
+  const ringProps = useAnimatedProps(
+    () => ({ strokeDashoffset: perim * (1 - ring.value / 100) }),
+    [perim],
+  );
+
+  return (
+    <View style={styles.milestoneCol}>
+      <View
+        style={styles.pillWrap}
+        onLayout={e =>
+          setSize({
+            w: e.nativeEvent.layout.width,
+            h: e.nativeEvent.layout.height,
+          })
+        }
+      >
+        <Raised radius={28} distance={5} style={styles.pill}>
+          <Icon size={22} color={iconColor} />
+          <Text
+            style={[styles.pillValue, { color: theme.colors.textPrimary }]}
+          >
+            {day}
+          </Text>
+        </Raised>
+        {size.w > 0 && (
+          <Svg
+            width={size.w}
+            height={size.h}
+            style={StyleSheet.absoluteFill}
+          >
+            <Rect
+              x={STROKE / 2}
+              y={STROKE / 2}
+              width={size.w - STROKE}
+              height={size.h - STROKE}
+              rx={RADIUS}
+              fill="none"
+              stroke={theme.colors.textMuted}
+              strokeOpacity={0.3}
+              strokeWidth={STROKE}
+            />
+            <AnimatedRect
+              x={STROKE / 2}
+              y={STROKE / 2}
+              width={size.w - STROKE}
+              height={size.h - STROKE}
+              rx={RADIUS}
+              fill="none"
+              stroke={iconColor}
+              strokeWidth={STROKE}
+              strokeLinecap="round"
+              strokeDasharray={perim}
+              animatedProps={ringProps}
+            />
+          </Svg>
+        )}
+      </View>
+      <Text style={[styles.milestoneLabel, { color: theme.colors.textPrimary }]}>
+        {label}
+      </Text>
+      <Text style={[styles.milestoneDate, { color: theme.colors.textMuted }]}>
+        {date}
+      </Text>
+    </View>
+  );
 }
 
 function fullDateTime(ms: number): string {
@@ -145,6 +254,22 @@ export default function GoalCompletionAnalytics({
   const taken = fitDurationUnit(stats.takenMs);
   const allowance = fitDurationUnit(stats.allottedMs);
   const gap = fitDurationUnit(stats.delayMs);
+
+  const milestones: {
+    key: string;
+    Icon: MilestoneIcon;
+    iconColor: string;
+    ms: number;
+  }[] = [
+    { key: 'start', Icon: FlagIcon, iconColor: goal.color, ms: start },
+    { key: 'deadline', Icon: ClockIcon, iconColor: '#FF9500', ms: end },
+    { key: 'finished', Icon: TrophyIcon, iconColor: verdictColor, ms: done },
+  ];
+  const milestoneLabels: Record<string, string> = {
+    start: t('goals.analytics.timelineStart'),
+    deadline: t('goals.analytics.timelineDeadline'),
+    finished: t('goals.analytics.timelineFinished'),
+  };
   const chips: { label: string; value: number; suffix: string }[] = [
     {
       label: t('goals.analytics.taken'),
@@ -279,32 +404,24 @@ export default function GoalCompletionAnalytics({
             <Circle cx={xDone} cy={TRACK_Y + 5} r={7} fill={verdictColor} />
           </AnimatedG>
         </Svg>
-        <View style={styles.timelineLabels}>
-          {showCreatedMarker && (
-            <Text
-              style={[styles.timelineLabel, { color: theme.colors.textMuted }]}
-            >
-              {t('goals.analytics.timelineCreated')} · {shortDate(created)}
-            </Text>
-          )}
-          <Text
-            style={[styles.timelineLabel, { color: theme.colors.textMuted }]}
-          >
-            {t('goals.analytics.timelineStart')} · {shortDate(start)}
-          </Text>
-          <Text
-            style={[styles.timelineLabel, { color: theme.colors.textMuted }]}
-          >
-            {t('goals.analytics.timelineDeadline')} · {shortDate(end)}
-          </Text>
-          <Text style={[styles.timelineLabel, { color: verdictColor }]}>
-            {t('goals.analytics.timelineFinished')} · {shortDate(done)}
-          </Text>
+        <View style={styles.milestoneRow}>
+          {milestones.map((m, i) => (
+            <MilestonePill
+              key={m.key}
+              Icon={m.Icon}
+              iconColor={m.iconColor}
+              day={new Date(m.ms).getDate()}
+              percent={milestonePercent(m.ms, t0, t1)}
+              label={milestoneLabels[m.key]}
+              date={shortDate(m.ms)}
+              delay={600 + i * 150}
+            />
+          ))}
         </View>
       </Animated.View>
 
       <Animated.View
-        entering={FadeInDown.duration(400).delay(280)}
+        entering={FadeInDown.duration(400).delay(380)}
         style={styles.infoRow}
       >
         <Raised radius={14} distance={4} style={styles.infoChip}>
@@ -332,7 +449,7 @@ export default function GoalCompletionAnalytics({
       </Animated.View>
 
       <Animated.View
-        entering={FadeInDown.duration(400).delay(400)}
+        entering={FadeInDown.duration(400).delay(480)}
         style={styles.chipGrid}
       >
         {chips.map(c => (
@@ -370,14 +487,21 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     marginBottom: 4,
   },
-  timelineLabels: {
+  milestoneRow: { flexDirection: 'row', gap: 12, marginTop: 10 },
+  milestoneCol: { flex: 1, alignItems: 'center', gap: 4 },
+  pillWrap: { width: '100%' },
+  pill: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    marginTop: 2,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    width: '100%',
   },
-  timelineLabel: { fontSize: 11, fontWeight: '700' },
+  pillValue: { fontSize: 22, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  milestoneLabel: { fontSize: 14, fontWeight: '700' },
+  milestoneDate: { fontSize: 11, fontWeight: '600' },
   infoRow: { flexDirection: 'row', gap: 10 },
   infoChip: {
     flex: 1,

@@ -567,6 +567,7 @@
     "overdueBy": "Deadline reached, {{overdue}} extra taken",
     "extendTime": "Add more time",
     "completeGoal": "Mark complete & archive",
+    "completeConfirm": "Complete",
     "completedIn": "Completed in {{duration}}",
     "timeTaken": "Time taken: {{duration}}",
     "deleteGoal": "Delete Goal",

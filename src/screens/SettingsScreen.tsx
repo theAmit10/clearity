@@ -19,6 +19,7 @@ import {
   SETTINGS_SHARED_TAGS,
   settingsCardTransition,
 } from '../components/SettingsRevealItem';
+import { ProUpsellCard } from '../components/ProUpsellCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import LockClosedIcon from 'react-native-heroicons/outline/LockClosedIcon';
@@ -320,6 +321,18 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={[styles.title, { color: theme.colors.iosLabel }]}>
           {t('settings.title')}
         </Text>
+
+        {!isPro && (
+          <SettingsRevealItem
+            scrollY={scrollY}
+            viewportHeight={viewportHeight}
+          >
+            <ProUpsellCard
+              expired={proExpired}
+              onPress={() => openPaywall(navigation, paywallParams)}
+            />
+          </SettingsRevealItem>
+        )}
 
         <Section
           title={t('settings.generalSection')}

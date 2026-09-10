@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, Alert } from 'react-native';
 import { useGoalStore } from '../store/goalStore';
 import GoalCard from '../components/GoalCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
@@ -15,7 +15,22 @@ export default function GoalListScreen({ navigation }: any) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const goals = useGoalStore(s => s.goals);
+  const completeGoal = useGoalStore(s => s.completeGoal);
   const [filter, setFilter] = useState<GoalFilter>('all');
+
+  const confirmComplete = (id: string) => {
+    const goal = goals.find(g => g.id === id);
+    if (!goal || goal.status !== 'active') return;
+    Alert.alert(t('goals.completeGoal'), goal.title, [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('goals.completeConfirm'),
+        onPress: () => {
+          completeGoal(id);
+        },
+      },
+    ]);
+  };
 
   const active = useMemo(
     () => goals.filter(g => g.status === 'active').sort((a, b) => +new Date(a.endAt) - +new Date(b.endAt)),
@@ -125,6 +140,7 @@ export default function GoalListScreen({ navigation }: any) {
                 <GoalCard
                   goal={item.goal}
                   onPress={() => navigation.navigate('GoalDetail', { id: item.goal.id })}
+                  onComplete={confirmComplete}
                 />
               );
             }}
