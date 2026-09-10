@@ -27,6 +27,16 @@ const GLASS_BORDER = 'rgba(255,255,255,0.12)';
 
 export type OnboardingResult = 'completed' | 'skipped';
 
+const CRATERS = [
+  { width: 56, height: 56, top: 34, left: 62 },
+  { width: 34, height: 34, top: 52, left: 128 },
+  { width: 44, height: 44, top: 88, left: 40 },
+  { width: 52, height: 52, top: 92, left: 100 },
+  { width: 46, height: 46, top: 96, left: 168 },
+  { width: 40, height: 40, top: 148, left: 66 },
+  { width: 36, height: 36, top: 152, left: 132 },
+] as const;
+
 interface Props {
   onFinish: (result: OnboardingResult, atIndex: number) => void;
 }
@@ -142,10 +152,10 @@ export default function OnboardingScreen({ onFinish }: Props) {
         </View>
         <View style={styles.glassCard}>
           <View style={styles.iconCluster}>
-            <View style={[styles.clusterDot, { backgroundColor: '#111111' }]}><Text style={styles.clusterGlyph}>✓</Text></View>
-            <View style={[styles.clusterDot, { backgroundColor: '#3B82C4' }]}><Text style={styles.clusterGlyph}>≈</Text></View>
-            <View style={[styles.clusterDot, { backgroundColor: '#4CAF7D' }]}><Text style={styles.clusterGlyph}>♪</Text></View>
-            <View style={[styles.clusterDot, { backgroundColor: '#C83E8B' }]}><Text style={styles.clusterGlyph}>T</Text></View>
+            <View style={[styles.clusterDot, styles.dotBlack]}><Text style={styles.clusterGlyph}>✓</Text></View>
+            <View style={[styles.clusterDot, styles.dotBlue]}><Text style={styles.clusterGlyph}>≈</Text></View>
+            <View style={[styles.clusterDot, styles.dotGreen]}><Text style={styles.clusterGlyph}>♪</Text></View>
+            <View style={[styles.clusterDot, styles.dotPink]}><Text style={styles.clusterGlyph}>T</Text></View>
           </View>
           <Text style={styles.cardBig}>
             4 <Text style={styles.cardActive}>{t('onboarding.active')}</Text>
@@ -178,7 +188,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
         <View style={styles.upNextRow}>
           <View style={styles.upNextCard}>
             <View style={styles.upNextHead}>
-              <View style={[styles.habitDot, { backgroundColor: '#111111' }]}>
+              <View style={[styles.habitDot, styles.dotBlack]}>
                 <Text style={styles.clusterGlyph}>✓</Text>
               </View>
               <Text style={styles.upNextWhen}>• {t('onboarding.example1Meta').split('· ')[1] ?? ''}</Text>
@@ -188,7 +198,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
           </View>
           <View style={styles.upNextCard}>
             <View style={styles.upNextHead}>
-              <View style={[styles.habitDot, { backgroundColor: '#3B82C4' }]}>
+              <View style={[styles.habitDot, styles.dotBlue]}>
                 <Text style={styles.clusterGlyph}>≈</Text>
               </View>
               <Text style={styles.upNextWhen}>• {t('onboarding.example2Meta').split('· ')[1] ?? ''}</Text>
@@ -221,13 +231,9 @@ export default function OnboardingScreen({ onFinish }: Props) {
       </Animated.Text>
       <Animated.View entering={FadeIn.delay(200).duration(380)} style={styles.moonWrap}>
         <View style={styles.moon}>
-          <View style={[styles.crater, { width: 56, height: 56, top: 34, left: 62 }]} />
-          <View style={[styles.crater, { width: 34, height: 34, top: 52, left: 128 }]} />
-          <View style={[styles.crater, { width: 44, height: 44, top: 88, left: 40 }]} />
-          <View style={[styles.crater, { width: 52, height: 52, top: 92, left: 100 }]} />
-          <View style={[styles.crater, { width: 46, height: 46, top: 96, left: 168 }]} />
-          <View style={[styles.crater, { width: 40, height: 40, top: 148, left: 66 }]} />
-          <View style={[styles.crater, { width: 36, height: 36, top: 152, left: 132 }]} />
+          {CRATERS.map((c, i) => (
+            <View key={i} style={[styles.crater, c]} />
+          ))}
         </View>
       </Animated.View>
       <View style={styles.flexSpacer} />
@@ -254,7 +260,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         scrollEnabled={false}
-        renderItem={({ index: i }) => pages[i]}
+        renderItem={({ index: i }) => <>{pages[i]}</>}
       />
     </SafeAreaView>
   );
@@ -407,6 +413,18 @@ const styles = StyleSheet.create({
     marginLeft: -10,
     borderWidth: 2,
     borderColor: 'rgba(20,11,10,0.9)',
+  },
+  dotBlack: {
+    backgroundColor: '#111111',
+  },
+  dotBlue: {
+    backgroundColor: '#3B82C4',
+  },
+  dotGreen: {
+    backgroundColor: '#4CAF7D',
+  },
+  dotPink: {
+    backgroundColor: '#C83E8B',
   },
   clusterGlyph: {
     color: '#FFFFFF',
