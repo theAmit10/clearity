@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import TrashIcon from 'react-native-heroicons/outline/TrashIcon';
 import { useGoalStore } from '../store/goalStore';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -209,13 +210,18 @@ export default function GoalDetailScreen({ route, navigation }: any) {
             <NeumorphicButton
               radius={14}
               distance={5}
-              style={styles.halfBtn}
+              style={styles.saveBtn}
               onPress={() => navigation.navigate('AddEditGoal', { id: goal.id })}
             >
               <Text style={[styles.secondaryText, { color: theme.colors.textPrimary }]}>{t('common.save')}</Text>
             </NeumorphicButton>
-            <NeumorphicButton radius={14} distance={5} style={styles.halfBtn} onPress={confirmDelete}>
-              <Text style={[styles.secondaryText, { color: '#FF3B30' }]}>{t('goals.deleteGoal')}</Text>
+            <NeumorphicButton
+              radius={14}
+              distance={5}
+              style={styles.deleteIconBtn}
+              onPress={confirmDelete}
+            >
+              <TrashIcon size={20} color="#FF3B30" />
             </NeumorphicButton>
           </View>
         </Raised>
@@ -254,6 +260,7 @@ const styles = StyleSheet.create({
   extendWrap: { marginTop: 12 },
   extendRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   extendBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
-  actionRow: { flexDirection: 'row', gap: 12, marginTop: 18 },
-  halfBtn: { flex: 1, paddingVertical: 13, alignItems: 'center' },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 18, alignItems: 'center' },
+  saveBtn: { flex: 1, paddingVertical: 13, alignItems: 'center' },
+  deleteIconBtn: { width: 52, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
 });
