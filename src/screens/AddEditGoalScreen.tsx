@@ -126,8 +126,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const pickerTitle = picker
     ? t(picker.field === 'start' ? 'goals.startTime' : 'goals.endTime')
     : '';
-  const pickerValue =
-    tempDate ?? (picker?.field === 'start' ? startAt : endAt);
+  const pickerValue = tempDate ?? (picker?.field === 'start' ? startAt : endAt);
   const pickerDoneValid =
     !picker ||
     picker.field === 'start' ||
@@ -303,16 +302,9 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
               animationType="fade"
               onRequestClose={closePicker}
             >
-              <Pressable
-                style={styles.modalOverlay}
-                onPress={closePicker}
-              >
+              <Pressable style={styles.modalOverlay} onPress={closePicker}>
                 <Pressable onPress={() => {}}>
-                  <Raised
-                    radius={16}
-                    distance={8}
-                    style={styles.modalCard}
-                  >
+                  <Raised radius={16} distance={8} style={styles.modalCard}>
                     <Text
                       style={[
                         styles.modalTitle,
@@ -332,12 +324,8 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
                     <DateTimePicker
                       value={pickerValue}
                       mode={picker.mode}
-                      display={
-                        Platform.OS === 'ios' ? 'spinner' : 'default'
-                      }
-                      minimumDate={
-                        picker.field === 'end' ? startAt : undefined
-                      }
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      minimumDate={picker.field === 'end' ? startAt : undefined}
                       onChange={onPickerChange}
                     />
                     <View style={styles.modalToggleRow}>
@@ -410,9 +398,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
                           distance={4}
                           disabled={!pickerDoneValid}
                           backgroundColor={
-                            pickerDoneValid
-                              ? color
-                              : theme.colors.insetFill
+                            pickerDoneValid ? color : theme.colors.insetFill
                           }
                           style={styles.modalActionBtn}
                           onPress={commitPicker}
@@ -436,23 +422,25 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
             </Modal>
           )}
 
-          <NeumorphicButton
-            radius={16}
-            distance={6}
-            disabled={!canSave}
-            backgroundColor={canSave ? color : theme.colors.insetFill}
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
-            <Text
-              style={[
-                styles.saveButtonText,
-                !canSave && { color: theme.colors.textMuted },
-              ]}
+          <View style={styles.saveWrap}>
+            <NeumorphicButton
+              radius={16}
+              distance={6}
+              disabled={!canSave}
+              backgroundColor={canSave ? color : theme.colors.insetFill}
+              style={styles.saveButton}
+              onPress={handleSave}
             >
-              {t(existing ? 'goals.saveChanges' : 'goals.createGoal')}
-            </Text>
-          </NeumorphicButton>
+              <Text
+                style={[
+                  styles.saveButtonText,
+                  !canSave && { color: theme.colors.textMuted },
+                ]}
+              >
+                {t(existing ? 'goals.saveChanges' : 'goals.createGoal')}
+              </Text>
+            </NeumorphicButton>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -533,8 +521,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalSaveText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
+  saveWrap: { marginTop: 28 },
   saveButton: {
-    marginTop: 2,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
