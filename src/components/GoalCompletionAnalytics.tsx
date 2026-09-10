@@ -23,6 +23,7 @@ import {
   getGoalCompletionStats,
   getTimelineBounds,
   formatDuration,
+  fitDurationUnit,
 } from '../services/goalUtils';
 import { Raised } from './neumorphic/NeumorphicView';
 import ProgressRing from './ProgressRing';
@@ -141,24 +142,27 @@ export default function GoalCompletionAnalytics({
     width: lateFill.value,
   }));
 
+  const taken = fitDurationUnit(stats.takenMs);
+  const allowance = fitDurationUnit(stats.allottedMs);
+  const gap = fitDurationUnit(stats.delayMs);
   const chips: { label: string; value: number; suffix: string }[] = [
     {
       label: t('goals.analytics.taken'),
-      value: Math.max(1, Math.round(stats.takenMs / 3600000)),
-      suffix: 'h',
+      value: taken.value,
+      suffix: taken.suffix,
     },
     {
       label: t('goals.analytics.allowance'),
-      value: Math.max(1, Math.round(stats.allottedMs / 3600000)),
-      suffix: 'h',
+      value: allowance.value,
+      suffix: allowance.suffix,
     },
     {
       label:
         stats.verdict === 'late'
           ? t('goals.analytics.delay')
           : t('goals.analytics.ahead'),
-      value: Math.max(1, Math.round(Math.abs(stats.delayMs) / 3600000)),
-      suffix: 'h',
+      value: gap.value,
+      suffix: gap.suffix,
     },
     {
       label: t('goals.analytics.efficiency'),

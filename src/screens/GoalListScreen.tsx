@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { useGoalStore } from '../store/goalStore';
 import GoalCard from '../components/GoalCard';
@@ -7,10 +7,15 @@ import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from '../i18n';
 
+type GoalFilter = 'all' | 'active' | 'completed';
+
+const FILTERS: GoalFilter[] = ['all', 'active', 'completed'];
+
 export default function GoalListScreen({ navigation }: any) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const goals = useGoalStore(s => s.goals);
+  const [filter, setFilter] = useState<GoalFilter>('all');
 
   const active = useMemo(
     () => goals.filter(g => g.status === 'active').sort((a, b) => +new Date(a.endAt) - +new Date(b.endAt)),
@@ -23,13 +28,24 @@ export default function GoalListScreen({ navigation }: any) {
 
   const sections = useMemo(() => {
     const rows: { key: string; header?: string; goal?: any }[] = [];
-    active.forEach(g => rows.push({ key: g.id, goal: g }));
-    if (completed.length > 0) {
-      rows.push({ key: '__completed_header', header: t('goals.completed') });
+    if (filter === 'all' || filter === 'active') {
+      active.forEach(g => rows.push({ key: g.id, goal: g }));
+    }
+    if (filter === 'all' || filter === 'completed') {
+      if (filter === 'all' && active.length > 0 && completed.length > 0) {
+        rows.push({ key: '__completed_header', header: t('goals.completed') });
+      }
       completed.forEach(g => rows.push({ key: g.id, goal: g }));
     }
     return rows;
-  }, [active, completed, t]);
+  }, [active, completed, filter, t]);
+
+  const emptyText =
+    goals.length === 0
+      ? t('goals.empty')
+      : filter === 'active'
+        ? t('goals.emptyActive')
+        : t('goals.emptyCompleted');
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -47,12 +63,48 @@ export default function GoalListScreen({ navigation }: any) {
         </NeumorphicButton>
       </View>
 
+      {goals.length > 0 && (
+        <View style={styles.filterRow}>
+          {FILTERS.map(f => {
+            const selected = filter === f;
+            return (
+              <NeumorphicButton
+                key={f}
+                radius={14}
+                distance={4}
+                forcePressed={selected}
+                style={[
+                  styles.filterPill,
+                  selected && {
+                    backgroundColor: `${theme.colors.textPrimary}15`,
+                  },
+                ]}
+                onPress={() => setFilter(f)}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    {
+                      color: selected
+                        ? theme.colors.textPrimary
+                        : theme.colors.textMuted,
+                    },
+                  ]}
+                >
+                  {t(`goals.filter_${f}`)}
+                </Text>
+              </NeumorphicButton>
+            );
+          })}
+        </View>
+      )}
+
       <View style={styles.body}>
-        {goals.length === 0 ? (
+        {sections.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
               <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
-                {t('goals.empty')}
+                {emptyText}
               </Text>
             </Raised>
           </View>
@@ -109,6 +161,23 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     marginTop: -2,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 8,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '800',
   },
   listContent: {
     paddingHorizontal: 0,

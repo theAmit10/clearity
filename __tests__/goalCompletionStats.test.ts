@@ -1,4 +1,4 @@
-import { getGoalCompletionStats, formatDuration, getTimelineBounds } from '../src/services/goalUtils';
+import { getGoalCompletionStats, formatDuration, getTimelineBounds, fitDurationUnit } from '../src/services/goalUtils';
 
 const HOUR = 3600_000;
 const DAY = 86400_000;
@@ -75,8 +75,7 @@ describe('formatDuration', () => {
   });
 });
 
-describe('getTimelineBounds', () => {
-  const created = Date.parse('2025-12-28T00:00:00Z');
+describe('getTimelineBounds', () => {  const created = Date.parse('2025-12-28T00:00:00Z');
   const start = Date.parse('2026-01-01T00:00:00Z');
   const end = Date.parse('2026-01-11T00:00:00Z');
 
@@ -111,5 +110,21 @@ describe('getTimelineBounds', () => {
       completedAt: iso(done),
     });
     expect(b.t1).toBe(done);
+  });
+});
+
+describe('fitDurationUnit', () => {
+  it('shows minutes for sub-hour spans (29 min late shows 29m, not 1h)', () => {
+    expect(fitDurationUnit(29 * 60_000)).toEqual({ value: 29, suffix: 'm' });
+    expect(fitDurationUnit(-29 * 60_000)).toEqual({ value: 29, suffix: 'm' });
+  });
+
+  it('shows hours for multi-hour spans and days for long spans', () => {
+    expect(fitDurationUnit(26 * HOUR)).toEqual({ value: 26, suffix: 'h' });
+    expect(fitDurationUnit(3 * DAY)).toEqual({ value: 3, suffix: 'd' });
+  });
+
+  it('keeps zero as zero instead of fabricating 1', () => {
+    expect(fitDurationUnit(0)).toEqual({ value: 0, suffix: 'm' });
   });
 });

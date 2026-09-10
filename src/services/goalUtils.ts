@@ -104,6 +104,19 @@ export function formatDuration(ms: number): string {
   return `${seconds}s`;
 }
 
+export type DurationUnit = 'm' | 'h' | 'd';
+
+/** Pick an integer-friendly unit for a duration chip so short spans
+ * don't get crushed by hour rounding (e.g. 29 min must show "29m",
+ * never "1h"). Zero stays zero. */
+export function fitDurationUnit(ms: number): { value: number; suffix: DurationUnit } {
+  const abs = Math.abs(ms);
+  if (abs === 0) return { value: 0, suffix: 'm' };
+  if (abs < 3600_000) return { value: Math.max(1, Math.round(abs / 60_000)), suffix: 'm' };
+  if (abs < 48 * 3600_000) return { value: Math.round(abs / 3600_000), suffix: 'h' };
+  return { value: Math.round(abs / 86400_000), suffix: 'd' };
+}
+
 export interface TimelineBounds {
   created: number;
   start: number;
