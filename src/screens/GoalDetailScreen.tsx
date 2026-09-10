@@ -675,13 +675,13 @@ const styles = StyleSheet.create({
   meta: { marginTop: 16, alignItems: 'center' },
   metaText: { fontSize: 13, fontWeight: '600', textAlign: 'center' },
   actionCol: { gap: 10, marginTop: 18 },
-  primaryBtn: { paddingVertical: 15, alignItems: 'center' },
+  primaryBtn: { paddingVertical: 15, paddingHorizontal: 12, alignItems: 'center' },
   primaryText: { color: '#FFFFFF', fontWeight: '800', fontSize: 15 },
-  secondaryBtn: { paddingVertical: 14, alignItems: 'center' },
+  secondaryBtn: { paddingVertical: 14, paddingHorizontal: 12, alignItems: 'center' },
   secondaryText: { fontWeight: '800', fontSize: 14 },
   extendWrap: { marginTop: 12 },
   extendRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  extendBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
+  extendBtn: { flex: 1, paddingVertical: 12, paddingHorizontal: 12, alignItems: 'center' },
   actionRow: {
     flexDirection: 'row',
     gap: 12,
@@ -694,6 +694,7 @@ const styles = StyleSheet.create({
   saveBtn: {
     width: '100%',
     paddingVertical: 13,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -732,6 +733,7 @@ const styles = StyleSheet.create({
   reminderTrash: { padding: 6, marginLeft: 8 },
   addReminderBtn: {
     paddingVertical: 13,
+    paddingHorizontal: 12,
     alignItems: 'center',
     marginTop: 2,
   },
@@ -747,6 +749,7 @@ const styles = StyleSheet.create({
   formActionBtn: {
     width: '100%',
     paddingVertical: 12,
+    paddingHorizontal: 12,
     alignItems: 'center',
   },
   modalOverlay: {
