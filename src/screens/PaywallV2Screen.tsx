@@ -60,7 +60,6 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     annualStrike,
     annualSavingsPct,
     lifetimeStrike,
-    lifetimeSavingsPct,
   } = usePaywallPricing();
 
   const isProUser = storeIsPro || remoteIsPro;
@@ -109,7 +108,10 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         Alert.alert(t('paywall.welcomeTitle'), t('paywall.welcomeBody'));
         navigation.goBack();
       } else {
-        Alert.alert(t('paywall.purchaseFailed'), t('paywall.purchaseFailedBody'));
+        Alert.alert(
+          t('paywall.purchaseFailed'),
+          t('paywall.purchaseFailedBody'),
+        );
       }
     } finally {
       setLoading(false);
@@ -126,10 +128,16 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         setRemoteIsPro(nowPro);
         setProExpiration(getProExpirationDate(info));
         if (nowPro) {
-          Alert.alert(t('common.restoreComplete'), t('common.restoreCompleteBody'));
+          Alert.alert(
+            t('common.restoreComplete'),
+            t('common.restoreCompleteBody'),
+          );
           navigation.goBack();
         } else {
-          Alert.alert(t('common.noPurchasesFound'), t('common.noPurchasesFoundBody'));
+          Alert.alert(
+            t('common.noPurchasesFound'),
+            t('common.noPurchasesFoundBody'),
+          );
         }
       }
     } finally {
@@ -170,20 +178,29 @@ export default function PaywallV2Screen({ navigation, route }: any) {
 
   if (isProUser) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: '#FFFFFF' }]} edges={['bottom']}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: '#FFFFFF' }]}
+        edges={['bottom']}
+      >
         <View style={styles.proWrap}>
           <Text style={styles.proTitle}>{t('paywall.youArePro')}</Text>
           <Text style={styles.proBody}>{t('paywall.youHaveAccess')}</Text>
           {proExpiration && (
             <Text style={styles.proBody}>
-              {t('paywall.expires', { date: new Date(proExpiration).toLocaleDateString() })}
+              {t('paywall.expires', {
+                date: new Date(proExpiration).toLocaleDateString(),
+              })}
             </Text>
           )}
           <Pressable style={styles.ctaBlack} onPress={handleManageSubscription}>
-            <Text style={styles.ctaBlackText}>{t('common.manageSubscription')}</Text>
+            <Text style={styles.ctaBlackText}>
+              {t('common.manageSubscription')}
+            </Text>
           </Pressable>
           <Pressable style={styles.restoreWhite} onPress={handleRestore}>
-            <Text style={styles.restoreWhiteText}>{t('common.restorePurchases')}</Text>
+            <Text style={styles.restoreWhiteText}>
+              {t('common.restorePurchases')}
+            </Text>
           </Pressable>
           <Pressable onPress={handleDismiss}>
             <Text style={styles.linkText}>✕ {t('common.cancel')}</Text>
@@ -218,7 +235,11 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         <View style={styles.hero}>
           <View style={styles.heroTopRow}>
             <Text style={styles.brand}>◐ {t('paywallV2.brand')}</Text>
-            <Pressable onPress={handleDismiss} style={styles.closeCircle} accessibilityLabel="Close">
+            <Pressable
+              onPress={handleDismiss}
+              style={styles.closeCircle}
+              accessibilityLabel="Close"
+            >
               <Text style={styles.closeX}>✕</Text>
             </Pressable>
           </View>
@@ -244,11 +265,15 @@ export default function PaywallV2Screen({ navigation, route }: any) {
             </View>
           </View>
           <Text style={styles.proofBody}>
-            {expiredMode ? t('paywall.expiredSubtitle') : t('paywallV2.unlockBody')}
+            {expiredMode
+              ? t('paywall.expiredSubtitle')
+              : t('paywallV2.unlockBody')}
           </Text>
           {expiredMode && proExpiration && (
             <Text style={styles.proofBody}>
-              {t('paywall.expiredOn', { date: new Date(proExpiration).toLocaleDateString() })}
+              {t('paywall.expiredOn', {
+                date: new Date(proExpiration).toLocaleDateString(),
+              })}
             </Text>
           )}
         </View>
@@ -263,7 +288,9 @@ export default function PaywallV2Screen({ navigation, route }: any) {
           )}
           {pricingState === 'error' && (
             <View style={styles.centerPad}>
-              <Text style={styles.mutedCenter}>{t('paywall.pricingError')}</Text>
+              <Text style={styles.mutedCenter}>
+                {t('paywall.pricingError')}
+              </Text>
               <Pressable style={styles.retryBtn} onPress={loadPricing}>
                 <Text style={styles.ctaBlackText}>{t('paywall.tryAgain')}</Text>
               </Pressable>
@@ -292,8 +319,12 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                 style={styles.expander}
                 onPress={() => setShowAlternatives(v => !v)}
               >
-                <Text style={styles.expanderText}>{t('paywallV2.notReadyYet')}</Text>
-                <Text style={styles.expanderChevron}>{showAlternatives ? '︿' : '﹀'}</Text>
+                <Text style={styles.expanderText}>
+                  {t('paywallV2.notReadyYet')}
+                </Text>
+                <Text style={styles.expanderChevron}>
+                  {showAlternatives ? '︿' : '﹀'}
+                </Text>
               </Pressable>
 
               {showAlternatives && (
@@ -325,7 +356,9 @@ export default function PaywallV2Screen({ navigation, route }: any) {
               <View style={styles.includedCard}>
                 <View style={styles.includedHeader}>
                   <View style={styles.includedLine} />
-                  <Text style={styles.includedTitle}>{t('paywallV2.whatsIncluded')}</Text>
+                  <Text style={styles.includedTitle}>
+                    {t('paywallV2.whatsIncluded')}
+                  </Text>
                   <View style={styles.includedLine} />
                 </View>
                 <IncludedRow
@@ -374,8 +407,12 @@ export default function PaywallV2Screen({ navigation, route }: any) {
 
               {/* Founder note (no star rating by request) */}
               <View style={styles.founder}>
-                <Text style={styles.founderTitle}>{t('paywallV2.founderTitle')}</Text>
-                <Text style={styles.founderBody}>{t('paywallV2.founderBody')}</Text>
+                <Text style={styles.founderTitle}>
+                  {t('paywallV2.founderTitle')}
+                </Text>
+                <Text style={styles.founderBody}>
+                  {t('paywallV2.founderBody')}
+                </Text>
               </View>
 
               <View style={styles.legalRow}>
@@ -387,8 +424,14 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                 </Pressable>
               </View>
 
-              <Pressable style={styles.restoreWhite} onPress={handleRestore} disabled={loading}>
-                <Text style={styles.restoreWhiteText}>{t('common.restorePurchases')}</Text>
+              <Pressable
+                style={styles.restoreWhite}
+                onPress={handleRestore}
+                disabled={loading}
+              >
+                <Text style={styles.restoreWhiteText}>
+                  {t('common.restorePurchases')}
+                </Text>
               </Pressable>
               {/* spacer so content clears the sticky CTA */}
               <View style={{ height: 132 }} />
@@ -401,7 +444,10 @@ export default function PaywallV2Screen({ navigation, route }: any) {
       {pricingState === 'ready' && (
         <SafeAreaView edges={['bottom']} style={styles.stickyWrap}>
           <Pressable
-            style={[styles.ctaBlack, (!selectedPackage || loading) && { opacity: 0.6 }]}
+            style={[
+              styles.ctaBlack,
+              (!selectedPackage || loading) && { opacity: 0.6 },
+            ]}
             onPress={handlePurchase}
             disabled={!selectedPackage || loading}
           >
@@ -449,11 +495,16 @@ function PlanOption({
   return (
     <Pressable
       onPress={onSelect}
-      style={[styles.planCard, selected ? styles.planSelected : styles.planUnselected]}
+      style={[
+        styles.planCard,
+        selected ? styles.planSelected : styles.planUnselected,
+      ]}
     >
       <View style={styles.planTopRow}>
         <View style={styles.planTitleRow}>
-          <View style={[styles.radio, selected ? styles.radioOn : styles.radioOff]}>
+          <View
+            style={[styles.radio, selected ? styles.radioOn : styles.radioOff]}
+          >
             {selected && <Text style={styles.radioCheck}>✓</Text>}
           </View>
           <Text style={styles.planTitle}>
@@ -464,7 +515,9 @@ function PlanOption({
         <Text style={styles.planPrice}>{price}</Text>
       </View>
       {savingsPct ? (
-        <Text style={styles.planSavings}>SAVE {savingsPct}%{strike ? ` · ${strike}` : ''}</Text>
+        <Text style={styles.planSavings}>
+          SAVE {savingsPct}%{strike ? ` · ${strike}` : ''}
+        </Text>
       ) : strike ? (
         <Text style={styles.planStrike}>{strike}</Text>
       ) : null}
@@ -510,21 +563,52 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: SHEET_BG },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 8 },
-  hero: { backgroundColor: HERO_BG, paddingHorizontal: 22, paddingTop: 54, paddingBottom: 30 },
-  heroTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 42 },
+  hero: {
+    backgroundColor: HERO_BG,
+    paddingHorizontal: 22,
+    paddingTop: 54,
+    paddingBottom: 30,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 42,
+  },
   brand: { color: '#F5D9C4', fontSize: 20, fontWeight: '700' },
   closeCircle: {
-    width: 44, height: 44, borderRadius: 22, backgroundColor: '#CBB9AC',
-    alignItems: 'center', justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#CBB9AC',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeX: { fontSize: 18, fontWeight: '700', color: '#3E2314' },
-  headline: { color: '#FFFFFF', fontSize: 34, fontWeight: '800', lineHeight: 40 },
+  headline: {
+    color: '#FFFFFF',
+    fontSize: 34,
+    fontWeight: '800',
+    lineHeight: 40,
+  },
   headlineMuted: { color: '#E8C9B3', marginTop: 2 },
-  proofSection: { backgroundColor: '#FFFFFF', paddingHorizontal: 22, paddingVertical: 20 },
-  proofTitle: { fontSize: 18, fontWeight: '600', color: '#111', marginBottom: 12 },
+  proofSection: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 22,
+    paddingVertical: 20,
+  },
+  proofTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 12,
+  },
   statRow: { flexDirection: 'row', gap: 12 },
   statCard: {
-    flex: 1, backgroundColor: '#F4F2EC', borderRadius: 22, paddingVertical: 16,
+    flex: 1,
+    backgroundColor: '#F4F2EC',
+    borderRadius: 22,
+    paddingVertical: 16,
     paddingHorizontal: 16,
   },
   statValue: { fontSize: 26, fontWeight: '800', color: '#111' },
@@ -532,63 +616,170 @@ const styles = StyleSheet.create({
   proofBody: { fontSize: 16, color: '#8A8A8E', lineHeight: 22, marginTop: 14 },
   sheet: { paddingHorizontal: 16, paddingTop: 18 },
   planCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 24, padding: 18,
-    borderWidth: 1.5, marginBottom: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1.5,
+    marginBottom: 4,
   },
   planSelected: { borderColor: ACCENT },
   planUnselected: { borderColor: '#FFFFFF' },
-  planTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  planTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   planTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
   radio: {
-    width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   radioOn: { backgroundColor: ACCENT },
-  radioOff: { borderWidth: 1.5, borderColor: '#C7C7CC', backgroundColor: '#FFF' },
+  radioOff: {
+    borderWidth: 1.5,
+    borderColor: '#C7C7CC',
+    backgroundColor: '#FFF',
+  },
   radioCheck: { color: '#FFF', fontWeight: '800' },
   planTitle: { fontSize: 19, fontWeight: '800', color: '#111' },
   planExtra: { color: '#8A8A8E', fontWeight: '400' },
   planPrice: { fontSize: 20, fontWeight: '800', color: '#111' },
   planSub: { color: '#8A8A8E', fontSize: 15, marginTop: 6 },
-  planStrike: { color: '#8A8A8E', fontSize: 13, textDecorationLine: 'line-through', marginTop: 4 },
+  planStrike: {
+    color: '#8A8A8E',
+    fontSize: 13,
+    textDecorationLine: 'line-through',
+    marginTop: 4,
+  },
   planSavings: { color: ACCENT, fontSize: 12, fontWeight: '800', marginTop: 6 },
-  bulletRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 10,
+  },
   bulletCheck: { color: '#B9B9BE', fontSize: 18, fontWeight: '700' },
   bulletText: { fontSize: 16, color: '#111' },
   planFootnote: { fontSize: 15, color: '#111', marginTop: 12 },
-  expander: { alignItems: 'center', paddingVertical: 12, flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  expander: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
   expanderText: { color: ACCENT, fontSize: 15, fontWeight: '700' },
   expanderChevron: { color: '#8A8A8E', fontSize: 14 },
-  includedCard: { backgroundColor: '#FFFFFF', borderRadius: 26, padding: 20, marginTop: 10 },
-  includedHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+  includedCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
+    padding: 20,
+    marginTop: 10,
+  },
+  includedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
   includedLine: { flex: 1, height: 1, backgroundColor: '#E5E5EA' },
   includedTitle: { fontSize: 19, fontWeight: '800', color: '#111' },
   includedRow: { flexDirection: 'row', gap: 12, marginBottom: 18 },
-  includedIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  includedIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   includedTextWrap: { flex: 1 },
   includedItemTitle: { fontSize: 16, fontWeight: '800', color: '#111' },
-  includedItemBody: { fontSize: 14, color: '#8A8A8E', lineHeight: 20, marginTop: 2 },
+  includedItemBody: {
+    fontSize: 14,
+    color: '#8A8A8E',
+    lineHeight: 20,
+    marginTop: 2,
+  },
   founder: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 30 },
-  founderTitle: { fontSize: 17, fontWeight: '700', color: '#111', textAlign: 'center' },
-  founderBody: { fontSize: 16, color: '#8A8A8E', textAlign: 'center', lineHeight: 23, marginTop: 6 },
-  legalRow: { flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 40, marginBottom: 14 },
+  founderTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#111',
+    textAlign: 'center',
+  },
+  founderBody: {
+    fontSize: 16,
+    color: '#8A8A8E',
+    textAlign: 'center',
+    lineHeight: 23,
+    marginTop: 6,
+  },
+  legalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 40,
+    marginBottom: 14,
+  },
   legalLink: { fontSize: 15, color: '#111', textDecorationLine: 'underline' },
   restoreWhite: {
-    backgroundColor: '#FFFFFF', borderRadius: 28, paddingVertical: 18,
-    alignItems: 'center', marginHorizontal: 16, marginBottom: 4,
-    shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 },
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   restoreWhiteText: { fontSize: 17, fontWeight: '700', color: '#111' },
-  stickyWrap: { backgroundColor: SHEET_BG, paddingHorizontal: 16, paddingTop: 6 },
-  ctaBlack: { backgroundColor: '#111', borderRadius: 30, paddingVertical: 19, alignItems: 'center' },
+  stickyWrap: {
+    backgroundColor: SHEET_BG,
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 12,
+  },
+  ctaBlack: {
+    backgroundColor: '#111',
+    borderRadius: 30,
+    paddingVertical: 19,
+    alignItems: 'center',
+  },
   ctaBlackText: { color: '#FFF', fontSize: 18, fontWeight: '800' },
   ctaNote: { textAlign: 'center', fontSize: 14, color: '#111', marginTop: 10 },
-  ctaHint: { textAlign: 'center', fontSize: 12, color: '#8A8A8E', marginTop: 4 },
+  ctaHint: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#8A8A8E',
+    marginTop: 4,
+  },
   centerPad: { alignItems: 'center', paddingVertical: 30, gap: 10 },
   muted: { color: '#8A8A8E', fontSize: 14, fontWeight: '600' },
-  mutedCenter: { color: '#8A8A8E', fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  retryBtn: { backgroundColor: '#111', borderRadius: 20, paddingHorizontal: 26, paddingVertical: 12, marginTop: 8 },
-  proWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
+  mutedCenter: {
+    color: '#8A8A8E',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  retryBtn: {
+    backgroundColor: '#111',
+    borderRadius: 20,
+    paddingHorizontal: 26,
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  proWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+  },
   proTitle: { fontSize: 22, fontWeight: '800', color: '#111' },
   proBody: { fontSize: 15, color: '#666', textAlign: 'center' },
   linkText: { fontSize: 14, color: '#666', marginTop: 8 },
