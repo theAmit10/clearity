@@ -67,7 +67,10 @@ export default function SettingsScreen({ navigation }: any) {
     try {
       await exportHabits(habits);
     } catch (e: any) {
-      Alert.alert(t('settings.exportFailed'), e?.message ?? t('settings.unknownError'));
+      Alert.alert(
+        t('settings.exportFailed'),
+        e?.message ?? t('settings.unknownError'),
+      );
     } finally {
       setBusy(false);
     }
@@ -95,7 +98,10 @@ export default function SettingsScreen({ navigation }: any) {
       );
     } catch (e: any) {
       if (e?.message !== undefined && e?.code !== 'DOCUMENT_PICKER_CANCELED') {
-        Alert.alert(t('settings.importFailed'), e?.message ?? t('settings.couldNotReadFile'));
+        Alert.alert(
+          t('settings.importFailed'),
+          e?.message ?? t('settings.couldNotReadFile'),
+        );
       }
     } finally {
       setBusy(false);
@@ -104,7 +110,10 @@ export default function SettingsScreen({ navigation }: any) {
 
   const handleFollowX = () => {
     Linking.openURL(`https://x.com/${X_HANDLE}`).catch(() => {
-      Alert.alert(t('settings.couldNotOpenX'), t('settings.findUsOnX', { handle: X_HANDLE }));
+      Alert.alert(
+        t('settings.couldNotOpenX'),
+        t('settings.findUsOnX', { handle: X_HANDLE }),
+      );
     });
   };
 
@@ -150,10 +159,7 @@ export default function SettingsScreen({ navigation }: any) {
       await refreshProStatus();
       const nowPro = useHabitStore.getState().isPro;
       if (!info) {
-        Alert.alert(
-          t('common.restoreFailed'),
-          t('common.restoreFailedBody'),
-        );
+        Alert.alert(t('common.restoreFailed'), t('common.restoreFailedBody'));
       } else if (nowPro) {
         Alert.alert(
           t('common.restoreComplete'),
@@ -166,10 +172,7 @@ export default function SettingsScreen({ navigation }: any) {
         );
       }
     } catch {
-      Alert.alert(
-        t('common.restoreFailed'),
-        t('common.restoreFailedBody'),
-      );
+      Alert.alert(t('common.restoreFailed'), t('common.restoreFailedBody'));
     } finally {
       setRestoring(false);
     }
@@ -199,30 +202,26 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleResetApp = () => {
-    Alert.alert(
-      t('settings.resetAppTitle'),
-      t('settings.resetAppBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.reset'),
-          style: 'destructive',
-          onPress: async () => {
-            replaceAllHabits([]);
-            try {
-              await clearAll();
-            } catch (e: any) {
-              Alert.alert(
-                t('settings.partialReset'),
-                t('settings.partialResetBody', {
-                  error: e?.message ?? t('settings.unknownError'),
-                }),
-              );
-            }
-          },
+    Alert.alert(t('settings.resetAppTitle'), t('settings.resetAppBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.reset'),
+        style: 'destructive',
+        onPress: async () => {
+          replaceAllHabits([]);
+          try {
+            await clearAll();
+          } catch (e: any) {
+            Alert.alert(
+              t('settings.partialReset'),
+              t('settings.partialResetBody', {
+                error: e?.message ?? t('settings.unknownError'),
+              }),
+            );
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   function Section({
@@ -323,10 +322,7 @@ export default function SettingsScreen({ navigation }: any) {
         </Text>
 
         {!isPro && (
-          <SettingsRevealItem
-            scrollY={scrollY}
-            viewportHeight={viewportHeight}
-          >
+          <SettingsRevealItem scrollY={scrollY} viewportHeight={viewportHeight}>
             <ProUpsellCard
               expired={proExpired}
               onPress={() => openPaywall(navigation, paywallParams)}
@@ -418,13 +414,17 @@ export default function SettingsScreen({ navigation }: any) {
             />
           ) : (
             <Row
-              label={proExpired ? t('common.renewPro') : t('common.upgradeToPro')}
+              label={
+                proExpired ? t('common.renewPro') : t('common.upgradeToPro')
+              }
               onPress={() => openPaywall(navigation, paywallParams)}
               disabled={busy}
             />
           )}
           <Row
-            label={restoring ? t('settings.restoring') : t('common.restorePurchases')}
+            label={
+              restoring ? t('settings.restoring') : t('common.restorePurchases')
+            }
             onPress={handleRestore}
             disabled={busy || restoring}
             rightContent={
@@ -529,7 +529,9 @@ export default function SettingsScreen({ navigation }: any) {
             return (
               <Row
                 key={themeOption.name}
-                label={`${active ? '✓ ' : '   '}${t(`themes.${themeOption.name}`)}`}
+                label={`${active ? '✓ ' : '   '}${t(
+                  `themes.${themeOption.name}`,
+                )}`}
                 rightContent={locked ? proBadge : null}
                 onPress={() => {
                   if (locked) {
@@ -545,8 +547,14 @@ export default function SettingsScreen({ navigation }: any) {
 
         <Section title={t('settings.communitySection')}>
           <Row label={t('settings.buildTogether')} onPress={handleRateApp} />
-          <Row label={t('settings.sendFeedback')} onPress={handleSendFeedback} />
-          <Row label={t('settings.followOnX', { handle: X_HANDLE })} onPress={handleFollowX} />
+          <Row
+            label={t('settings.sendFeedback')}
+            onPress={handleSendFeedback}
+          />
+          <Row
+            label={t('settings.followOnX', { handle: X_HANDLE })}
+            onPress={handleFollowX}
+          />
         </Section>
 
         {/* <Section title="Diagnostics (stored locally only)">
