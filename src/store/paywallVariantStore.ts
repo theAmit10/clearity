@@ -14,7 +14,7 @@ interface PaywallVariantState {
 }
 
 export const usePaywallVariantStore = create<PaywallVariantState>((set) => ({
-  variant: 'classic',
+  variant: 'v2',
   loaded: false,
   setVariant: async (variant) => {
     set({ variant });
@@ -27,14 +27,24 @@ export const usePaywallVariantStore = create<PaywallVariantState>((set) => ({
   loadVariant: async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored === 'classic' || stored === 'v2') {
-        set({ variant: stored, loaded: true });
+      if (stored === 'v2') {
+        set({ variant: 'v2', loaded: true });
+        return;
+      }
+      if (stored === 'classic') {
+        // V2 is now the default for everyone — migrate legacy choice.
+        set({ variant: 'v2', loaded: true });
+        try {
+          await AsyncStorage.setItem(STORAGE_KEY, 'v2');
+        } catch (err) {
+          logEvent('error', 'Failed to persist paywall variant', err);
+        }
         return;
       }
     } catch (err) {
       logEvent('error', 'Failed to load paywall variant', err);
     }
-    set({ variant: 'classic', loaded: true });
+    set({ variant: 'v2', loaded: true });
   },
 }));
 
