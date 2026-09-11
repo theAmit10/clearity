@@ -78,6 +78,16 @@ function HomeStack() {
         component={NewCategoryScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
       />
+      <Stack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="PaywallV2"
+        component={PaywallV2Screen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
     </Stack.Navigator>
   );
 }
@@ -103,6 +113,16 @@ function GoalStack() {
         name="AddEditGoal"
         component={AddEditGoalScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="PaywallV2"
+        component={PaywallV2Screen}
+        options={{ headerShown: false, presentation: 'modal' }}
       />
     </Stack.Navigator>
   );

@@ -13,6 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useGoalStore } from '../store/goalStore';
+import { useHabitStore } from '../store/habitStore';
+import { openPaywall } from '../services/paywallRouter';
 import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -67,6 +69,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const existing = useGoalStore(s => s.goals.find(g => g.id === editId));
   const addGoal = useGoalStore(s => s.addGoal);
   const updateGoal = useGoalStore(s => s.updateGoal);
+  const proExpired = useHabitStore(s => s.proExpired);
 
   const [title, setTitle] = useState(existing?.title ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -151,10 +154,20 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
     };
     if (existing) {
       await updateGoal(existing.id, payload);
+      navigation.goBack();
     } else {
-      await addGoal(payload);
+      try {
+        await addGoal(payload);
+      } catch {
+        if (proExpired) {
+          openPaywall(navigation, { mode: 'expired' });
+          return;
+        }
+        openPaywall(navigation);
+        return;
+      }
+      navigation.goBack();
     }
-    navigation.goBack();
   };
 
   return (

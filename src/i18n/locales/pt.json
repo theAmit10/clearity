@@ -56,7 +56,8 @@
     "noPurchasesFoundBody": "Não foi possível restaurar compras anteriores.",
     "restoreFailed": "Falha na restauração",
     "restoreFailedBody": "Não foi possível restaurar as compras. Tente novamente.",
-    "deleteAll": "Excluir"
+    "deleteAll": "Excluir",
+    "edit": "Edit"
   },
   "tabs": {
     "home": "Início",
@@ -149,25 +150,25 @@
     "getStarted": "Get started",
     "continue": "Continue",
     "skip": "Skip",
-    "page1Top": "Hello, habits.",
-    "page1Bottom": "Meet your new home.",
-    "page2Top": "All your habits,",
-    "page2Bottom": "in one place",
-    "page2Body": "See everything at a glance. No surprises. No broken streaks.",
-    "page3Top": "Stay ahead,",
-    "page3Bottom": "of streaks",
-    "page3Body": "See what's due today and get gentle reminders. Never miss a day that matters.",
+    "page1Top": "Build habits.",
+    "page1Bottom": "That actually stick.",
+    "page2Top": "Check in daily,",
+    "page2Bottom": "grow your streaks",
+    "page2Body": "One tap logs your day. Streaks, heatmaps, and reminders keep you consistent.",
+    "page3Top": "Set a deadline,",
+    "page3Bottom": "hit your goal",
+    "page3Body": "Big ambitions get a live countdown, smart reminders, and a finish report. Early, on time, or late.",
     "page4Top": "Start free with",
-    "page4Bottom": "up to {{count}} habits",
-    "page4Body": "Need unlimited habits, widgets or analytics later? Unlock Habitic Pro. One-time purchase. No surprises.",
+    "page4Bottom": "{{habitCount}} habits + {{goalCount}} goals",
+    "page4Body": "Need unlimited everything, widgets, and analytics? Unlock Habitic Unlimited. One-time purchase, yours forever.",
     "today": "Today",
     "doneToday": "done today",
     "active": "Active",
     "upNext": "Up next",
-    "example1Name": "Drink water",
-    "example1Meta": "Daily · in 2 hours",
-    "example2Name": "Read",
-    "example2Meta": "Daily · in 1 day",
+    "example1Name": "Run a marathon",
+    "example1Meta": "Deadline · 12d left",
+    "example2Name": "Read 12 books",
+    "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
   "addHabit": {
@@ -282,7 +283,7 @@
     "habitsSection": "Hábitos",
     "habitsDescription": "Reordene seus hábitos pressionando e segurando na tela inicial, ou use a tela de reordenação dedicada abaixo.",
     "reorderHabits": "Reordenar hábitos",
-    "exportData": "Exportar dados ({{count}} hábitos)",
+    "exportData": "Export data ({{habitCount}} habits, {{goalCount}} goals)",
     "importData": "Importar dados de um arquivo",
     "proSection": "Habitic Pro",
     "proActive": "Você tem o Habitic Pro. Obrigado por apoiar o aplicativo!",
@@ -308,7 +309,7 @@
     "exportFailed": "Falha na exportação",
     "unknownError": "Erro desconhecido",
     "importDataTitle": "Importar dados",
-    "importDataBody": "Encontrado(s) {{count}} hábito(s) no arquivo. Como você quer importar?",
+    "importDataBody": "Found {{habitCount}} habit(s) and {{goalCount}} goal(s) in the file. How do you want to import?",
     "mergeWithCurrent": "Mesclar com os atuais",
     "replaceEverything": "Substituir tudo",
     "importFailed": "Falha na importação",
@@ -327,12 +328,8 @@
     "diagnosticsDescription": "Preview screens and choose which paywall new users see. Stored on this device only.",
     "diagnosticsRow": "Paywall version",
     "proCard": {
-      "titleFree": "You're on a Free Plan",
-      "subtitleFree": "Upgrade to focus better with Habitic Pro",
-      "titleExpired": "Your plan has expired",
-      "subtitleExpired": "Renew to keep your streaks with Habitic Pro",
-      "unlimitedSubtitle": "No limits on habits or rules",
-      "ctaTryFor": "Try for {{price}}"
+      "headlineTop": "Consistency is a choice.",
+      "headlineBottom": "Make yours easier."
     }
   },
   "general": {
@@ -490,11 +487,14 @@
   },
   "importExport": {
     "copyFailed": "Falha ao copiar o arquivo selecionado para importação.",
-    "invalidBackup": "O arquivo selecionado não é um backup válido do Habit Tracker."
+    "invalidBackup": "Selected file is not a valid Habit Tracker backup (expected habits and/or goals)."
   },
   "habitStore": {
     "habitLimitBody": "O plano gratuito é limitado a {{count}} hábitos. Faça upgrade para Pro e tenha ilimitados.",
     "notifLimitBody": "O plano gratuito é limitado a {{count}} lembrete por hábito. Faça upgrade para Pro e tenha ilimitados."
+  },
+  "goalStore": {
+    "goalLimitBody": "Free tier is limited to {{count}} goals. Upgrade to Pro for unlimited."
   },
   "goals": {
     "title": "Goals",
@@ -506,6 +506,9 @@
     "filter_completed": "Completed",
     "emptyActive": "No ongoing goals yet.",
     "emptyCompleted": "No completed goals yet.",
+    "limitTitle": "Goal limit reached",
+    "planExpiredTitle": "Your plan has expired",
+    "planExpiredBody": "Renew your Pro subscription to keep creating unlimited goals.",
     "titleNew": "New Goal",
     "titleEdit": "Edit Goal",
     "name": "Title",
@@ -566,6 +569,19 @@
       "timelineCreated": "Created",
       "createdAt": "Created",
       "deadlineAt": "Deadline"
+    },
+    "live": {
+      "onTrackMsg": "You're on track",
+      "pastHalfwayMsg": "More than halfway there",
+      "almostOutMsg": "Almost out of time",
+      "overdueMsg": "Deadline passed",
+      "daysLeft": "{{duration}} left",
+      "dayWord": "Day",
+      "ofWord": "of",
+      "startedDate": "Started",
+      "deadlineDate": "Deadline",
+      "passedState": "Passed",
+      "caption": "Live pace based on your deadline."
     }
   },
   "goalNotifications": {

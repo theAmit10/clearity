@@ -27,6 +27,7 @@
     "notifications": "Notifications",
     "cancel": "Cancel",
     "save": "Save",
+    "edit": "Edit",
     "remove": "Remove",
     "delete": "Delete",
     "reset": "Reset",
@@ -149,25 +150,25 @@
     "getStarted": "Get started",
     "continue": "Continue",
     "skip": "Skip",
-    "page1Top": "Hello, habits.",
-    "page1Bottom": "Meet your new home.",
-    "page2Top": "All your habits,",
-    "page2Bottom": "in one place",
-    "page2Body": "See everything at a glance. No surprises. No broken streaks.",
-    "page3Top": "Stay ahead,",
-    "page3Bottom": "of streaks",
-    "page3Body": "See what's due today and get gentle reminders. Never miss a day that matters.",
+    "page1Top": "Build habits.",
+    "page1Bottom": "That actually stick.",
+    "page2Top": "Check in daily,",
+    "page2Bottom": "grow your streaks",
+    "page2Body": "One tap logs your day. Streaks, heatmaps, and reminders keep you consistent.",
+    "page3Top": "Set a deadline,",
+    "page3Bottom": "hit your goal",
+    "page3Body": "Big ambitions get a live countdown, smart reminders, and a finish report. Early, on time, or late.",
     "page4Top": "Start free with",
-    "page4Bottom": "up to {{count}} habits",
-    "page4Body": "Need unlimited habits, widgets or analytics later? Unlock Habitic Pro. One-time purchase. No surprises.",
+    "page4Bottom": "{{habitCount}} habits + {{goalCount}} goals",
+    "page4Body": "Need unlimited everything, widgets, and analytics? Unlock Habitic Unlimited. One-time purchase, yours forever.",
     "today": "Today",
     "doneToday": "done today",
     "active": "Active",
     "upNext": "Up next",
-    "example1Name": "Drink water",
-    "example1Meta": "Daily · in 2 hours",
-    "example2Name": "Read",
-    "example2Meta": "Daily · in 1 day",
+    "example1Name": "Run a marathon",
+    "example1Meta": "Deadline · 12d left",
+    "example2Name": "Read 12 books",
+    "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
   "addHabit": {
@@ -282,7 +283,7 @@
     "habitsSection": "Habits",
     "habitsDescription": "Reorder your habits by long-pressing them on the home screen, or use the dedicated reorder screen below.",
     "reorderHabits": "Reorder habits",
-    "exportData": "Export data ({{count}} habits)",
+    "exportData": "Export data ({{habitCount}} habits, {{goalCount}} goals)",
     "importData": "Import data from file",
     "proSection": "Habitic Pro",
     "proActive": "You have Habitic Pro. Thank you for supporting the app!",
@@ -308,7 +309,7 @@
     "exportFailed": "Export failed",
     "unknownError": "Unknown error",
     "importDataTitle": "Import data",
-    "importDataBody": "Found {{count}} habit(s) in the file. How do you want to import?",
+    "importDataBody": "Found {{habitCount}} habit(s) and {{goalCount}} goal(s) in the file. How do you want to import?",
     "mergeWithCurrent": "Merge with current",
     "replaceEverything": "Replace everything",
     "importFailed": "Import failed",
@@ -320,12 +321,16 @@
     "couldNotOpenStore": "Could not open the store",
     "searchManually": "Please search for the app manually to leave a review.",
     "resetAppTitle": "Reset app?",
-    "resetAppBody": "This deletes ALL habits and history. This cannot be undone.",
+    "resetAppBody": "This deletes ALL habits, goals, and history. This cannot be undone.",
     "partialReset": "Partial reset",
     "partialResetBody": "Your habits were cleared, but local storage couldn't be fully wiped: {{error}}",
     "diagnosticsSection": "Diagnostics",
     "diagnosticsDescription": "Preview screens and choose which paywall new users see. Stored on this device only.",
-    "diagnosticsRow": "Paywall version"
+    "diagnosticsRow": "Paywall version",
+    "proCard": {
+      "headlineTop": "Consistency is a choice.",
+      "headlineBottom": "Make yours easier."
+    }
   },
   "general": {
     "title": "General",
@@ -534,11 +539,14 @@
   },
   "importExport": {
     "copyFailed": "Failed to copy the selected file for import.",
-    "invalidBackup": "Selected file is not a valid Habit Tracker backup."
+    "invalidBackup": "Selected file is not a valid Habit Tracker backup (expected habits and/or goals)."
   },
   "habitStore": {
     "habitLimitBody": "Free tier is limited to {{count}} habits. Upgrade to Pro for unlimited.",
     "notifLimitBody": "Free tier is limited to {{count}} reminder per habit. Upgrade to Pro for unlimited."
+  },
+  "goalStore": {
+    "goalLimitBody": "Free tier is limited to {{count}} goals. Upgrade to Pro for unlimited."
   },
   "goals": {
     "title": "Goals",
@@ -550,6 +558,9 @@
     "filter_completed": "Completed",
     "emptyActive": "No ongoing goals yet.",
     "emptyCompleted": "No completed goals yet.",
+    "limitTitle": "Goal limit reached",
+    "planExpiredTitle": "Your plan has expired",
+    "planExpiredBody": "Renew your Pro subscription to keep creating unlimited goals.",
     "titleNew": "New Goal",
     "titleEdit": "Edit Goal",
     "name": "Title",
@@ -610,6 +621,19 @@
       "timelineStart": "Start",
       "timelineDeadline": "Deadline",
       "timelineFinished": "Finished"
+    },
+    "live": {
+      "onTrackMsg": "You're on track",
+      "pastHalfwayMsg": "More than halfway there",
+      "almostOutMsg": "Almost out of time",
+      "overdueMsg": "Deadline passed",
+      "daysLeft": "{{duration}} left",
+      "dayWord": "Day",
+      "ofWord": "of",
+      "startedDate": "Started",
+      "deadlineDate": "Deadline",
+      "passedState": "Passed",
+      "caption": "Live pace based on your deadline."
     }
   },
   "goalNotifications": {

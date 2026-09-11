@@ -24,6 +24,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import LockClosedIcon from 'react-native-heroicons/outline/LockClosedIcon';
 import { useHabitStore } from '../store/habitStore';
+import { useGoalStore } from '../store/goalStore';
 import { exportHabits, pickAndParseImportFile } from '../services/importExport';
 import { clearAll } from '../services/storage';
 import {
@@ -50,6 +51,9 @@ export default function SettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const replaceAllHabits = useHabitStore(s => s.replaceAllHabits);
   const mergeHabits = useHabitStore(s => s.mergeHabits);
+  const goals = useGoalStore(s => s.goals);
+  const replaceAllGoals = useGoalStore(s => s.replaceAllGoals);
+  const mergeGoals = useGoalStore(s => s.mergeGoals);
   const isPro = useHabitStore(s => s.isPro);
   const proExpired = useHabitStore(s => s.proExpired);
   const [busy, setBusy] = useState(false);
@@ -65,7 +69,7 @@ export default function SettingsScreen({ navigation }: any) {
   const handleExport = async () => {
     setBusy(true);
     try {
-      await exportHabits(habits);
+      await exportHabits(habits, goals);
     } catch (e: any) {
       Alert.alert(
         t('settings.exportFailed'),
@@ -80,19 +84,31 @@ export default function SettingsScreen({ navigation }: any) {
     setBusy(true);
     try {
       const payload = await pickAndParseImportFile();
+      const incomingHabits = payload.habits ?? [];
+      const incomingGoals = payload.goals ?? [];
       Alert.alert(
         t('settings.importDataTitle'),
-        t('settings.importDataBody', { count: payload.habits.length }),
+        t('settings.importDataBody', {
+          count: incomingHabits.length,
+          habitCount: incomingHabits.length,
+          goalCount: incomingGoals.length,
+        }),
         [
           { text: t('common.cancel'), style: 'cancel' },
           {
             text: t('settings.mergeWithCurrent'),
-            onPress: () => mergeHabits(payload.habits),
+            onPress: () => {
+              mergeHabits(incomingHabits);
+              mergeGoals(incomingGoals);
+            },
           },
           {
             text: t('settings.replaceEverything'),
             style: 'destructive',
-            onPress: () => replaceAllHabits(payload.habits),
+            onPress: () => {
+              replaceAllHabits(incomingHabits);
+              replaceAllGoals(incomingGoals);
+            },
           },
         ],
       );
@@ -209,6 +225,7 @@ export default function SettingsScreen({ navigation }: any) {
         style: 'destructive',
         onPress: async () => {
           replaceAllHabits([]);
+          replaceAllGoals([]);
           try {
             await clearAll();
           } catch (e: any) {
@@ -365,7 +382,11 @@ export default function SettingsScreen({ navigation }: any) {
             onPress={() => navigation.navigate('ReorderHabits')}
           />
           <Row
-            label={t('settings.exportData', { count: habits.length })}
+            label={t('settings.exportData', {
+              count: habits.length,
+              habitCount: habits.length,
+              goalCount: goals.length,
+            })}
             rightContent={isPro ? null : proBadge}
             onPress={() => {
               if (isPro) {

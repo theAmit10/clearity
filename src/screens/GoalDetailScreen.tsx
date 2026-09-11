@@ -20,6 +20,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
 import { getCountdownParts, formatOverdue } from '../services/goalUtils';
 import GoalCompletionAnalytics from '../components/GoalCompletionAnalytics';
+import GoalLiveAnalytics from '../components/GoalLiveAnalytics';
 import { useTranslation } from '../i18n';
 
 function Pad(n: number): string {
@@ -242,6 +243,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                     })}
                   </Text>
                 )}
+                <GoalLiveAnalytics goal={goal} now={now} />
               </>
             )}
           </Inset>
@@ -603,7 +605,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                     { color: theme.colors.textPrimary },
                   ]}
                 >
-                  {t('common.save')}
+                  {t('common.edit')}
                 </Text>
               </NeumorphicButton>
             </View>

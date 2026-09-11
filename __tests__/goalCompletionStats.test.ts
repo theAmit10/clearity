@@ -1,4 +1,4 @@
-import { getGoalCompletionStats, formatDuration, getTimelineBounds, fitDurationUnit, milestonePercent } from '../src/services/goalUtils';
+import { getGoalCompletionStats, formatDuration, getTimelineBounds, fitDurationUnit, milestonePercent, getLiveGoalStats, ZONE_COPY_KEY } from '../src/services/goalUtils';
 
 const HOUR = 3600_000;
 const DAY = 86400_000;
@@ -140,5 +140,61 @@ describe('milestonePercent', () => {
     expect(milestonePercent(-50, 0, 100)).toBe(0);
     expect(milestonePercent(150, 0, 100)).toBe(100);
     expect(milestonePercent(50, 100, 100)).toBe(100);
+  });
+});
+
+describe('getLiveGoalStats', () => {
+  const start = Date.parse('2026-01-01T00:00:00Z');
+  const end = start + 10 * DAY;
+  const goal = { startAt: iso(start), endAt: iso(end) };
+
+  it('reports on_track early with no milestones reached', () => {
+    const s = getLiveGoalStats(goal, start + DAY);
+    expect(s.zone).toBe('on_track');
+    expect(s.elapsedPct).toBeCloseTo(10);
+    expect(s.halfwayReached).toBe(false);
+    expect(s.almostDueReached).toBe(false);
+    expect(s.remainingMs).toBe(9 * DAY);
+  });
+
+  it('transitions through halfway and danger zones', () => {
+    expect(getLiveGoalStats(goal, start + 5 * DAY).zone).toBe('halfway');
+    expect(getLiveGoalStats(goal, start + 9.6 * DAY).zone).toBe('danger');
+    const s = getLiveGoalStats(goal, start + 9.6 * DAY);
+    expect(s.halfwayReached).toBe(true);
+    expect(s.almostDueReached).toBe(true);
+  });
+
+  it('reports overdue once the deadline passes', () => {
+    const s = getLiveGoalStats(goal, end + HOUR);
+    expect(s.zone).toBe('overdue');
+    expect(s.elapsedPct).toBe(100);
+    expect(s.remainingMs).toBe(-HOUR);
+  });
+
+  it('handles zero-duration allowances without NaN', () => {
+    const s = getLiveGoalStats({ startAt: iso(start), endAt: iso(start) }, start);
+    expect(s.elapsedPct).toBe(100);
+    expect(Number.isNaN(s.elapsedPct)).toBe(false);
+  });
+
+  it('tracks day progress within the allowance', () => {
+    const s = getLiveGoalStats(goal, start + 3 * DAY + HOUR);
+    expect(s.dayTotal).toBe(10);
+    expect(s.dayCurrent).toBe(4);
+  });
+
+  it('clamps day progress at the bounds', () => {
+    const future = getLiveGoalStats(goal, start - DAY);
+    expect(future.dayCurrent).toBe(1);
+    const past = getLiveGoalStats(goal, end + 5 * DAY);
+    expect(past.dayCurrent).toBe(past.dayTotal);
+  });
+
+  it('maps each zone to its banner copy key', () => {
+    expect(ZONE_COPY_KEY.on_track).toBe('goals.live.onTrackMsg');
+    expect(ZONE_COPY_KEY.halfway).toBe('goals.live.pastHalfwayMsg');
+    expect(ZONE_COPY_KEY.danger).toBe('goals.live.almostOutMsg');
+    expect(ZONE_COPY_KEY.overdue).toBe('goals.live.overdueMsg');
   });
 });

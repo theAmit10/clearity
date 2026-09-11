@@ -8,6 +8,7 @@ import {
   Pressable,
   Linking,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ChartBarIcon from 'react-native-heroicons/outline/ChartBarIcon';
@@ -234,7 +235,10 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.heroTopRow}>
-            <Text style={styles.brand}>◐ {t('paywallV2.brand')}</Text>
+            <Image
+              source={require('../assets/app-logo.png')}
+              style={styles.brandLogo}
+            />
             <Pressable
               onPress={handleDismiss}
               style={styles.closeCircle}
@@ -575,7 +579,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 42,
   },
-  brand: { color: '#F5D9C4', fontSize: 20, fontWeight: '700' },
+  brandLogo: { width: 32, height: 32, borderRadius: 9 },
   closeCircle: {
     width: 44,
     height: 44,

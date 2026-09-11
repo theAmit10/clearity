@@ -56,7 +56,8 @@
     "noPurchasesFoundBody": "복원할 수 있는 이전 구매 내역이 없습니다.",
     "restoreFailed": "복원 실패",
     "restoreFailedBody": "구매를 복원할 수 없습니다. 다시 시도해 주세요.",
-    "deleteAll": "삭제"
+    "deleteAll": "삭제",
+    "edit": "Edit"
   },
   "tabs": {
     "home": "홈",
@@ -149,25 +150,25 @@
     "getStarted": "Get started",
     "continue": "Continue",
     "skip": "Skip",
-    "page1Top": "Hello, habits.",
-    "page1Bottom": "Meet your new home.",
-    "page2Top": "All your habits,",
-    "page2Bottom": "in one place",
-    "page2Body": "See everything at a glance. No surprises. No broken streaks.",
-    "page3Top": "Stay ahead,",
-    "page3Bottom": "of streaks",
-    "page3Body": "See what's due today and get gentle reminders. Never miss a day that matters.",
+    "page1Top": "Build habits.",
+    "page1Bottom": "That actually stick.",
+    "page2Top": "Check in daily,",
+    "page2Bottom": "grow your streaks",
+    "page2Body": "One tap logs your day. Streaks, heatmaps, and reminders keep you consistent.",
+    "page3Top": "Set a deadline,",
+    "page3Bottom": "hit your goal",
+    "page3Body": "Big ambitions get a live countdown, smart reminders, and a finish report. Early, on time, or late.",
     "page4Top": "Start free with",
-    "page4Bottom": "up to {{count}} habits",
-    "page4Body": "Need unlimited habits, widgets or analytics later? Unlock Habitic Pro. One-time purchase. No surprises.",
+    "page4Bottom": "{{habitCount}} habits + {{goalCount}} goals",
+    "page4Body": "Need unlimited everything, widgets, and analytics? Unlock Habitic Unlimited. One-time purchase, yours forever.",
     "today": "Today",
     "doneToday": "done today",
     "active": "Active",
     "upNext": "Up next",
-    "example1Name": "Drink water",
-    "example1Meta": "Daily · in 2 hours",
-    "example2Name": "Read",
-    "example2Meta": "Daily · in 1 day",
+    "example1Name": "Run a marathon",
+    "example1Meta": "Deadline · 12d left",
+    "example2Name": "Read 12 books",
+    "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
   "addHabit": {
@@ -282,7 +283,7 @@
     "habitsSection": "습관",
     "habitsDescription": "홈 화면에서 길게 눌러 순서를 바꾸거나, 아래의 전용 순서 변경 화면을 이용하세요.",
     "reorderHabits": "습관 순서 변경",
-    "exportData": "데이터 내보내기 (습관 {{count}}개)",
+    "exportData": "Export data ({{habitCount}} habits, {{goalCount}} goals)",
     "importData": "파일에서 데이터 가져오기",
     "proSection": "Habitic Pro",
     "proActive": "Habitic Pro를 이용 중입니다. 이용해 주셔서 감사합니다!",
@@ -308,7 +309,7 @@
     "exportFailed": "내보내기 실패",
     "unknownError": "알 수 없는 오류",
     "importDataTitle": "데이터 가져오기",
-    "importDataBody": "파일에서 {{count}}개의 습관을 찾았습니다. 어떻게 가져올까요?",
+    "importDataBody": "Found {{habitCount}} habit(s) and {{goalCount}} goal(s) in the file. How do you want to import?",
     "mergeWithCurrent": "현재 데이터와 병합",
     "replaceEverything": "모두 교체",
     "importFailed": "가져오기 실패",
@@ -327,12 +328,8 @@
     "diagnosticsDescription": "Preview screens and choose which paywall new users see. Stored on this device only.",
     "diagnosticsRow": "Paywall version",
     "proCard": {
-      "titleFree": "You're on a Free Plan",
-      "subtitleFree": "Upgrade to focus better with Habitic Pro",
-      "titleExpired": "Your plan has expired",
-      "subtitleExpired": "Renew to keep your streaks with Habitic Pro",
-      "unlimitedSubtitle": "No limits on habits or rules",
-      "ctaTryFor": "Try for {{price}}"
+      "headlineTop": "Consistency is a choice.",
+      "headlineBottom": "Make yours easier."
     }
   },
   "general": {
@@ -490,11 +487,14 @@
   },
   "importExport": {
     "copyFailed": "가져오기용 파일을 복사하지 못했습니다.",
-    "invalidBackup": "선택한 파일은 유효한 Habit Tracker 백업 파일이 아닙니다."
+    "invalidBackup": "Selected file is not a valid Habit Tracker backup (expected habits and/or goals)."
   },
   "habitStore": {
     "habitLimitBody": "무료 요금제는 최대 {{count}}개의 습관까지 만들 수 있습니다. Pro로 업그레이드하면 무제한으로 이용할 수 있습니다.",
     "notifLimitBody": "무료 요금제는 습관당 리마인더 {{count}}개까지 설정할 수 있습니다. Pro로 업그레이드하면 무제한으로 이용할 수 있습니다."
+  },
+  "goalStore": {
+    "goalLimitBody": "Free tier is limited to {{count}} goals. Upgrade to Pro for unlimited."
   },
   "goals": {
     "title": "Goals",
@@ -506,6 +506,9 @@
     "filter_completed": "Completed",
     "emptyActive": "No ongoing goals yet.",
     "emptyCompleted": "No completed goals yet.",
+    "limitTitle": "Goal limit reached",
+    "planExpiredTitle": "Your plan has expired",
+    "planExpiredBody": "Renew your Pro subscription to keep creating unlimited goals.",
     "titleNew": "New Goal",
     "titleEdit": "Edit Goal",
     "name": "Title",
@@ -566,6 +569,19 @@
       "timelineCreated": "Created",
       "createdAt": "Created",
       "deadlineAt": "Deadline"
+    },
+    "live": {
+      "onTrackMsg": "You're on track",
+      "pastHalfwayMsg": "More than halfway there",
+      "almostOutMsg": "Almost out of time",
+      "overdueMsg": "Deadline passed",
+      "daysLeft": "{{duration}} left",
+      "dayWord": "Day",
+      "ofWord": "of",
+      "startedDate": "Started",
+      "deadlineDate": "Deadline",
+      "passedState": "Passed",
+      "caption": "Live pace based on your deadline."
     }
   },
   "goalNotifications": {

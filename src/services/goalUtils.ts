@@ -1,4 +1,5 @@
 import type { Goal } from '../types/goal';
+import type { TranslationKey } from '../i18n';
 
 export interface CountdownParts {
   days: number;
@@ -148,3 +149,68 @@ export function milestonePercent(ms: number, t0: number, t1: number): number {
   if (t1 <= t0) return 100;
   return Math.min(100, Math.max(0, ((ms - t0) / (t1 - t0)) * 100));
 }
+
+export type LiveZone = 'on_track' | 'halfway' | 'danger' | 'overdue';
+
+export interface LiveGoalStats {
+  /** Elapsed share of the allowance, clamped 0-100. */
+  elapsedPct: number;
+  /** end - now. Negative when overdue. */
+  remainingMs: number;
+  zone: LiveZone;
+  halfwayAt: number;
+  almostDueAt: number;
+  halfwayReached: boolean;
+  almostDueReached: boolean;
+  /** 1-based day number within the allowance (clamped). */
+  dayCurrent: number;
+  /** Total allowance days (min 1). */
+  dayTotal: number;
+}
+
+const DAY_MS = 86400_000;
+
+/** Live progress snapshot for an active goal. Pure function of the goal
+ * and now, so the detail screen can recompute it on every countdown tick. */
+export function getLiveGoalStats(
+  goal: Pick<Goal, 'startAt' | 'endAt'>,
+  now: number = Date.now(),
+): LiveGoalStats {
+  const start = new Date(goal.startAt).getTime();
+  const end = new Date(goal.endAt).getTime();
+  const span = Math.max(0, end - start);
+  const halfwayAt = start + span * 0.5;
+  const almostDueAt = start + span * 0.95;
+  const remainingMs = end - now;
+  const elapsedPct =
+    span > 0 ? Math.min(100, Math.max(0, ((now - start) / span) * 100)) : 100;
+  const zone: LiveZone =
+    remainingMs <= 0
+      ? 'overdue'
+      : elapsedPct >= 95
+        ? 'danger'
+        : elapsedPct >= 50
+          ? 'halfway'
+          : 'on_track';
+  const dayTotal = Math.max(1, Math.ceil(span / DAY_MS));
+  const dayCurrent = Math.min(dayTotal, Math.max(1, Math.floor((now - start) / DAY_MS) + 1));
+  return {
+    elapsedPct,
+    remainingMs,
+    zone,
+    halfwayAt,
+    almostDueAt,
+    halfwayReached: now >= halfwayAt,
+    almostDueReached: now >= almostDueAt,
+    dayCurrent,
+    dayTotal,
+  };
+}
+
+/** Banner headline per pace zone. Pure mapping so copy stays unit-testable. */
+export const ZONE_COPY_KEY: Record<LiveZone, TranslationKey> = {
+  on_track: 'goals.live.onTrackMsg',
+  halfway: 'goals.live.pastHalfwayMsg',
+  danger: 'goals.live.almostOutMsg',
+  overdue: 'goals.live.overdueMsg',
+};

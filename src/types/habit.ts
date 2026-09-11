@@ -1,3 +1,5 @@
+import type { Goal } from './goal';
+
 export type FrequencyType = 'daily' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
 
 export interface Habit {
@@ -32,9 +34,10 @@ export interface HabitStats {
 }
 
 export interface ExportPayload {
-  version: 1;
+  version: 1 | 2;
   exportedAt: string;
   habits: Habit[];
+  goals?: Goal[];
 }
 
 export type LogLevel = 'info' | 'warn' | 'error';

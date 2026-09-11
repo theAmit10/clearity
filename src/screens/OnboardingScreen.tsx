@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   FlatList,
   Pressable,
@@ -12,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import BellAlertIcon from 'react-native-heroicons/outline/BellAlertIcon';
 import { useTranslation } from '../i18n';
-import { FREE_HABIT_LIMIT } from '../constants/appInfo';
+import { FREE_HABIT_LIMIT, FREE_GOAL_LIMIT } from '../constants/appInfo';
 
 /* Subo-inspired palette — standalone, intentionally independent of ThemeProvider */
 const BG = '#140B0A';
@@ -46,15 +47,6 @@ function GlowBackground() {
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <View style={styles.glowTop} />
       <View style={styles.glowBottom} />
-    </View>
-  );
-}
-
-function LogoMark() {
-  return (
-    <View style={styles.logoWrap}>
-      <View style={styles.logoOrange} />
-      <View style={styles.logoCream} />
     </View>
   );
 }
@@ -123,7 +115,13 @@ export default function OnboardingScreen({ onFinish }: Props) {
     /* ── Page 1: welcome ─────────────────────────────── */
     <View key="p1" style={[styles.page, { width }]}>
       <View style={styles.heroSpacer} />
-      <LogoMark />
+      <Animated.View entering={FadeInDown.duration(380)}>
+        <Image
+          source={require('../assets/app-logo.png')}
+          style={styles.heroLogo}
+          resizeMode="contain"
+        />
+      </Animated.View>
       <Text style={styles.brand}>{t('onboarding.brand')}</Text>
       <View style={styles.flexSpacer} />
       <PageTitle top={t('onboarding.page1Top')} bottom={t('onboarding.page1Bottom')} />
@@ -224,7 +222,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
       <View style={styles.topPad} />
       <PageTitle
         top={t('onboarding.page4Top')}
-        bottom={t('onboarding.page4Bottom', { count: FREE_HABIT_LIMIT })}
+        bottom={t('onboarding.page4Bottom', { habitCount: FREE_HABIT_LIMIT, goalCount: FREE_GOAL_LIMIT })}
       />
       <Animated.Text entering={FadeIn.delay(120).duration(320)} style={styles.body}>
         {t('onboarding.page4Body')}
@@ -305,29 +303,12 @@ const styles = StyleSheet.create({
   flexSpacer: {
     flex: 1,
   },
-  logoWrap: {
+  heroLogo: {
     alignSelf: 'center',
-    width: 150,
-    height: 110,
+    width: 120,
+    height: 120,
+    borderRadius: 28,
     marginBottom: 10,
-  },
-  logoOrange: {
-    position: 'absolute',
-    right: 18,
-    top: 10,
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: ACCENT,
-  },
-  logoCream: {
-    position: 'absolute',
-    left: 14,
-    top: 0,
-    width: 108,
-    height: 108,
-    borderRadius: 54,
-    backgroundColor: 'rgba(232,220,208,0.92)',
   },
   brand: {
     textAlign: 'center',

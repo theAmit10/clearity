@@ -83,7 +83,7 @@ If auth is added in the future:
 | `habit_completed` | User checks off a habit for a day | — | `src/store/habitStore.ts` |
 | `habit_uncompleted` | User unchecks a habit | — | `src/store/habitStore.ts` |
 | `habits_reordered` | User reorders habit list | — | `src/store/habitStore.ts` |
-| `habits_imported` | User imports habits (replace or merge) | `count`, `type` | `src/store/habitStore.ts` |
+| `habits_imported` | User imports habits (replace or merge, unified backup) | `count`, `type` | `src/store/habitStore.ts` |
 | `subscription_expired` | Pro subscription lapses (entitlement present but inactive, or active → inactive transition) | — | `src/store/habitStore.ts` |
 | `goal_added` | User creates a new goal | `icon` | `src/store/goalStore.ts` |
 | `goal_deleted` | User deletes a goal | — | `src/store/goalStore.ts` |
@@ -91,6 +91,7 @@ If auth is added in the future:
 | `goal_extended` | User adds more time to a goal deadline | — | `src/store/goalStore.ts` |
 | `goal_reminder_set` | User sets a custom reminder on a goal | — | `src/store/goalStore.ts` |
 | `goal_reminder_removed` | User deletes a custom goal reminder | — | `src/store/goalStore.ts` |
+| `goals_imported` | User imports goals (replace or merge, unified backup) | `count`, `type` | `src/store/goalStore.ts` |
 | `onboarding_started` | Onboarding shows on first launch | — | `App.tsx` |
 | `onboarding_completed` | User taps Continue on the last onboarding screen | — | `App.tsx` |
 | `onboarding_skipped` | User taps Skip on an onboarding screen | `at_screen` | `App.tsx` |

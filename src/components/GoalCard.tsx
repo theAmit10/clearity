@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import type { Goal } from '../types/goal';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 import { getHabitIcon } from '../constants/habitIcons';
-import { getCountdownParts, formatOverdue, getProgress } from '../services/goalUtils';
+import {
+  getCountdownParts,
+  formatOverdue,
+  getProgress,
+} from '../services/goalUtils';
 import { useTranslation } from '../i18n';
 
 interface Props {
@@ -36,6 +47,13 @@ export default function GoalCard({ goal, onPress, onComplete }: Props) {
   const parts = getCountdownParts(goal.endAt, now);
   const expired = !completed && parts.expired;
   const progress = completed ? 1 : getProgress(goal, now);
+  const { width: screenWidth } = useWindowDimensions();
+  // Bar width = screen - card margins (16*2) - card padding (13*2).
+  const barWidth = Math.max(0, screenWidth - 58);
+  const fillWidth = Math.min(barWidth, Math.max(0, progress * barWidth));
+  const fillColor = expired ? '#FF3B30' : goal.color;
+  const fillOpacity = expired ? 0.55 : 0.45;
+  const gradId = `goalCardFill-${goal.id}`;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -52,10 +70,10 @@ export default function GoalCard({ goal, onPress, onComplete }: Props) {
   const sub = completed
     ? t('goals.completed')
     : expired
-      ? formatOverdue(parts.overdueMs)
-      : parts.days > 0
-        ? `${parts.days}d ${parts.hours}h left`
-        : `${parts.hours}h ${parts.minutes}m left`;
+    ? formatOverdue(parts.overdueMs)
+    : parts.days > 0
+    ? `${parts.days}d ${parts.hours}h left`
+    : `${parts.hours}h ${parts.minutes}m left`;
 
   return (
     <Pressable onPress={onPress}>
@@ -65,20 +83,26 @@ export default function GoalCard({ goal, onPress, onComplete }: Props) {
             <Icon size={20} color={goal.color} />
           </Raised>
           <View style={styles.headerText}>
-            <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+            <Text
+              style={[styles.name, { color: theme.colors.textPrimary }]}
+              numberOfLines={1}
+            >
               {goal.title}
             </Text>
-            <Text style={[styles.sub, { color: expired ? '#FF3B30' : theme.colors.textMuted }]} numberOfLines={1}>
+            <Text
+              style={[
+                styles.sub,
+                { color: expired ? '#FF3B30' : theme.colors.textMuted },
+              ]}
+              numberOfLines={1}
+            >
               {expired ? `${t('goals.expired')} · ${sub}` : sub}
             </Text>
           </View>
           {completed ? (
             <Inset
               radius={17}
-              style={[
-                styles.checkCircle,
-                { backgroundColor: goal.color },
-              ]}
+              style={[styles.checkCircle, { backgroundColor: goal.color }]}
             >
               <Text style={styles.checkMarkDone}>✓</Text>
             </Inset>
@@ -91,16 +115,46 @@ export default function GoalCard({ goal, onPress, onComplete }: Props) {
                   style={[
                     styles.checkCircle,
                     styles.checkCircleEmpty,
-                    { borderColor: goal.color, backgroundColor: theme.colors.background },
+                    {
+                      borderColor: goal.color,
+                      backgroundColor: theme.colors.background,
+                    },
                   ]}
                 />
               </Pressable>
             </Animated.View>
           ) : null}
         </View>
-        <View style={[styles.track, { backgroundColor: theme.colors.insetFill }]}>
-          <View style={[styles.fill, { width: `${Math.round(progress * 100)}%`, backgroundColor: expired ? '#FF3B30' : goal.color }]} />
-        </View>
+        <Svg width={barWidth} height={6} style={styles.track}>
+          <Defs>
+            <LinearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
+              <Stop
+                offset="0"
+                stopColor={fillColor}
+                stopOpacity={fillOpacity}
+              />
+              <Stop offset="1" stopColor={fillColor} />
+            </LinearGradient>
+          </Defs>
+          <Rect
+            x={0}
+            y={0}
+            width={barWidth}
+            height={6}
+            rx={3}
+            fill={theme.colors.insetFill}
+          />
+          {fillWidth > 0 && (
+            <Rect
+              x={0}
+              y={0}
+              width={fillWidth}
+              height={6}
+              rx={3}
+              fill={`url(#${gradId})`}
+            />
+          )}
+        </Svg>
       </Raised>
     </Pressable>
   );
@@ -110,7 +164,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 13,
     marginHorizontal: 16,
-    marginVertical: 5,
+    marginVertical: 20,
   },
   header: {
     flexDirection: 'row',
@@ -158,9 +212,5 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     overflow: 'hidden',
-  },
-  fill: {
-    height: 6,
-    borderRadius: 3,
   },
 });

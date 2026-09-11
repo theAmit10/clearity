@@ -33,6 +33,7 @@ export const REVENUECAT_API_KEY: string = Config.REVENUECAT_API_KEY;
 export const REVENUECAT_ENTITLEMENT_ID = 'Habitic: Offline Habit Tracker Pro';
 // export const REVENUECAT_ENTITLEMENT_ID = 'pro';
 export const FREE_HABIT_LIMIT = 4;
+export const FREE_GOAL_LIMIT = 2;
 export const FREE_NOTIF_LIMIT = 1;
 
 export const PREMIUM_THEMES: string[] = ['blue', 'gold', 'pink', 'green', 'gray', 'purple'];

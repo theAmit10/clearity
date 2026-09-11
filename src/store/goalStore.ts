@@ -4,6 +4,9 @@ import type { GoalNotificationConfig, GoalNotificationKind } from '../types/noti
 import { loadGoals, saveGoals, loadGoalNotifications, saveGoalNotifications } from '../services/storage';
 import { logEvent } from '../services/logger';
 import { trackEvent } from '../services/analytics';
+import { t } from '../i18n';
+import { FREE_GOAL_LIMIT } from '../constants/appInfo';
+import { useHabitStore } from './habitStore';
 import {
   scheduleGoalNotification,
   cancelGoalNotification,
@@ -25,6 +28,8 @@ interface GoalState {
   addGoalReminder: (goalId: string, data: { title: string; body: string; timestamp: number }) => Promise<void>;
   updateGoalReminder: (id: string, patch: Partial<GoalNotificationConfig>) => Promise<void>;
   removeGoalReminder: (id: string) => Promise<void>;
+  replaceAllGoals: (goals: Goal[]) => Promise<void>;
+  mergeGoals: (incoming: Goal[]) => Promise<void>;
   rescheduleActive: () => Promise<void>;
 }
 
@@ -114,6 +119,11 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   addGoal: async data => {
+    const isPro = useHabitStore.getState().isPro;
+    if (!isPro && get().goals.length >= FREE_GOAL_LIMIT) {
+      logEvent('info', 'Goal creation blocked — free limit reached');
+      throw new Error(t('goalStore.goalLimitBody', { count: FREE_GOAL_LIMIT }));
+    }
     const goal: Goal = {
       ...data,
       id: makeId(),
@@ -243,5 +253,61 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     persistNotifs(goalNotifications);
     trackEvent('goal_reminder_removed');
     logEvent('info', 'Goal reminder removed', { id });
+  },
+
+  replaceAllGoals: async goals => {
+    const incoming = goals.map(g => ({
+      ...g,
+      status: g.status ?? ('active' as const),
+    }));
+    const oldIds = get().goalNotifications.map(n => n.id);
+    await Promise.all(oldIds.map(cancelGoalNotification));
+    const autos = incoming.flatMap(g => autoConfigsFor(g));
+    set({ goals: incoming, goalNotifications: autos });
+    persist(incoming);
+    persistNotifs(autos);
+    await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+    trackEvent('goals_imported', { count: incoming.length, type: 'replace' });
+    logEvent('info', 'Goals replaced via import', { count: incoming.length });
+  },
+
+  mergeGoals: async incomingRaw => {
+    const incoming = incomingRaw.map(g => ({
+      ...g,
+      status: g.status ?? ('active' as const),
+    }));
+    const existing = get().goals;
+    const byId = new Map(existing.map(g => [g.id, g]));
+    for (const g of incoming) {
+      byId.set(g.id, { ...byId.get(g.id), ...g });
+    }
+    const goals = Array.from(byId.values());
+    const incomingIds = new Set(incoming.map(g => g.id));
+    const keptNotifs = get().goalNotifications.filter(
+      n => !incomingIds.has(n.goalId) || n.kind === 'custom',
+    );
+    const keptAutoIds = new Set(
+      keptNotifs.filter(n => AUTO_KINDS.includes(n.kind)).map(n => n.id),
+    );
+    const removedAutoIds = get()
+      .goalNotifications.filter(
+        n => incomingIds.has(n.goalId) && AUTO_KINDS.includes(n.kind) && !keptAutoIds.has(n.id),
+      )
+      .map(n => n.id);
+    await Promise.all(removedAutoIds.map(cancelGoalNotification));
+    const autos = incoming.flatMap(g => {
+      const merged = byId.get(g.id);
+      return merged ? autoConfigsFor(merged) : [];
+    });
+    const goalNotifications = [
+      ...keptNotifs.filter(n => !(incomingIds.has(n.goalId) && AUTO_KINDS.includes(n.kind))),
+      ...autos,
+    ];
+    set({ goals, goalNotifications });
+    persist(goals);
+    persistNotifs(goalNotifications);
+    await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+    trackEvent('goals_imported', { count: goals.length, type: 'merge' });
+    logEvent('info', 'Goals merged via import', { count: goals.length });
   },
 }));

@@ -56,7 +56,8 @@
     "noPurchasesFoundBody": "没有可恢复的历史购买记录。",
     "restoreFailed": "恢复失败",
     "restoreFailedBody": "无法恢复购买，请重试。",
-    "deleteAll": "删除"
+    "deleteAll": "删除",
+    "edit": "Edit"
   },
   "tabs": {
     "home": "首页",
@@ -149,25 +150,25 @@
     "getStarted": "Get started",
     "continue": "Continue",
     "skip": "Skip",
-    "page1Top": "Hello, habits.",
-    "page1Bottom": "Meet your new home.",
-    "page2Top": "All your habits,",
-    "page2Bottom": "in one place",
-    "page2Body": "See everything at a glance. No surprises. No broken streaks.",
-    "page3Top": "Stay ahead,",
-    "page3Bottom": "of streaks",
-    "page3Body": "See what's due today and get gentle reminders. Never miss a day that matters.",
+    "page1Top": "Build habits.",
+    "page1Bottom": "That actually stick.",
+    "page2Top": "Check in daily,",
+    "page2Bottom": "grow your streaks",
+    "page2Body": "One tap logs your day. Streaks, heatmaps, and reminders keep you consistent.",
+    "page3Top": "Set a deadline,",
+    "page3Bottom": "hit your goal",
+    "page3Body": "Big ambitions get a live countdown, smart reminders, and a finish report. Early, on time, or late.",
     "page4Top": "Start free with",
-    "page4Bottom": "up to {{count}} habits",
-    "page4Body": "Need unlimited habits, widgets or analytics later? Unlock Habitic Pro. One-time purchase. No surprises.",
+    "page4Bottom": "{{habitCount}} habits + {{goalCount}} goals",
+    "page4Body": "Need unlimited everything, widgets, and analytics? Unlock Habitic Unlimited. One-time purchase, yours forever.",
     "today": "Today",
     "doneToday": "done today",
     "active": "Active",
     "upNext": "Up next",
-    "example1Name": "Drink water",
-    "example1Meta": "Daily · in 2 hours",
-    "example2Name": "Read",
-    "example2Meta": "Daily · in 1 day",
+    "example1Name": "Run a marathon",
+    "example1Meta": "Deadline · 12d left",
+    "example2Name": "Read 12 books",
+    "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
   "addHabit": {
@@ -282,7 +283,7 @@
     "habitsSection": "习惯",
     "habitsDescription": "在主屏幕上长按习惯即可重新排序，或使用下方专门的排序界面。",
     "reorderHabits": "重新排序习惯",
-    "exportData": "导出数据（共 {{count}} 个习惯）",
+    "exportData": "Export data ({{habitCount}} habits, {{goalCount}} goals)",
     "importData": "从文件导入数据",
     "proSection": "Habitic Pro",
     "proActive": "你已开通 Habitic Pro。感谢你的支持！",
@@ -308,7 +309,7 @@
     "exportFailed": "导出失败",
     "unknownError": "未知错误",
     "importDataTitle": "导入数据",
-    "importDataBody": "文件中找到 {{count}} 个习惯。你想如何导入？",
+    "importDataBody": "Found {{habitCount}} habit(s) and {{goalCount}} goal(s) in the file. How do you want to import?",
     "mergeWithCurrent": "与当前数据合并",
     "replaceEverything": "替换全部数据",
     "importFailed": "导入失败",
@@ -327,12 +328,8 @@
     "diagnosticsDescription": "Preview screens and choose which paywall new users see. Stored on this device only.",
     "diagnosticsRow": "Paywall version",
     "proCard": {
-      "titleFree": "You're on a Free Plan",
-      "subtitleFree": "Upgrade to focus better with Habitic Pro",
-      "titleExpired": "Your plan has expired",
-      "subtitleExpired": "Renew to keep your streaks with Habitic Pro",
-      "unlimitedSubtitle": "No limits on habits or rules",
-      "ctaTryFor": "Try for {{price}}"
+      "headlineTop": "Consistency is a choice.",
+      "headlineBottom": "Make yours easier."
     }
   },
   "general": {
@@ -490,11 +487,14 @@
   },
   "importExport": {
     "copyFailed": "复制待导入文件失败。",
-    "invalidBackup": "所选文件不是有效的 Habit Tracker 备份文件。"
+    "invalidBackup": "Selected file is not a valid Habit Tracker backup (expected habits and/or goals)."
   },
   "habitStore": {
     "habitLimitBody": "免费版最多可创建 {{count}} 个习惯。升级到 Pro 可无限制创建。",
     "notifLimitBody": "免费版每个习惯最多可设置 {{count}} 个提醒。升级到 Pro 可无限制设置。"
+  },
+  "goalStore": {
+    "goalLimitBody": "Free tier is limited to {{count}} goals. Upgrade to Pro for unlimited."
   },
   "goals": {
     "title": "Goals",
@@ -506,6 +506,9 @@
     "filter_completed": "Completed",
     "emptyActive": "No ongoing goals yet.",
     "emptyCompleted": "No completed goals yet.",
+    "limitTitle": "Goal limit reached",
+    "planExpiredTitle": "Your plan has expired",
+    "planExpiredBody": "Renew your Pro subscription to keep creating unlimited goals.",
     "titleNew": "New Goal",
     "titleEdit": "Edit Goal",
     "name": "Title",
@@ -566,6 +569,19 @@
       "timelineCreated": "Created",
       "createdAt": "Created",
       "deadlineAt": "Deadline"
+    },
+    "live": {
+      "onTrackMsg": "You're on track",
+      "pastHalfwayMsg": "More than halfway there",
+      "almostOutMsg": "Almost out of time",
+      "overdueMsg": "Deadline passed",
+      "daysLeft": "{{duration}} left",
+      "dayWord": "Day",
+      "ofWord": "of",
+      "startedDate": "Started",
+      "deadlineDate": "Deadline",
+      "passedState": "Passed",
+      "caption": "Live pace based on your deadline."
     }
   },
   "goalNotifications": {
