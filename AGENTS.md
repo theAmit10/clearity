@@ -76,15 +76,19 @@ If auth is added in the future:
 
 | Event | Trigger | Key Properties | File |
 |---|---|---|---|
-| `app_opened` | App launches and store initializes | `habit_count` | `src/store/habitStore.ts` |
-| `screen_view` | User navigates to a screen | `screen_name` | `src/navigation/RootNavigator.tsx` |
+| `app_opened` | App launches and store initializes | `habit_count`, `goal_count`, `is_pro`, `paywall_variant`, `app_version` | `src/store/habitStore.ts` |
 | `habit_added` | User creates a new habit | `icon`, `frequency` | `src/store/habitStore.ts` |
 | `habit_deleted` | User deletes a habit | — | `src/store/habitStore.ts` |
-| `habit_completed` | User checks off a habit for a day | — | `src/store/habitStore.ts` |
-| `habit_uncompleted` | User unchecks a habit | — | `src/store/habitStore.ts` |
-| `habits_reordered` | User reorders habit list | — | `src/store/habitStore.ts` |
-| `habits_imported` | User imports habits (replace or merge, unified backup) | `count`, `type` | `src/store/habitStore.ts` |
 | `subscription_expired` | Pro subscription lapses (entitlement present but inactive, or active → inactive transition) | — | `src/store/habitStore.ts` |
+| `subscription_activated` | Pro entitlement flips inactive → active (deduped 60s; funnel endpoint) | `package`, `via` (purchase/restore/auto), `previous_state` (free/expired) | `src/store/habitStore.ts`, `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx`, `src/screens/SettingsScreen.tsx` |
+| `paywall_shown` | Paywall opens (once per open; skipped for previews and pro status view) | `variant` (classic/v2), `source`, `mode` (default/expired), `is_pro`, `habit_count` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `paywall_dismissed` | User closes the paywall without purchasing | `variant`, `source`, `mode`, `viewed_seconds` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `paywall_package_selected` | User taps a plan card | `variant`, `package`, `source` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `purchase_started` | User taps the paywall CTA, before the store sheet | `variant`, `package`, `price_string`, `source` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `purchase_completed` | Store transaction succeeds and entitlement is active | `variant`, `package`, `source` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `purchase_cancelled` | User cancels the store sheet | `variant`, `package`, `source` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `purchase_failed` | Store transaction errors (non-cancel) | `variant`, `package`, `source`, `error_code` | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx` |
+| `purchase_restored` | Restore finds an active Pro entitlement | `via` (paywall/settings) | `src/screens/PaywallScreen.tsx`, `src/screens/PaywallV2Screen.tsx`, `src/screens/SettingsScreen.tsx` |
 | `goal_added` | User creates a new goal | `icon` | `src/store/goalStore.ts` |
 | `goal_deleted` | User deletes a goal | — | `src/store/goalStore.ts` |
 | `goal_completed` | User marks a goal complete and archives it | `overdue` | `src/store/goalStore.ts` |
@@ -99,7 +103,15 @@ If auth is added in the future:
 
 ### Value Moment
 
-The core value moment is **habit_completed** — a user checking off a habit. This represents active engagement and habit formation, which is the primary purpose of the app.
+The conversion moment is **subscription_activated** — a user becoming Pro. Engagement events (`habit_completed`, `streak_achieved`, `screen_view`, imports/reorders) are intentionally not tracked; retention signal comes from `app_opened` frequency.
+
+### Paying-user funnel (Mixpanel Funnels)
+
+Ordered steps: `paywall_shown` → `purchase_started` → `purchase_completed` → `subscription_activated`. Break down by `source` (which trigger converts), `variant` (classic vs v2), and `package` (weekly/annual/lifetime). `subscription_activated` is the conversion endpoint — it fires on every inactive → active entitlement flip (purchase, restore, auto-renewal) and is deduped within 60s so it never double-counts. RevenueCat remains the revenue source of truth; Mixpanel mirrors it for funnel analysis only.
+
+### Super properties
+
+Every event carries `app_version`, `platform`, `paywall_variant`, `is_pro` (registered in `App.tsx` via `setAnalyticsDefaults`, refreshed on change; pre-init values are queued and flushed in `initAnalytics`). Paywall entry points must pass a `source` from the `PaywallSource` union in `src/services/paywallRouter.ts` — never open the paywall without one (except previews, which skip `paywall_shown`/`paywall_dismissed`).
 
 ---
 

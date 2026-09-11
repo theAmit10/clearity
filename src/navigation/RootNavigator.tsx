@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
   NavigationContainer,
   DefaultTheme,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import { trackScreenView } from '../services/analytics';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
@@ -219,7 +218,6 @@ export default function RootNavigator({
   showOnboarding?: boolean;
   onOnboardingFinish?: (result: OnboardingResult, atIndex: number) => void;
 }) {
-  const prevScreen = useRef<string | null>(null);
   const { theme } = useTheme();
 
   const navigationTheme = {
@@ -231,20 +229,6 @@ export default function RootNavigator({
       border: 'transparent',
     },
   };
-
-  function getActiveRouteName(state: any): string {
-    const route = state?.routes?.[state.index];
-    if (route?.state) return getActiveRouteName(route.state);
-    return route?.name ?? 'Unknown';
-  }
-
-  useEffect(() => {
-    if (navigationRef.isReady()) {
-      const name = getActiveRouteName(navigationRef.getState());
-      trackScreenView(name);
-      prevScreen.current = name;
-    }
-  }, []);
 
   if (showOnboarding) {
     return (
@@ -258,13 +242,6 @@ export default function RootNavigator({
     <NavigationContainer
       ref={navigationRef}
       theme={navigationTheme}
-      onStateChange={state => {
-        const name = getActiveRouteName(state);
-        if (name !== prevScreen.current) {
-          trackScreenView(name);
-          prevScreen.current = name;
-        }
-      }}
     >
       <Tab.Navigator
         screenOptions={{ headerShown: false }}

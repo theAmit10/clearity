@@ -1,15 +1,21 @@
 import { create } from 'zustand';
 import { Habit, HabitStats, HabitCategory } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
-import { loadHabits, saveHabits, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings, loadCustomCategories, saveCustomCategories } from '../services/storage';
+import { loadHabits, saveHabits, loadGoals, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings, loadCustomCategories, saveCustomCategories } from '../services/storage';
 import { logEvent } from '../services/logger';
-import { trackEvent } from '../services/analytics';
+import {
+  trackEvent,
+  trackSubscriptionActivated,
+} from '../services/analytics';
+import { getStoredVariantSync } from './paywallVariantStore';
+import { APP_VERSION } from '../constants/appInfo';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
 import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import type { CustomerInfo } from 'react-native-purchases';
+import type { Goal } from '../types/goal';
 import { t } from '../i18n';
 
 interface HabitState {
@@ -89,16 +95,26 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   refreshProStatus: async () => {
     const info = await getCustomerInfo();
-    const wasExpired = get().proExpired;
-    const next = computeProState(info, get().isPro);
+    const prev = get();
+    const next = computeProState(info, prev.isPro);
     set(next);
-    if (next.proExpired && !wasExpired) trackEvent('subscription_expired');
+    if (next.proExpired && !prev.proExpired) trackEvent('subscription_expired');
+    // Renewals / external activations land here (purchase + restore handlers
+    // track their own with package details; the shared dedupe in
+    // trackSubscriptionActivated keeps the funnel endpoint counted once).
+    if (next.isPro && !prev.isPro) {
+      trackSubscriptionActivated({
+        via: 'auto',
+        previous_state: prev.proExpired ? 'expired' : 'free',
+      });
+    }
   },
 
   init: async () => {
     try {
-      const [stored, reviewShown, notifData, generalSettings, customCategories] = await Promise.all([
+      const [stored, storedGoals, reviewShown, notifData, generalSettings, customCategories] = await Promise.all([
         loadHabits<Habit[]>(),
+        loadGoals<Goal[]>(),
         loadReviewState(),
         loadNotificationData<NotificationStoreData>(),
         loadGeneralSettings(),
@@ -164,7 +180,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         saveNotificationData({ habitNotifications: habitNotifs, adminNotifications: get().adminNotifications });
       }
 
-      trackEvent('app_opened', { habit_count: stored?.length ?? 0 });
+      trackEvent('app_opened', {
+        habit_count: stored?.length ?? 0,
+        goal_count: storedGoals?.length ?? 0,
+        is_pro: proState.isPro,
+        paywall_variant: getStoredVariantSync(),
+        app_version: APP_VERSION,
+      });
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
       const h = stored ?? [];
       const active = h.filter((x: { archived: boolean }) => !x.archived);
@@ -241,8 +263,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       delete missedNotes[key];
       return { ...h, completions, missedNotes };
     });
-    const wasChecked = !get().habits.find(h => h.id === id)?.completions[key];
-    trackEvent(wasChecked ? 'habit_uncompleted' : 'habit_completed');
     set({ habits });
     persist(habits);
     updateWidget(habits);
@@ -281,7 +301,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
-    trackEvent('habits_imported', { count: habits.length, type: 'replace' });
     logEvent('info', 'Habits replaced via import', { count: habits.length });
   },
 
@@ -305,7 +324,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
-    trackEvent('habits_imported', { count: habits.length, type: 'merge' });
     logEvent('info', 'Habits merged via import', { count: habits.length });
   },
 
@@ -322,7 +340,6 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set({ habits });
     persist(habits);
     updateWidget(habits);
-    trackEvent('habits_reordered');
     logEvent('info', 'Habits reordered');
   },
 

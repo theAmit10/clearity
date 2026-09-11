@@ -110,28 +110,33 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
   }
 }
 
+export type PurchaseResult =
+  | { status: 'purchased'; customerInfo: CustomerInfo }
+  | { status: 'cancelled' }
+  | { status: 'error'; error: string };
+
 export async function purchasePackage(
   aPackage: PurchasesPackage,
-): Promise<{ customerInfo: CustomerInfo } | null> {
+): Promise<PurchaseResult> {
   try {
     const { customerInfo } = await Purchases.purchasePackage(aPackage);
     logEvent('info', 'Purchase successful', {
       product: aPackage.identifier,
       entitlement: REVENUECAT_ENTITLEMENT_ID,
     });
-    return { customerInfo };
+    return { status: 'purchased', customerInfo };
   } catch (err: any) {
     if (err?.userCancelled) {
       logEvent('info', 'Purchase cancelled by user');
-      return null;
+      return { status: 'cancelled' };
     }
     logEvent('error', 'Purchase failed', err);
     if (usingMockOfferings) {
       logEvent('info', 'Dev mode: simulating successful purchase');
       devProActive = true;
-      return { customerInfo: { entitlements: { active: { [REVENUECAT_ENTITLEMENT_ID]: { isActive: true } } } } } as any;
+      return { status: 'purchased', customerInfo: { entitlements: { active: { [REVENUECAT_ENTITLEMENT_ID]: { isActive: true } } } } } as any;
     }
-    return null;
+    return { status: 'error', error: String(err?.message ?? err) };
   }
 }
 

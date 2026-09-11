@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,11 @@ import {
 import { useHabitStore } from '../store/habitStore';
 import { usePaywallPricing } from '../hooks/usePaywallPricing';
 import { logEvent } from '../services/logger';
+import {
+  trackEvent,
+  trackSubscriptionActivated,
+  updateProProp,
+} from '../services/analytics';
 import { useTranslation } from '../i18n';
 
 const PRIVACY_URL = 'https://theamit10.github.io/habitic-legal/privacy-policy';
@@ -67,6 +72,16 @@ export default function PaywallV2Screen({ navigation, route }: any) {
   const isProUser = storeIsPro || remoteIsPro;
   const expiredMode =
     !isProUser && (route?.params?.mode === 'expired' || storeProExpired);
+  const paywallSource = route?.params?.source ?? 'unknown';
+  const paywallMode = expiredMode ? 'expired' : 'default';
+  const isPreview = paywallSource === 'preview';
+  const mountedAt = useRef(Date.now());
+
+  const funnelBase = {
+    variant: 'v2',
+    source: paywallSource,
+    mode: paywallMode,
+  };
 
   useEffect(() => {
     (async () => {
@@ -83,6 +98,18 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     })();
   }, [refreshProStatus]);
 
+  // Funnel entry — fires once per open for real (non-preview, non-pro) views.
+  useEffect(() => {
+    if (!storeIsPro && !isPreview) {
+      trackEvent('paywall_shown', {
+        ...funnelBase,
+        is_pro: false,
+        habit_count: habits.length,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const stats = useMemo(() => {
     const active = habits.filter(h => !h.archived);
     const checkIns = habits.reduce(
@@ -97,16 +124,65 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     return { habitCount: active.length, checkIns };
   }, [habits]);
 
+  const handleSelectPackage = useCallback(
+    (pkg: typeof selectedPackage) => {
+      setSelectedPackage(pkg);
+      if (!isPreview && pkg) {
+        trackEvent('paywall_package_selected', {
+          ...funnelBase,
+          package: pkg.identifier,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPreview],
+  );
+
   const handlePurchase = useCallback(async () => {
     if (!selectedPackage || loading) return;
     setLoading(true);
+    trackEvent('purchase_started', {
+      ...funnelBase,
+      package: selectedPackage.identifier,
+      price_string: selectedPackage.product?.priceString,
+    });
     try {
       const result = await purchasePackage(selectedPackage);
-      if (result) {
-        const nowPro = isPro(result.customerInfo);
-        useHabitStore.setState({ isPro: nowPro, proExpired: false });
-        setRemoteIsPro(nowPro);
-        setProExpiration(getProExpirationDate(result.customerInfo));
+      if (result.status === 'cancelled') {
+        trackEvent('purchase_cancelled', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+        });
+        return;
+      }
+      if (result.status === 'error') {
+        trackEvent('purchase_failed', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+          error_code: result.error,
+        });
+        Alert.alert(
+          t('paywall.purchaseFailed'),
+          t('paywall.purchaseFailedBody'),
+        );
+        return;
+      }
+      const nowPro = isPro(result.customerInfo);
+      useHabitStore.setState({ isPro: nowPro, proExpired: false });
+      setRemoteIsPro(nowPro);
+      setProExpiration(getProExpirationDate(result.customerInfo));
+      if (nowPro) {
+        updateProProp(true);
+        trackEvent('purchase_completed', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+        });
+        trackSubscriptionActivated({
+          ...funnelBase,
+          package: selectedPackage.identifier,
+          via: 'purchase',
+          previous_state: paywallMode === 'expired' ? 'expired' : 'free',
+        });
         Alert.alert(t('paywall.welcomeTitle'), t('paywall.welcomeBody'));
         navigation.goBack();
       } else {
@@ -118,6 +194,8 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     } finally {
       setLoading(false);
     }
+  // funnelBase/paywallMode are fixed for this open — no need to rebuild the handler.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPackage, loading, navigation, t]);
 
   const handleRestore = useCallback(async () => {
@@ -130,6 +208,16 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         setRemoteIsPro(nowPro);
         setProExpiration(getProExpirationDate(info));
         if (nowPro) {
+          updateProProp(true);
+          trackEvent('purchase_restored', {
+            ...funnelBase,
+            via: 'paywall',
+          });
+          trackSubscriptionActivated({
+            ...funnelBase,
+            via: 'restore',
+            previous_state: paywallMode === 'expired' ? 'expired' : 'free',
+          });
           Alert.alert(
             t('common.restoreComplete'),
             t('common.restoreCompleteBody'),
@@ -145,9 +233,11 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, t]);
 
   const handleDismiss = useCallback(async () => {
+    const wasPro = useHabitStore.getState().isPro;
     try {
       const info = await getCustomerInfo();
       if (isPro(info)) {
@@ -159,7 +249,14 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         error: String(err),
       });
     }
+    if (!wasPro && !isPreview) {
+      trackEvent('paywall_dismissed', {
+        ...funnelBase,
+        viewed_seconds: Math.round((Date.now() - mountedAt.current) / 1000),
+      });
+    }
     navigation.goBack();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   const handleManageSubscription = useCallback(async () => {
@@ -379,7 +476,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                     t('paywallV2.fullAccessForever'),
                     t('paywallV2.futureUpdates'),
                   ]}
-                  onSelect={() => setSelectedPackage(lifetimePkg)}
+                  onSelect={() => handleSelectPackage(lifetimePkg)}
                 />
               )}
 
@@ -405,7 +502,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                       subtitle={t('paywallV2.yearSub')}
                       strike={annualStrike}
                       savingsPct={annualSavingsPct}
-                      onSelect={() => setSelectedPackage(annualPkg)}
+                      onSelect={() => handleSelectPackage(annualPkg)}
                     />
                   )}
                   {weeklyPkg && (
@@ -414,7 +511,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                       title={t('paywallV2.weekAccess')}
                       price={weeklyPkg.product.priceString}
                       subtitle={t('paywallV2.weekSub')}
-                      onSelect={() => setSelectedPackage(weeklyPkg)}
+                      onSelect={() => handleSelectPackage(weeklyPkg)}
                     />
                   )}
                 </>

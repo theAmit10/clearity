@@ -124,7 +124,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               {
                 text: t('common.renewPro'),
                 onPress: () =>
-                  openPaywall(navigation, { mode: 'expired' }),
+                  openPaywall(navigation, {
+                    mode: 'expired',
+                    source: 'habit_limit',
+                  }),
               },
             ],
           );
@@ -387,7 +390,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                         {
                           text: t('common.renewPro'),
                           onPress: () =>
-                            openPaywall(navigation, { mode: 'expired' }),
+                            openPaywall(navigation, {
+                              mode: 'expired',
+                              source: 'category_limit',
+                            }),
                         },
                       ],
                     );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -51,6 +51,11 @@ import { useHabitStore } from '../store/habitStore';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { logEvent } from '../services/logger';
+import {
+  trackEvent,
+  trackSubscriptionActivated,
+  updateProProp,
+} from '../services/analytics';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 
@@ -368,6 +373,16 @@ export default function PaywallScreen({ navigation, route }: any) {
   const isProUser = storeIsPro || remoteIsPro;
   const expiredMode =
     !isProUser && (route?.params?.mode === 'expired' || storeProExpired);
+  const paywallSource = route?.params?.source ?? 'unknown';
+  const paywallMode = expiredMode ? 'expired' : 'default';
+  const isPreview = paywallSource === 'preview';
+  const mountedAt = useRef(Date.now());
+
+  const funnelBase = {
+    variant: 'classic',
+    source: paywallSource,
+    mode: paywallMode,
+  };
 
   // Subtle continuous pulse for the "Best value" badge — draws the eye
   // without being distracting.
@@ -453,16 +468,78 @@ export default function PaywallScreen({ navigation, route }: any) {
     })();
   }, [loadPricing]);
 
+  // Funnel entry — fires once per open for real (non-preview, non-pro) views.
+  useEffect(() => {
+    if (!storeIsPro && paywallSource !== 'preview') {
+      trackEvent('paywall_shown', {
+        variant: 'classic',
+        source: paywallSource,
+        mode: route?.params?.mode === 'expired' ? 'expired' : 'default',
+        is_pro: false,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSelectPackage = useCallback(
+    (pkg: any) => {
+      setSelectedPackage(pkg);
+      if (!isPreview && pkg) {
+        trackEvent('paywall_package_selected', {
+          ...funnelBase,
+          package: pkg.identifier,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isPreview],
+  );
+
   const handlePurchase = useCallback(async () => {
     if (!selectedPackage || loading) return;
     setLoading(true);
+    trackEvent('purchase_started', {
+      ...funnelBase,
+      package: selectedPackage.identifier,
+      price_string: selectedPackage.product?.priceString,
+    });
     try {
       const result = await purchasePackage(selectedPackage);
-      if (result) {
-        const nowPro = isPro(result.customerInfo);
-        useHabitStore.setState({ isPro: nowPro, proExpired: false });
-        setRemoteIsPro(nowPro);
-        setProExpiration(getProExpirationDate(result.customerInfo));
+      if (result.status === 'cancelled') {
+        trackEvent('purchase_cancelled', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+        });
+        return;
+      }
+      if (result.status === 'error') {
+        trackEvent('purchase_failed', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+          error_code: result.error,
+        });
+        Alert.alert(
+          t('paywall.purchaseFailed'),
+          t('paywall.purchaseFailedBody'),
+        );
+        return;
+      }
+      const nowPro = isPro(result.customerInfo);
+      useHabitStore.setState({ isPro: nowPro, proExpired: false });
+      setRemoteIsPro(nowPro);
+      setProExpiration(getProExpirationDate(result.customerInfo));
+      if (nowPro) {
+        updateProProp(true);
+        trackEvent('purchase_completed', {
+          ...funnelBase,
+          package: selectedPackage.identifier,
+        });
+        trackSubscriptionActivated({
+          ...funnelBase,
+          package: selectedPackage.identifier,
+          via: 'purchase',
+          previous_state: paywallMode === 'expired' ? 'expired' : 'free',
+        });
         Alert.alert(
           t('paywall.welcomeTitle'),
           t('paywall.welcomeBody'),
@@ -477,6 +554,8 @@ export default function PaywallScreen({ navigation, route }: any) {
     } finally {
       setLoading(false);
     }
+  // funnelBase/paywallMode are fixed for this open — no need to rebuild the handler.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPackage, loading, navigation, t]);
 
   const handleRestore = useCallback(async () => {
@@ -489,6 +568,16 @@ export default function PaywallScreen({ navigation, route }: any) {
         setRemoteIsPro(nowPro);
         setProExpiration(getProExpirationDate(info));
         if (nowPro) {
+          updateProProp(true);
+          trackEvent('purchase_restored', {
+            ...funnelBase,
+            via: 'paywall',
+          });
+          trackSubscriptionActivated({
+            ...funnelBase,
+            via: 'restore',
+            previous_state: paywallMode === 'expired' ? 'expired' : 'free',
+          });
           Alert.alert(
             t('common.restoreComplete'),
             t('common.restoreCompleteBody'),
@@ -504,9 +593,11 @@ export default function PaywallScreen({ navigation, route }: any) {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, t]);
 
   const handleDismiss = useCallback(async () => {
+    const wasPro = useHabitStore.getState().isPro;
     try {
       const info = await getCustomerInfo();
       if (isPro(info)) {
@@ -518,7 +609,14 @@ export default function PaywallScreen({ navigation, route }: any) {
         error: String(err),
       });
     }
+    if (!wasPro && !isPreview) {
+      trackEvent('paywall_dismissed', {
+        ...funnelBase,
+        viewed_seconds: Math.round((Date.now() - mountedAt.current) / 1000),
+      });
+    }
     navigation.goBack();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   const handleManageSubscription = useCallback(async () => {
@@ -959,7 +1057,7 @@ export default function PaywallScreen({ navigation, route }: any) {
                       perWeek={perWeek}
                       best={best}
                       selected={selected}
-                      onSelect={() => setSelectedPackage(pkg)}
+                      onSelect={() => handleSelectPackage(pkg)}
                       theme={theme}
                     />
                   );

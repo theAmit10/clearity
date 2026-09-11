@@ -89,7 +89,7 @@ export default function DiagnosticsScreen({ navigation }: any) {
 
         <Pressable
           style={[styles.button, { backgroundColor: theme.colors.surface }]}
-          onPress={() => navigation.navigate('Paywall')}
+          onPress={() => navigation.navigate('Paywall', { source: 'preview' })}
         >
           <Text style={[styles.buttonText, { color: theme.colors.iosBlue }]}>
             {t('diagnostics.previewClassic')}
@@ -97,7 +97,7 @@ export default function DiagnosticsScreen({ navigation }: any) {
         </Pressable>
         <Pressable
           style={[styles.button, { backgroundColor: theme.colors.surface }]}
-          onPress={() => navigation.navigate('PaywallV2')}
+          onPress={() => navigation.navigate('PaywallV2', { source: 'preview' })}
         >
           <Text style={[styles.buttonText, { color: theme.colors.iosBlue }]}>
             {t('diagnostics.previewNew')}

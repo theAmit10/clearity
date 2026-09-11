@@ -420,10 +420,10 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
           <Pressable
             style={[styles.addButton, { backgroundColor: theme.colors.surface }]}
             onPress={() =>
-              openPaywall(
-                navigation,
-                proExpired ? { mode: 'expired' } : undefined,
-              )
+              openPaywall(navigation, {
+                ...(proExpired ? { mode: 'expired' as const } : null),
+                source: 'reminder_limit',
+              })
             }
           >
             <Text style={[styles.addButtonText, { color: theme.colors.iosBlue }]}>

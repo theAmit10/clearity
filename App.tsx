@@ -14,7 +14,13 @@ import {
   setupChannel,
   rescheduleAll,
 } from './src/services/notification';
-import { initAnalytics, trackEvent } from './src/services/analytics';
+import {
+  initAnalytics,
+  trackEvent,
+  setAnalyticsDefaults,
+  updatePaywallVariantProp,
+  updateProProp,
+} from './src/services/analytics';
 import { initRevenueCat } from './src/services/revenueCat';
 import { initI18n, useI18nStore } from './src/i18n';
 import { usePaywallVariantStore } from './src/store/paywallVariantStore';
@@ -45,6 +51,18 @@ function AppContent() {
     initRevenueCat();
     initI18n();
     usePaywallVariantStore.getState().loadVariant();
+    // Baseline super props for every event; the subscriptions below keep
+    // the mutable ones (variant, pro status) correct for the whole session.
+    setAnalyticsDefaults({
+      paywallVariant: usePaywallVariantStore.getState().variant,
+      isPro: useHabitStore.getState().isPro,
+    });
+    const unsubVariant = usePaywallVariantStore.subscribe((s, p) => {
+      if (s.variant !== p?.variant) updatePaywallVariantProp(s.variant);
+    });
+    const unsubPro = useHabitStore.subscribe((s, p) => {
+      if (s.isPro !== p?.isPro) updateProProp(s.isPro);
+    });
     init();
     initGoals();
     loadOnboardingSeen()
@@ -54,6 +72,10 @@ function AppContent() {
       .catch(() => {
         setOnboardingState('show');
       });
+    return () => {
+      unsubVariant();
+      unsubPro();
+    };
   }, []);
 
   useEffect(() => {

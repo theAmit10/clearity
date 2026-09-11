@@ -40,7 +40,12 @@ export default function ProGate({ children }: { children?: React.ReactNode }) {
           backgroundColor={theme.colors.accent}
           style={styles.button}
           onPress={() =>
-            openPaywall(navigation, expired ? { mode: 'expired' } : undefined)
+            openPaywall(
+              navigation,
+              expired
+                ? { mode: 'expired', source: 'pro_gate' }
+                : { source: 'pro_gate' },
+            )
           }
         >
           <Text style={styles.buttonText}>

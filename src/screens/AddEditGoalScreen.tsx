@@ -160,10 +160,10 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
         await addGoal(payload);
       } catch {
         if (proExpired) {
-          openPaywall(navigation, { mode: 'expired' });
+          openPaywall(navigation, { mode: 'expired', source: 'goal_limit' });
           return;
         }
-        openPaywall(navigation);
+        openPaywall(navigation, { source: 'goal_limit' });
         return;
       }
       navigation.goBack();

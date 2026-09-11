@@ -1,6 +1,24 @@
 import { getStoredVariantSync } from '../store/paywallVariantStore';
 
-export type PaywallParams = { mode?: string } | undefined;
+export type PaywallSource =
+  | 'pro_gate'
+  | 'habit_limit'
+  | 'category_limit'
+  | 'goal_limit'
+  | 'reminder_limit'
+  | 'settings_upsell_card'
+  | 'settings_export'
+  | 'settings_import'
+  | 'settings_upgrade_row'
+  | 'settings_widgets'
+  | 'settings_analytics'
+  | 'settings_theme'
+  | 'preview'
+  | 'unknown';
+
+export type PaywallParams =
+  | { mode?: 'default' | 'expired'; source?: PaywallSource }
+  | undefined;
 
 /**
  * Single choke point for opening the paywall.
