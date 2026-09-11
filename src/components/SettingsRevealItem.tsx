@@ -13,7 +13,7 @@ import Animated, {
  * (or header block) of its destination screen. Source tags live in
  * `SettingsScreen`; matching tags live in the destination screens.
  *
- * Paywall / ManageSubscription are `presentation: modal` — shared element
+ * Paywall modals are `presentation: modal` — shared element
  * morphs are unreliable on modals (and several sections funnel into the same
  * Paywall), so modals intentionally have no tag and fall back to the
  * platform modal animation.

@@ -195,7 +195,7 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleCustomerCenter = () => {
-    navigation.navigate('ManageSubscription');
+    navigation.navigate('PaywallV2');
   };
 
   const handleRateApp = () => {

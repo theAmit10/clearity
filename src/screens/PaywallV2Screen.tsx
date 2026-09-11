@@ -17,6 +17,7 @@ import SparklesIcon from 'react-native-heroicons/outline/SparklesIcon';
 import TagIcon from 'react-native-heroicons/outline/TagIcon';
 import BellAlertIcon from 'react-native-heroicons/outline/BellAlertIcon';
 import CubeIcon from 'react-native-heroicons/outline/CubeIcon';
+import FlagIcon from 'react-native-heroicons/outline/FlagIcon';
 import {
   getCustomerInfo,
   isPro,
@@ -183,7 +184,13 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         style={[styles.container, { backgroundColor: '#FFFFFF' }]}
         edges={['bottom']}
       >
-        <View style={styles.proWrap}>
+        <ScrollView
+          contentContainerStyle={styles.proScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.proBadge}>
+            <Text style={styles.proBadgeText}>{t('paywall.active')}</Text>
+          </View>
           <Text style={styles.proTitle}>{t('paywall.youArePro')}</Text>
           <Text style={styles.proBody}>{t('paywall.youHaveAccess')}</Text>
           {proExpiration && (
@@ -198,15 +205,73 @@ export default function PaywallV2Screen({ navigation, route }: any) {
               {t('common.manageSubscription')}
             </Text>
           </Pressable>
-          <Pressable style={styles.restoreWhite} onPress={handleRestore}>
+          <Pressable style={[styles.restoreWhite, styles.restoreFlush]} onPress={handleRestore}>
             <Text style={styles.restoreWhiteText}>
               {t('common.restorePurchases')}
             </Text>
           </Pressable>
+          <View style={styles.includedCard}>
+            <View style={styles.includedHeader}>
+              <View style={styles.includedLine} />
+              <Text style={styles.includedTitle}>
+                {t('paywallV2.whatsIncluded')}
+              </Text>
+              <View style={styles.includedLine} />
+            </View>
+            <IncludedRow
+              bg="#FDEBD9"
+              color={ACCENT}
+              Icon={SparklesIcon}
+              title={t('paywallV2.incUnlimitedTitle')}
+              body={t('paywallV2.incUnlimitedBody')}
+            />
+            <IncludedRow
+              bg="#FEF3C7"
+              color="#B45309"
+              Icon={FlagIcon}
+              title={t('paywallV2.incGoalsTitle')}
+              body={t('paywallV2.incGoalsBody')}
+            />
+            <IncludedRow
+              bg="#E3ECFF"
+              color="#3B82F6"
+              Icon={Squares2X2Icon}
+              title={t('paywallV2.incWidgetsTitle')}
+              body={t('paywallV2.incWidgetsBody')}
+            />
+            <IncludedRow
+              bg="#E6F6EC"
+              color="#22A06B"
+              Icon={ChartBarIcon}
+              title={t('paywallV2.incAnalyticsTitle')}
+              body={t('paywallV2.incAnalyticsBody')}
+            />
+            <IncludedRow
+              bg="#EDE9FE"
+              color="#7C6CF0"
+              Icon={TagIcon}
+              title={t('paywallV2.incCategoriesTitle')}
+              body={t('paywallV2.incCategoriesBody')}
+            />
+            <IncludedRow
+              bg="#FFE9EC"
+              color="#E14D5A"
+              Icon={BellAlertIcon}
+              title={t('paywallV2.incRemindersTitle')}
+              body={t('paywallV2.incRemindersBody')}
+            />
+            <IncludedRow
+              bg="#F3E8FF"
+              color="#A855F7"
+              Icon={CubeIcon}
+              title={t('paywallV2.incUpdatesTitle')}
+              body={t('paywallV2.incUpdatesBody')}
+            />
+          </View>
           <Pressable onPress={handleDismiss}>
             <Text style={styles.linkText}>✕ {t('common.cancel')}</Text>
           </Pressable>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -314,7 +379,6 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                     t('paywallV2.fullAccessForever'),
                     t('paywallV2.futureUpdates'),
                   ]}
-                  footnote={t('paywallV2.familySharing')}
                   onSelect={() => setSelectedPackage(lifetimePkg)}
                 />
               )}
@@ -371,6 +435,13 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                   Icon={SparklesIcon}
                   title={t('paywallV2.incUnlimitedTitle')}
                   body={t('paywallV2.incUnlimitedBody')}
+                />
+                <IncludedRow
+                  bg="#FEF3C7"
+                  color="#B45309"
+                  Icon={FlagIcon}
+                  title={t('paywallV2.incGoalsTitle')}
+                  body={t('paywallV2.incGoalsBody')}
                 />
                 <IncludedRow
                   bg="#E3ECFF"
@@ -742,6 +813,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   restoreWhiteText: { fontSize: 17, fontWeight: '700', color: '#111' },
+  restoreFlush: { marginHorizontal: 0 },
   stickyWrap: {
     backgroundColor: SHEET_BG,
     paddingHorizontal: 16,
@@ -777,14 +849,26 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginTop: 8,
   },
-  proWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  proScroll: {
     padding: 24,
+    paddingBottom: 32,
     gap: 12,
   },
-  proTitle: { fontSize: 22, fontWeight: '800', color: '#111' },
+  proBadge: {
+    backgroundColor: ACCENT,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 4,
+    alignSelf: 'center',
+  },
+  proBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  proTitle: { fontSize: 22, fontWeight: '800', color: '#111', textAlign: 'center' },
   proBody: { fontSize: 15, color: '#666', textAlign: 'center' },
-  linkText: { fontSize: 14, color: '#666', marginTop: 8 },
+  linkText: { fontSize: 14, color: '#666', marginTop: 8, textAlign: 'center' },
 });
