@@ -11,20 +11,60 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Svg, {
+  Defs,
+  LinearGradient,
+  Stop,
+  Rect,
+  RadialGradient,
+} from 'react-native-svg';
 import BellAlertIcon from 'react-native-heroicons/outline/BellAlertIcon';
 import { useTranslation } from '../i18n';
 import { FREE_HABIT_LIMIT, FREE_GOAL_LIMIT } from '../constants/appInfo';
 
 /* Subo-inspired palette — standalone, intentionally independent of ThemeProvider */
-const BG = '#140B0A';
-const TITLE = '#FFFFFF';
-const TITLE_MUTED = '#8D7D76';
-const BODY = '#A89890';
-const CREAM = '#FFF3E8';
-const CREAM_TEXT = '#1A0F0E';
-const ACCENT = '#E07A2E';
+// const BG_TOP = '#080607';
+// const BG = '#140B0A';
+// const TITLE = '#FFFFFF';
+// const TITLE_MUTED = '#8D7D76';
+// const BODY = '#A89890';
+// const CREAM = '#FFF3E8';
+// const CREAM_TEXT = '#1A0F0E';
+// const ACCENT = '#E07A2E';
+// const GLASS_BG = 'rgba(255,255,255,0.06)';
+// const GLASS_BORDER = 'rgba(255,255,255,0.12)';
+
+// const BG_TOP = 'white';
+// const BG = '#140B0A';
+// const TITLE = '#FFFFFF';
+// const TITLE_MUTED = '#8D7D76';
+// const BODY = '#A89890';
+// const CREAM = '#FFF3E8';
+// const CREAM_TEXT = '#1A0F0E';
+// const ACCENT = '#E07A2E';
+// const GLASS_BG = 'rgba(255,255,255,0.06)';
+// const GLASS_BORDER = 'rgba(255,255,255,0.12)';
+
+// Background
+const BG_TOP = '#F4F5F7'; // light neumorphic gray — matches Home/Settings
+const BG = '#0F1410'; // deep near-black with a soft green undertone
+
+// Text
+const TITLE = '#FFFFFF'; // headline on dark
+const TITLE_MUTED = '#93A399'; // muted sage-gray for secondary headline text
+const BODY = '#A9B3AC'; // body copy on dark, cool and legible
+
+// Light surface (cards, sheets, "cream" replacement)
+const CREAM = '#F4F5F7'; // same light gray as your app surfaces
+const CREAM_TEXT = '#1C1C1E'; // matches Home/Settings text exactly
+
+// Accent
+const ACCENT = '#34C759'; // your streak-flame / checkmark green
+const ACCENT_SOFT = 'rgba(52,199,89,0.14)'; // for glows, highlighted rows, progress fills
+
+// Glass / overlay
 const GLASS_BG = 'rgba(255,255,255,0.06)';
-const GLASS_BORDER = 'rgba(255,255,255,0.12)';
+const GLASS_BORDER = 'rgba(255,255,255,0.52)';
 
 export type OnboardingResult = 'completed' | 'skipped';
 
@@ -42,16 +82,82 @@ interface Props {
   onFinish: (result: OnboardingResult, atIndex: number) => void;
 }
 
-function GlowBackground() {
+// function GradientBackground() {
+//   return (
+//     <View style={StyleSheet.absoluteFill} pointerEvents="none">
+//       <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+//         <Defs>
+//           <LinearGradient id="suboBg" x1="0" y1="0" x2="0" y2="1">
+//             <Stop offset="0" stopColor="#080607" stopOpacity="1" />
+//             <Stop offset="0.35" stopColor="#140B0A" stopOpacity="1" />
+//             <Stop offset="0.7" stopColor="#2A1511" stopOpacity="1" />
+//             <Stop offset="1" stopColor="#3E221A" stopOpacity="1" />
+//           </LinearGradient>
+//         </Defs>
+//         <Rect x="0" y="0" width="100%" height="100%" fill="url(#suboBg)" />
+//       </Svg>
+//     </View>
+//   );
+// }
+
+function GradientBackground() {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
+      <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+        <Defs>
+          <LinearGradient id="suboBg" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#F1F7F2" stopOpacity="1" />
+            <Stop offset="0.5" stopColor="#DCEEE0" stopOpacity="1" />
+            <Stop offset="1" stopColor="#BFE0C7" stopOpacity="1" />
+          </LinearGradient>
+          <RadialGradient id="accentGlow" cx="50%" cy="12%" r="65%">
+            <Stop offset="0" stopColor="#34C759" stopOpacity="0.22" />
+            <Stop offset="1" stopColor="#34C759" stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#suboBg)" />
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#accentGlow)" />
+      </Svg>
     </View>
   );
 }
 
-function PillButton({ label, onPress, testID }: { label: string; onPress: () => void; testID?: string }) {
+// function GradientBackground() {
+//   return (
+//     <View style={StyleSheet.absoluteFill} pointerEvents="none">
+//       <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+//         <Defs>
+//           {/* Base premium gradient — matches the "Habitic Unlimited" card */}
+//           <LinearGradient id="suboBg" x1="0" y1="0" x2="0" y2="1">
+//             <Stop offset="0" stopColor="#0A0807" stopOpacity="1" />
+//             <Stop offset="0.4" stopColor="#1C0F0C" stopOpacity="1" />
+//             <Stop offset="0.72" stopColor="#331B14" stopOpacity="1" />
+//             <Stop offset="1" stopColor="#4A241A" stopOpacity="1" />
+//           </LinearGradient>
+
+//           {/* Subtle green glow to tie back to the brand accent */}
+//           <RadialGradient id="accentGlow" cx="50%" cy="15%" r="65%">
+//             <Stop offset="0" stopColor="#3ED96B" stopOpacity="0.16" />
+//             <Stop offset="1" stopColor="#3ED96B" stopOpacity="0" />
+//           </RadialGradient>
+//         </Defs>
+
+//         <Rect x="0" y="0" width="100%" height="100%" fill="url(#suboBg)" />
+//         <Rect x="0" y="0" width="100%" height="100%" fill="url(#accentGlow)" />
+//       </Svg>
+//     </View>
+//   );
+// }
+
+function PillButton({
+  label,
+  onPress,
+  testID,
+}: {
+  label: string;
+  onPress: () => void;
+  testID?: string;
+}) {
   return (
     <Pressable
       testID={testID}
@@ -63,7 +169,13 @@ function PillButton({ label, onPress, testID }: { label: string; onPress: () => 
   );
 }
 
-function SkipButton({ label, onPress }: { label: string; onPress: () => void }) {
+function SkipButton({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       testID="onboarding-skip"
@@ -91,13 +203,10 @@ export default function OnboardingScreen({ onFinish }: Props) {
   const listRef = useRef<FlatList<number>>(null);
   const [index, setIndex] = useState(0);
 
-  const goTo = useCallback(
-    (next: number) => {
-      setIndex(next);
-      listRef.current?.scrollToIndex({ index: next, animated: true });
-    },
-    [],
-  );
+  const goTo = useCallback((next: number) => {
+    setIndex(next);
+    listRef.current?.scrollToIndex({ index: next, animated: true });
+  }, []);
 
   const handlePrimary = useCallback(() => {
     if (index >= 3) {
@@ -124,7 +233,10 @@ export default function OnboardingScreen({ onFinish }: Props) {
       </Animated.View>
       <Text style={styles.brand}>{t('onboarding.brand')}</Text>
       <View style={styles.flexSpacer} />
-      <PageTitle top={t('onboarding.page1Top')} bottom={t('onboarding.page1Bottom')} />
+      <PageTitle
+        top={t('onboarding.page1Top')}
+        bottom={t('onboarding.page1Bottom')}
+      />
       <View style={styles.ctaZone}>
         <PillButton
           testID="onboarding-continue"
@@ -137,23 +249,40 @@ export default function OnboardingScreen({ onFinish }: Props) {
     /* ── Page 2: everything in one place ─────────────── */
     <View key="p2" style={[styles.page, { width }]}>
       <View style={styles.topPad} />
-      <PageTitle top={t('onboarding.page2Top')} bottom={t('onboarding.page2Bottom')} />
-      <Animated.Text entering={FadeIn.delay(120).duration(320)} style={styles.body}>
+      <PageTitle
+        top={t('onboarding.page2Top')}
+        bottom={t('onboarding.page2Bottom')}
+      />
+      <Animated.Text
+        entering={FadeIn.delay(120).duration(320)}
+        style={styles.body}
+      >
         {t('onboarding.page2Body')}
       </Animated.Text>
-      <Animated.View entering={FadeIn.delay(200).duration(380)} style={styles.cardsRow}>
+      <Animated.View
+        entering={FadeIn.delay(200).duration(380)}
+        style={styles.cardsRow}
+      >
         <View style={styles.glassCard}>
-          <Text style={styles.cardLabel}>▦  {t('onboarding.today')}</Text>
+          <Text style={styles.cardLabel}>▦ {t('onboarding.today')}</Text>
           <Text style={styles.cardBig}>3/4</Text>
           <View style={styles.cardDivider} />
           <Text style={styles.cardSub}>{t('onboarding.doneToday')}</Text>
         </View>
         <View style={styles.glassCard}>
           <View style={styles.iconCluster}>
-            <View style={[styles.clusterDot, styles.dotBlack]}><Text style={styles.clusterGlyph}>✓</Text></View>
-            <View style={[styles.clusterDot, styles.dotBlue]}><Text style={styles.clusterGlyph}>≈</Text></View>
-            <View style={[styles.clusterDot, styles.dotGreen]}><Text style={styles.clusterGlyph}>♪</Text></View>
-            <View style={[styles.clusterDot, styles.dotPink]}><Text style={styles.clusterGlyph}>T</Text></View>
+            <View style={[styles.clusterDot, styles.dotBlack]}>
+              <Text style={styles.clusterGlyph}>✓</Text>
+            </View>
+            <View style={[styles.clusterDot, styles.dotBlue]}>
+              <Text style={styles.clusterGlyph}>≈</Text>
+            </View>
+            <View style={[styles.clusterDot, styles.dotGreen]}>
+              <Text style={styles.clusterGlyph}>♪</Text>
+            </View>
+            <View style={[styles.clusterDot, styles.dotPink]}>
+              <Text style={styles.clusterGlyph}>T</Text>
+            </View>
           </View>
           <Text style={styles.cardBig}>
             4 <Text style={styles.cardActive}>{t('onboarding.active')}</Text>
@@ -174,11 +303,20 @@ export default function OnboardingScreen({ onFinish }: Props) {
     /* ── Page 3: stay ahead of streaks ───────────────── */
     <View key="p3" style={[styles.page, { width }]}>
       <View style={styles.topPad} />
-      <PageTitle top={t('onboarding.page3Top')} bottom={t('onboarding.page3Bottom')} />
-      <Animated.Text entering={FadeIn.delay(120).duration(320)} style={styles.body}>
+      <PageTitle
+        top={t('onboarding.page3Top')}
+        bottom={t('onboarding.page3Bottom')}
+      />
+      <Animated.Text
+        entering={FadeIn.delay(120).duration(320)}
+        style={styles.body}
+      >
         {t('onboarding.page3Body')}
       </Animated.Text>
-      <Animated.View entering={FadeIn.delay(200).duration(380)} style={styles.upNextWrap}>
+      <Animated.View
+        entering={FadeIn.delay(200).duration(380)}
+        style={styles.upNextWrap}
+      >
         <View style={styles.upNextBadge}>
           <BellAlertIcon size={22} color="#1A0F0E" />
         </View>
@@ -189,20 +327,32 @@ export default function OnboardingScreen({ onFinish }: Props) {
               <View style={[styles.habitDot, styles.dotBlack]}>
                 <Text style={styles.clusterGlyph}>✓</Text>
               </View>
-              <Text style={styles.upNextWhen}>• {t('onboarding.example1Meta').split('· ')[1] ?? ''}</Text>
+              <Text style={styles.upNextWhen}>
+                • {t('onboarding.example1Meta').split('· ')[1] ?? ''}
+              </Text>
             </View>
-            <Text style={styles.upNextName}>{t('onboarding.example1Name')}</Text>
-            <Text style={styles.upNextMeta}>{t('onboarding.example1Meta')}</Text>
+            <Text style={styles.upNextName}>
+              {t('onboarding.example1Name')}
+            </Text>
+            <Text style={styles.upNextMeta}>
+              {t('onboarding.example1Meta')}
+            </Text>
           </View>
           <View style={styles.upNextCard}>
             <View style={styles.upNextHead}>
               <View style={[styles.habitDot, styles.dotBlue]}>
                 <Text style={styles.clusterGlyph}>≈</Text>
               </View>
-              <Text style={styles.upNextWhen}>• {t('onboarding.example2Meta').split('· ')[1] ?? ''}</Text>
+              <Text style={styles.upNextWhen}>
+                • {t('onboarding.example2Meta').split('· ')[1] ?? ''}
+              </Text>
             </View>
-            <Text style={styles.upNextName}>{t('onboarding.example2Name')}</Text>
-            <Text style={styles.upNextMeta}>{t('onboarding.example2Meta')}</Text>
+            <Text style={styles.upNextName}>
+              {t('onboarding.example2Name')}
+            </Text>
+            <Text style={styles.upNextMeta}>
+              {t('onboarding.example2Meta')}
+            </Text>
           </View>
         </View>
       </Animated.View>
@@ -222,12 +372,21 @@ export default function OnboardingScreen({ onFinish }: Props) {
       <View style={styles.topPad} />
       <PageTitle
         top={t('onboarding.page4Top')}
-        bottom={t('onboarding.page4Bottom', { habitCount: FREE_HABIT_LIMIT, goalCount: FREE_GOAL_LIMIT })}
+        bottom={t('onboarding.page4Bottom', {
+          habitCount: FREE_HABIT_LIMIT,
+          goalCount: FREE_GOAL_LIMIT,
+        })}
       />
-      <Animated.Text entering={FadeIn.delay(120).duration(320)} style={styles.body}>
+      <Animated.Text
+        entering={FadeIn.delay(120).duration(320)}
+        style={styles.body}
+      >
         {t('onboarding.page4Body')}
       </Animated.Text>
-      <Animated.View entering={FadeIn.delay(200).duration(380)} style={styles.moonWrap}>
+      <Animated.View
+        entering={FadeIn.delay(200).duration(380)}
+        style={styles.moonWrap}
+      >
         <View style={styles.moon}>
           {CRATERS.map((c, i) => (
             <View key={i} style={[styles.crater, c]} />
@@ -248,8 +407,8 @@ export default function OnboardingScreen({ onFinish }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor={BG} />
-      <GlowBackground />
+      <StatusBar barStyle="light-content" backgroundColor={BG_TOP} />
+      <GradientBackground />
       <FlatList
         ref={listRef}
         data={[0, 1, 2, 3]}
@@ -267,27 +426,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BG,
-  },
-  glowTop: {
-    position: 'absolute',
-    top: -180,
-    left: -80,
-    right: -80,
-    height: 420,
-    borderRadius: 999,
-    backgroundColor: '#3A1A10',
-    opacity: 0.55,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -220,
-    left: -100,
-    right: -100,
-    height: 480,
-    borderRadius: 999,
-    backgroundColor: '#4A2412',
-    opacity: 0.5,
+    backgroundColor: BG_TOP,
   },
   page: {
     flex: 1,
@@ -487,14 +626,14 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 125,
     backgroundColor: 'rgba(255,255,255,0.07)',
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.62)',
     borderWidth: 1,
   },
   crater: {
     position: 'absolute',
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.09)',
-    borderColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(255,255,255,0.19)',
+    borderColor: 'rgba(255,255,255,0.6)',
     borderWidth: 1,
   },
   ctaZone: {

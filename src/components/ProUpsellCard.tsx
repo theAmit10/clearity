@@ -10,7 +10,8 @@ import { useTranslation } from '../i18n';
  * accent: richer top-left, deeper bottom-right. Whole banner is a single
  * tap target into the paywall — no button, no price. */
 
-const BASE_BG = '#1B1B1E';
+// const BASE_BG = '#1B1B1E';
+const BASE_BG = '#0F1410';
 const CARD_RADIUS = 28;
 
 function hexToRgb(hex: string): [number, number, number] | null {

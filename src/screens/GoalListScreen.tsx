@@ -1,6 +1,11 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, Alert } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, Alert, ScrollView } from 'react-native';
+import DraggableFlatList, {
+  ScaleDecorator,
+  RenderItemParams,
+} from 'react-native-draggable-flatlist';
 import { useGoalStore } from '../store/goalStore';
+import type { Goal } from '../types/goal';
 import GoalCard from '../components/GoalCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -11,12 +16,27 @@ type GoalFilter = 'all' | 'active' | 'completed';
 
 const FILTERS: GoalFilter[] = ['all', 'active', 'completed'];
 
+/** Merge a reordered section back into the full store array.
+ * Items matching `status` are replaced in-place (in order) by
+ * `reorderedSection`; all other items keep their positions. This keeps
+ * active/completed orders independent (per-section reorder). */
+function mergeSectionReorder(
+  full: Goal[],
+  reorderedSection: Goal[],
+  status: Goal['status'],
+): Goal[] {
+  const queue = [...reorderedSection];
+  return full.map(g => (g.status === status ? queue.shift() ?? g : g));
+}
+
 export default function GoalListScreen({ navigation }: any) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const goals = useGoalStore(s => s.goals);
   const completeGoal = useGoalStore(s => s.completeGoal);
+  const reorderGoals = useGoalStore(s => s.reorderGoals);
   const [filter, setFilter] = useState<GoalFilter>('all');
+  const [isReordering, setIsReordering] = useState(false);
 
   const confirmComplete = (id: string) => {
     const goal = goals.find(g => g.id === id);
@@ -32,6 +52,7 @@ export default function GoalListScreen({ navigation }: any) {
     ]);
   };
 
+  // Deadline-sorted view (normal mode)
   const active = useMemo(
     () => goals.filter(g => g.status === 'active').sort((a, b) => +new Date(a.endAt) - +new Date(b.endAt)),
     [goals],
@@ -40,6 +61,10 @@ export default function GoalListScreen({ navigation }: any) {
     () => goals.filter(g => g.status === 'completed').sort((a, b) => +new Date(b.completedAt ?? b.endAt) - +new Date(a.completedAt ?? a.endAt)),
     [goals],
   );
+
+  // Manual (store) order — used only in reorder mode, no date sort
+  const manualActive = useMemo(() => goals.filter(g => g.status === 'active'), [goals]);
+  const manualCompleted = useMemo(() => goals.filter(g => g.status === 'completed'), [goals]);
 
   const sections = useMemo(() => {
     const rows: { key: string; header?: string; goal?: any }[] = [];
@@ -55,6 +80,34 @@ export default function GoalListScreen({ navigation }: any) {
     return rows;
   }, [active, completed, filter, t]);
 
+  const handleDragEndActive = useCallback(
+    ({ data }: { data: Goal[] }) => {
+      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, data, 'active'));
+    },
+    [reorderGoals],
+  );
+
+  const handleDragEndCompleted = useCallback(
+    ({ data }: { data: Goal[] }) => {
+      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, data, 'completed'));
+    },
+    [reorderGoals],
+  );
+
+  const renderDragItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<Goal>) => (
+      <ScaleDecorator>
+        <GoalCard
+          goal={item}
+          onPress={() => {}}
+          onLongPress={drag}
+          isDragging={isActive}
+        />
+      </ScaleDecorator>
+    ),
+    [],
+  );
+
   const emptyText =
     goals.length === 0
       ? t('goals.empty')
@@ -62,20 +115,102 @@ export default function GoalListScreen({ navigation }: any) {
         ? t('goals.emptyActive')
         : t('goals.emptyCompleted');
 
+  const showReorderToggle = goals.length > 1;
+
+  const renderReorderBody = () => {
+    if (filter === 'active') {
+      if (manualActive.length === 0) return null;
+      return (
+        <DraggableFlatList
+          data={manualActive}
+          keyExtractor={g => g.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={renderDragItem}
+          onDragEnd={handleDragEndActive}
+        />
+      );
+    }
+    if (filter === 'completed') {
+      if (manualCompleted.length === 0) return null;
+      return (
+        <DraggableFlatList
+          data={manualCompleted}
+          keyExtractor={g => g.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={renderDragItem}
+          onDragEnd={handleDragEndCompleted}
+        />
+      );
+    }
+    // filter === 'all': two independent draggable sections
+    return (
+      <ScrollView contentContainerStyle={styles.listContent}>
+        {manualActive.length > 0 && (
+          <DraggableFlatList
+            data={manualActive}
+            keyExtractor={g => g.id}
+            renderItem={renderDragItem}
+            onDragEnd={handleDragEndActive}
+            scrollEnabled={false}
+          />
+        )}
+        {manualActive.length > 0 && manualCompleted.length > 0 && (
+          <Text style={[styles.sectionHeader, { color: theme.colors.textMuted }]}>
+            {t('goals.completed')}
+          </Text>
+        )}
+        {manualCompleted.length > 0 && (
+          <DraggableFlatList
+            data={manualCompleted}
+            keyExtractor={g => g.id}
+            renderItem={renderDragItem}
+            onDragEnd={handleDragEndCompleted}
+            scrollEnabled={false}
+          />
+        )}
+      </ScrollView>
+    );
+  };
+
+  const isEmptyReordering =
+    (filter === 'active' && manualActive.length === 0) ||
+    (filter === 'completed' && manualCompleted.length === 0) ||
+    (filter === 'all' && manualActive.length === 0 && manualCompleted.length === 0);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.headerRow}>
         <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
           {t('goals.title')}
         </Text>
-        <NeumorphicButton
-          radius={18}
-          distance={5}
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AddEditGoal')}
-        >
-          <Text style={[styles.addButtonText, { color: theme.colors.textPrimary }]}>+</Text>
-        </NeumorphicButton>
+        <View style={styles.headerActions}>
+          {showReorderToggle && (
+            <NeumorphicButton
+              radius={14}
+              distance={4}
+              forcePressed={isReordering}
+              style={styles.reorderButton}
+              onPress={() => setIsReordering(v => !v)}
+            >
+              <Text
+                style={[
+                  styles.reorderButtonText,
+                  { color: isReordering ? theme.colors.textPrimary : theme.colors.textMuted },
+                ]}
+              >
+                {isReordering ? t('goals.done') : t('goals.reorder')}
+              </Text>
+            </NeumorphicButton>
+          )}
+          <NeumorphicButton
+            radius={18}
+            distance={5}
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddEditGoal')}
+          >
+            <Text style={[styles.addButtonText, { color: theme.colors.textPrimary }]}>+</Text>
+          </NeumorphicButton>
+        </View>
       </View>
 
       {goals.length > 0 && (
@@ -114,8 +249,26 @@ export default function GoalListScreen({ navigation }: any) {
         </View>
       )}
 
+      {isReordering && !isEmptyReordering && (
+        <Text style={[styles.reorderHint, { color: theme.colors.textMuted }]}>
+          {t('goals.reorderHelp')}
+        </Text>
+      )}
+
       <View style={styles.body}>
-        {sections.length === 0 ? (
+        {isReordering ? (
+          isEmptyReordering ? (
+            <View style={styles.emptyWrap}>
+              <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
+                <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
+                  {emptyText}
+                </Text>
+              </Raised>
+            </View>
+          ) : (
+            renderReorderBody()
+          )
+        ) : sections.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Raised radius={theme.radii.panel} distance={7} style={styles.empty}>
               <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
@@ -167,6 +320,21 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: -0.5,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  reorderButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reorderButtonText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
   addButton: {
     width: 36,
     height: 36,
@@ -194,6 +362,13 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: 14,
     fontWeight: '800',
+  },
+  reorderHint: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingTop: 8,
+    paddingHorizontal: 20,
   },
   listContent: {
     paddingHorizontal: 0,

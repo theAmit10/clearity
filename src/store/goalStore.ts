@@ -30,6 +30,7 @@ interface GoalState {
   removeGoalReminder: (id: string) => Promise<void>;
   replaceAllGoals: (goals: Goal[]) => Promise<void>;
   mergeGoals: (incoming: Goal[]) => Promise<void>;
+  reorderGoals: (reordered: Goal[]) => Promise<void>;
   rescheduleActive: () => Promise<void>;
 }
 
@@ -309,5 +310,12 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     await Promise.all(autos.map(n => scheduleGoalNotification(n)));
     trackEvent('goals_imported', { count: goals.length, type: 'merge' });
     logEvent('info', 'Goals merged via import', { count: goals.length });
+  },
+
+  reorderGoals: async reordered => {
+    set({ goals: reordered });
+    persist(reordered);
+    trackEvent('goals_reordered');
+    logEvent('info', 'Goals reordered');
   },
 }));

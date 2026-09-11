@@ -29,9 +29,11 @@ interface Props {
   /** Called when the quick-complete circle is tapped (ongoing goals only).
    * If omitted, the circle renders as a passive completed indicator. */
   onComplete?: (id: string) => void;
+  onLongPress?: () => void;
+  isDragging?: boolean;
 }
 
-export default function GoalCard({ goal, onPress, onComplete }: Props) {
+export default function GoalCard({ goal, onPress, onComplete, onLongPress, isDragging }: Props) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
@@ -76,8 +78,8 @@ export default function GoalCard({ goal, onPress, onComplete }: Props) {
     : `${parts.hours}h ${parts.minutes}m left`;
 
   return (
-    <Pressable onPress={onPress}>
-      <Raised radius={theme.radii.panel} distance={7} style={styles.card}>
+    <Pressable onPress={onPress} onLongPress={onLongPress} delayLongPress={250}>
+      <Raised radius={theme.radii.panel} distance={isDragging ? 10 : 7} style={[styles.card, isDragging && styles.dragging]}>
         <View style={styles.header}>
           <Raised radius={14} distance={4} style={styles.iconBadge}>
             <Icon size={20} color={goal.color} />
@@ -165,6 +167,9 @@ const styles = StyleSheet.create({
     padding: 13,
     marginHorizontal: 16,
     marginVertical: 20,
+  },
+  dragging: {
+    opacity: 0.85,
   },
   header: {
     flexDirection: 'row',
