@@ -154,6 +154,35 @@ export default function SettingsScreen({ navigation }: any) {
     });
   };
 
+  const handleFeatureRequest = () => {
+    const subject = encodeURIComponent('Feature Request');
+    const template = [
+      'Feature title:',
+      '<describe your idea in one line>',
+      '',
+      'Problem it solves:',
+      "<what's hard or missing today?>",
+      '',
+      'Suggested solution:',
+      '<how should it work?>',
+      '',
+      '',
+      '',
+      '---',
+      `App: ${APP_NAME} v${APP_VERSION}`,
+      `Platform: ${DEVICE_INFO}`,
+    ].join('\n');
+    const body = encodeURIComponent(template);
+    Linking.openURL(
+      `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${body}`,
+    ).catch(() => {
+      Alert.alert(
+        t('settings.couldNotOpenMail'),
+        t('settings.noMailApp', { email: FEEDBACK_EMAIL }),
+      );
+    });
+  };
+
   const refreshProStatus = useHabitStore(s => s.refreshProStatus);
 
   const paywallParams = proExpired ? { mode: 'expired' } : undefined;
@@ -338,14 +367,20 @@ export default function SettingsScreen({ navigation }: any) {
           {t('settings.title')}
         </Text>
 
-        {!isPro && (
-          <SettingsRevealItem scrollY={scrollY} viewportHeight={viewportHeight}>
-            <ProUpsellCard
-              expired={proExpired}
-              onPress={() => openPaywall(navigation, paywallParams)}
-            />
-          </SettingsRevealItem>
-        )}
+        <SettingsRevealItem scrollY={scrollY} viewportHeight={viewportHeight}>
+          <ProUpsellCard
+            expired={proExpired}
+            onPress={() => {
+              if (isPro) {
+                // Pro users keep the hero card; tapping shows their plan
+                // status (PaywallV2 renders its Pro status view for them).
+                navigation.navigate('PaywallV2');
+              } else {
+                openPaywall(navigation, paywallParams);
+              }
+            }}
+          />
+        </SettingsRevealItem>
 
         <Section
           title={t('settings.generalSection')}
@@ -571,6 +606,10 @@ export default function SettingsScreen({ navigation }: any) {
           <Row
             label={t('settings.sendFeedback')}
             onPress={handleSendFeedback}
+          />
+          <Row
+            label={t('settings.featureRequest')}
+            onPress={handleFeatureRequest}
           />
           <Row
             label={t('settings.followOnX', { handle: X_HANDLE })}

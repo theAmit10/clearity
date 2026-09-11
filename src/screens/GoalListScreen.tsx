@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import DraggableFlatList, {
   ScaleDecorator,
   RenderItemParams,
@@ -16,6 +16,8 @@ type GoalFilter = 'all' | 'active' | 'completed';
 
 const FILTERS: GoalFilter[] = ['all', 'active', 'completed'];
 
+type AllRow = { kind: 'goal'; goal: Goal } | { kind: 'header' };
+
 /** Merge a reordered section back into the full store array.
  * Items matching `status` are replaced in-place (in order) by
  * `reorderedSection`; all other items keep their positions. This keeps
@@ -26,7 +28,7 @@ function mergeSectionReorder(
   status: Goal['status'],
 ): Goal[] {
   const queue = [...reorderedSection];
-  return full.map(g => (g.status === status ? queue.shift() ?? g : g));
+  return full.map(g => (g && g.status === status ? queue.shift() ?? g : g));
 }
 
 export default function GoalListScreen({ navigation }: any) {
@@ -38,7 +40,7 @@ export default function GoalListScreen({ navigation }: any) {
 
   const confirmComplete = useCallback(
     (id: string) => {
-      const goal = useGoalStore.getState().goals.find(g => g.id === id);
+      const goal = useGoalStore.getState().goals.find(g => !!g && g.id === id);
       if (!goal || goal.status !== 'active') return;
       Alert.alert(t('goals.completeGoal'), goal.title, [
         { text: t('common.cancel'), style: 'cancel' },
@@ -55,35 +57,104 @@ export default function GoalListScreen({ navigation }: any) {
 
   // Manual (store) order — the list order IS the store order, like Home habits.
   // Long-press drag reorders directly; no separate reorder mode.
-  const manualActive = useMemo(() => goals.filter(g => g.status === 'active'), [goals]);
-  const manualCompleted = useMemo(() => goals.filter(g => g.status === 'completed'), [goals]);
+  // The `isValid` guards keep a corrupt entry from ever reaching the
+  // draggable lists (their `keyExtractor` crashes on undefined items).
+  const manualActive = useMemo(
+    () => goals.filter(g => !!g && typeof g.id === 'string' && g.status === 'active'),
+    [goals],
+  );
+  const manualCompleted = useMemo(
+    () => goals.filter(g => !!g && typeof g.id === 'string' && g.status === 'completed'),
+    [goals],
+  );
 
   const handleDragEndActive = useCallback(
     ({ data }: { data: Goal[] }) => {
-      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, data, 'active'));
+      const clean = data.filter(g => !!g && typeof g.id === 'string');
+      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, clean, 'active'));
     },
     [reorderGoals],
   );
 
   const handleDragEndCompleted = useCallback(
     ({ data }: { data: Goal[] }) => {
-      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, data, 'completed'));
+      const clean = data.filter(g => !!g && typeof g.id === 'string');
+      reorderGoals(mergeSectionReorder(useGoalStore.getState().goals, clean, 'completed'));
     },
     [reorderGoals],
   );
 
+  // Single scrollable list for the "All" filter: active goals, a static
+  // header row, then completed goals. One top-level DraggableFlatList keeps
+  // scrolling working (nested lists inside a ScrollView swallow gestures).
+  const allRows = useMemo<AllRow[]>(() => {
+    const rows: AllRow[] = manualActive.map(goal => ({ kind: 'goal', goal }));
+    if (manualActive.length > 0 && manualCompleted.length > 0) {
+      rows.push({ kind: 'header' });
+    }
+    manualCompleted.forEach(goal => rows.push({ kind: 'goal', goal }));
+    return rows;
+  }, [manualActive, manualCompleted]);
+
+  const handleDragEndAll = useCallback(
+    ({ data }: { data: AllRow[] }) => {
+      const full = useGoalStore.getState().goals;
+      const rowGoals = data
+        .filter((r): r is { kind: 'goal'; goal: Goal } => !!r && r.kind === 'goal')
+        .map(r => r.goal)
+        .filter(g => !!g && typeof g.id === 'string');
+      const newActive = rowGoals.filter(g => g.status === 'active');
+      const newCompleted = rowGoals.filter(g => g.status === 'completed');
+      const merged = mergeSectionReorder(
+        mergeSectionReorder(full, newActive, 'active'),
+        newCompleted,
+        'completed',
+      );
+      reorderGoals(merged);
+    },
+    [reorderGoals],
+  );
+
+  const renderAllRow = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<AllRow>) => {
+      if (!item) return null;
+      if (item.kind === 'header') {
+        return (
+          <Text style={[styles.sectionHeader, { color: theme.colors.textMuted }]}>
+            {t('goals.completed')}
+          </Text>
+        );
+      }
+      return (
+        <ScaleDecorator>
+          <GoalCard
+            goal={item.goal}
+            onPress={() => navigation.navigate('GoalDetail', { id: item.goal.id })}
+            onComplete={confirmComplete}
+            onLongPress={drag}
+            isDragging={isActive}
+          />
+        </ScaleDecorator>
+      );
+    },
+    [navigation, confirmComplete, theme, t],
+  );
+
   const renderDragItem = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<Goal>) => (
-      <ScaleDecorator>
-        <GoalCard
-          goal={item}
-          onPress={() => navigation.navigate('GoalDetail', { id: item.id })}
-          onComplete={confirmComplete}
-          onLongPress={drag}
-          isDragging={isActive}
-        />
-      </ScaleDecorator>
-    ),
+    ({ item, drag, isActive }: RenderItemParams<Goal>) => {
+      if (!item) return null;
+      return (
+        <ScaleDecorator>
+          <GoalCard
+            goal={item}
+            onPress={() => navigation.navigate('GoalDetail', { id: item.id })}
+            onComplete={confirmComplete}
+            onLongPress={drag}
+            isDragging={isActive}
+          />
+        </ScaleDecorator>
+      );
+    },
     [navigation, confirmComplete],
   );
 
@@ -115,7 +186,7 @@ export default function GoalListScreen({ navigation }: any) {
       return (
         <DraggableFlatList
           data={manualActive}
-          keyExtractor={g => g.id}
+          keyExtractor={(g: Goal | undefined, index: number) => g?.id ?? `goal-${index}`}
           contentContainerStyle={styles.listContent}
           renderItem={renderDragItem}
           onDragEnd={handleDragEndActive}
@@ -126,40 +197,27 @@ export default function GoalListScreen({ navigation }: any) {
       return (
         <DraggableFlatList
           data={manualCompleted}
-          keyExtractor={g => g.id}
+          keyExtractor={(g: Goal | undefined, index: number) => g?.id ?? `goal-${index}`}
           contentContainerStyle={styles.listContent}
           renderItem={renderDragItem}
           onDragEnd={handleDragEndCompleted}
         />
       );
     }
-    // filter === 'all': two independent draggable sections
+    // filter === 'all': one scrollable draggable list (active, static
+    // header, completed) — nested lists inside a ScrollView break scrolling.
     return (
-      <ScrollView contentContainerStyle={styles.listContent}>
-        {manualActive.length > 0 && (
-          <DraggableFlatList
-            data={manualActive}
-            keyExtractor={g => g.id}
-            renderItem={renderDragItem}
-            onDragEnd={handleDragEndActive}
-            scrollEnabled={false}
-          />
-        )}
-        {manualActive.length > 0 && manualCompleted.length > 0 && (
-          <Text style={[styles.sectionHeader, { color: theme.colors.textMuted }]}>
-            {t('goals.completed')}
-          </Text>
-        )}
-        {manualCompleted.length > 0 && (
-          <DraggableFlatList
-            data={manualCompleted}
-            keyExtractor={g => g.id}
-            renderItem={renderDragItem}
-            onDragEnd={handleDragEndCompleted}
-            scrollEnabled={false}
-          />
-        )}
-      </ScrollView>
+      <DraggableFlatList
+        data={allRows}
+        keyExtractor={(item: AllRow | undefined, index: number) =>
+          item?.kind === 'header'
+            ? '__completed_header'
+            : (item?.goal?.id ?? `goal-${index}`)
+        }
+        contentContainerStyle={styles.listContent}
+        renderItem={renderAllRow}
+        onDragEnd={handleDragEndAll}
+      />
     );
   };
 

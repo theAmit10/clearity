@@ -46,6 +46,13 @@ function makeId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/** Guard against corrupt entries (e.g. a drag-and-drop edge case handing
+ * back an undefined row that got persisted). Draggable lists crash in
+ * `keyExtractor` on such entries, so never let them into the store. */
+function isValidGoal(g: unknown): g is Goal {
+  return !!g && typeof (g as Goal).id === 'string';
+}
+
 const AUTO_KINDS: GoalNotificationKind[] = ['ten_second', 'halfway', 'almost_due'];
 
 /** Build the automated reminders for a goal. Times already in the past
@@ -94,10 +101,15 @@ export const useGoalStore = create<GoalState>((set, get) => ({
         loadGoals<Goal[]>(),
         loadGoalNotifications<GoalNotificationConfig[]>(),
       ]);
-      const migrated = (stored ?? []).map(g => ({
+      const migrated = (stored ?? []).filter(isValidGoal).map(g => ({
         ...g,
         status: g.status ?? 'active' as const,
       }));
+      if ((stored ?? []).length !== migrated.length) {
+        logEvent('warn', 'Dropped corrupt goal entries on load', {
+          dropped: (stored ?? []).length - migrated.length,
+        });
+      }
       const liveIds = new Set(migrated.map(g => g.id));
       const notifs = (storedNotifs ?? []).filter(n => liveIds.has(n.goalId));
       set({ goals: migrated, goalNotifications: notifs, loaded: true });
@@ -313,8 +325,9 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   reorderGoals: async reordered => {
-    set({ goals: reordered });
-    persist(reordered);
+    const clean = reordered.filter(isValidGoal);
+    set({ goals: clean });
+    persist(clean);
     trackEvent('goals_reordered');
     logEvent('info', 'Goals reordered');
   },

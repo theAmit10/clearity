@@ -701,9 +701,8 @@ export default function PaywallScreen({ navigation, route }: any) {
   // Annual plan pricing: prefer a REAL StoreKit introductory price (only
   // shown when the user is actually eligible for it — see
   // getIntroEligibility above). If no intro offer exists, or the user
-  // already isn't eligible, fall back to the computed "vs weekly x 52"
-  // comparison — still a genuine, verifiable number, just not
-  // StoreKit-native.
+  // already isn't eligible, fall back to a 1.5x-annual reference baseline
+  // (rounded to avoid fractional currency like ₹1,498.50).
   let annualDisplayPrice: string | null = null;
   let annualStrike: string | null = null;
   let annualSavingsPct: number | null = null;
@@ -728,15 +727,14 @@ export default function PaywallScreen({ navigation, route }: any) {
     annualIntroNote = t('paywall.thenPerYear', {
       price: annualPkg.product.priceString,
     });
-  } else if (annualPkg && weeklyPkg) {
-    const weeklyPrice = weeklyPkg.product.price;
+  } else if (annualPkg) {
     const annualPrice = annualPkg.product.price;
-    const yearOfWeekly = weeklyPrice * 52;
-    const pct = computeSavings(annualPrice, yearOfWeekly);
+    const reference = Math.round(annualPrice * 1.5);
+    const pct = computeSavings(annualPrice, reference);
     if (pct) {
       annualSavingsPct = pct;
       annualStrike = formatCurrency(
-        yearOfWeekly,
+        reference,
         annualPkg.product.currencyCode,
       );
     }

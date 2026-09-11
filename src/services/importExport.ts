@@ -6,8 +6,35 @@ import type { Goal } from '../types/goal';
 import { logEvent } from './logger';
 import { t } from '../i18n';
 
-const EXPORT_FILENAME = 'habit-tracker-backup.json';
-const LOGS_EXPORT_FILENAME = 'habit-tracker-logs.json';
+const EXPORT_BASENAME = 'habit-tracker-backup';
+const LOGS_EXPORT_BASENAME = 'habit-tracker-logs';
+
+// Unique per export (YYYYMMDD-HHmmss, no colons/spaces) so repeated saves
+// never collide into "habit-tracker-backup 2.json" duplicates.
+function timestampSuffix(date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}` +
+    `-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+  );
+}
+
+function exportFileName(base: string): string {
+  return `${base}-${timestampSuffix()}.json`;
+}
+
+// Converts a file:// localUri into a plain filesystem path, decoding
+// percent-encoded characters (e.g. %20 from "backup 2.json") so RNFS
+// can read files whose names contain spaces or special characters.
+function localUriToPath(localUri: string): string {
+  let path = localUri.replace(/^file:\/\/localhost/, '').replace(/^file:\/\//, '');
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    // keep the raw path if it isn't valid percent-encoding
+  }
+  return path;
+}
 
 // Writes a unified JSON backup (habits + goals) to a temp file and opens
 // the native share sheet (AirDrop / Nearby Share / email / messaging /
@@ -23,7 +50,7 @@ export async function exportHabits(
     habits,
     goals,
   };
-  const path = `${RNFS.CachesDirectoryPath}/${EXPORT_FILENAME}`;
+  const path = `${RNFS.CachesDirectoryPath}/${exportFileName(EXPORT_BASENAME)}`;
   try {
     await RNFS.writeFile(path, JSON.stringify(payload, null, 2), 'utf8');
     await Share.open({
@@ -42,7 +69,9 @@ export async function exportHabits(
 }
 
 export async function exportLogs(logs: LogEntry[]): Promise<void> {
-  const path = `${RNFS.CachesDirectoryPath}/${LOGS_EXPORT_FILENAME}`;
+  const path = `${RNFS.CachesDirectoryPath}/${exportFileName(
+    LOGS_EXPORT_BASENAME,
+  )}`;
   try {
     await RNFS.writeFile(path, JSON.stringify(logs, null, 2), 'utf8');
     await Share.open({
@@ -78,10 +107,7 @@ export async function pickAndParseImportFile(): Promise<ExportPayload> {
     throw new Error(t('importExport.copyFailed'));
   }
 
-  const raw = await RNFS.readFile(
-    localCopy.localUri.replace('file://', ''),
-    'utf8',
-  );
+  const raw = await RNFS.readFile(localUriToPath(localCopy.localUri), 'utf8');
   const parsed = JSON.parse(raw);
 
   const hasHabits = Array.isArray(parsed?.habits);

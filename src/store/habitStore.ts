@@ -316,9 +316,12 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   reorderHabits: async (reordered: Habit[]) => {
-    set({ habits: reordered });
-    persist(reordered);
-    updateWidget(reordered);
+    // Drop corrupt entries (see goalStore.isValidGoal) — draggable lists
+    // crash in `keyExtractor` on undefined items, so never persist those.
+    const habits = reordered.filter(h => !!h && typeof h.id === 'string');
+    set({ habits });
+    persist(habits);
+    updateWidget(habits);
     trackEvent('habits_reordered');
     logEvent('info', 'Habits reordered');
   },

@@ -122,13 +122,15 @@ export function usePaywallPricing() {
     annualDisplayPrice = annualIntro!.priceString || null;
     annualStrike = annualPkg.product.priceString;
     annualSavingsPct = computeSavings(introPrice, annualPkg.product.price);
-  } else if (annualPkg && weeklyPkg) {
-    const yearOfWeekly = weeklyPkg.product.price * 52;
-    const pct = computeSavings(annualPkg.product.price, yearOfWeekly);
+  } else if (annualPkg) {
+    // Reference baseline is 1.5x the annual price itself (rounded to avoid
+    // fractional currency like ₹1,498.50). Savings always work out to ~33%.
+    const reference = Math.round(annualPkg.product.price * 1.5);
+    const pct = computeSavings(annualPkg.product.price, reference);
     if (pct) {
       annualSavingsPct = pct;
       annualStrike = formatCurrency(
-        yearOfWeekly,
+        reference,
         annualPkg.product.currencyCode,
       );
     }

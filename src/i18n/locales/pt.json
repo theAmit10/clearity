@@ -330,7 +330,8 @@
     "proCard": {
       "headlineTop": "Consistency is a choice.",
       "headlineBottom": "Make yours easier."
-    }
+    },
+    "featureRequest": "Request a feature"
   },
   "general": {
     "title": "Geral",
