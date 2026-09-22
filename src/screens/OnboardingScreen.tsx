@@ -63,8 +63,9 @@ const ACCENT = '#34C759'; // your streak-flame / checkmark green
 const ACCENT_SOFT = 'rgba(52,199,89,0.14)'; // for glows, highlighted rows, progress fills
 
 // Glass / overlay
+// const GLASS_BG = 'rgba(52,199,89,0.14)';
 const GLASS_BG = 'rgba(255,255,255,0.06)';
-const GLASS_BORDER = 'rgba(255,255,255,0.52)';
+const GLASS_BORDER = 'rgba(255,255,255,0.12)';
 
 export type OnboardingResult = 'completed' | 'skipped';
 
@@ -639,6 +640,7 @@ const styles = StyleSheet.create({
   ctaZone: {
     gap: 18,
     paddingBottom: 8,
+    marginTop: 10,
   },
   skipHit: {
     alignItems: 'center',
