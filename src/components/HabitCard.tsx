@@ -14,7 +14,10 @@ import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { getHabitIcon } from '../constants/habitIcons';
-import { getCategoryMeta, BUILT_IN_CATEGORIES } from '../constants/habitCategories';
+import {
+  getCategoryMeta,
+  BUILT_IN_CATEGORIES,
+} from '../constants/habitCategories';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
@@ -44,16 +47,17 @@ export default function HabitCard({
     habit.category && habit.category !== 'none'
       ? BUILT_IN_KEYS.has(habit.category)
         ? t(`categories.${habit.category}` as TranslationKey)
-        : getCategoryMeta(habit.category, customCategories)?.name ?? habit.category
+        : getCategoryMeta(habit.category, customCategories)?.name ??
+          habit.category
       : '';
   const stats = computeStats(habit);
   const todayStr = todayKey();
   const count = habit.completions[todayStr] || 0;
-  const target = habit.frequency === 'n_times_in_m_days' ? (habit.frequencyValue ?? 1) : 1;
+  const target =
+    habit.frequency === 'n_times_in_m_days' ? habit.frequencyValue ?? 1 : 1;
   // High-volume custom habits (X > 12) use a "+" button + circular
   // window-progress ring instead of per-tap segments.
-  const isHighVolume =
-    habit.frequency === 'n_times_in_m_days' && target > 12;
+  const isHighVolume = habit.frequency === 'n_times_in_m_days' && target > 12;
   const windowSize = habit.frequencyWindow ?? 7;
   let windowSum = count;
   if (isHighVolume) {
@@ -100,11 +104,19 @@ export default function HabitCard({
 
           <View style={styles.headerText}>
             <View style={styles.nameRow}>
-              <Text style={[styles.name, { color: theme.colors.textPrimary }]} numberOfLines={1}>
+              <Text
+                style={[styles.name, { color: theme.colors.textPrimary }]}
+                numberOfLines={1}
+              >
                 {habit.name}
               </Text>
               {showCategoryBadges && categoryName && (
-                <View style={[styles.catBadge, { backgroundColor: `${habit.color}1A` }]}>
+                <View
+                  style={[
+                    styles.catBadge,
+                    { backgroundColor: `${habit.color}1A` },
+                  ]}
+                >
                   <Text style={[styles.catBadgeText, { color: habit.color }]}>
                     {categoryName}
                   </Text>
@@ -113,18 +125,29 @@ export default function HabitCard({
             </View>
             <View style={styles.streakRow}>
               {showStreaks && (
-                <Text style={[styles.streak, { color: theme.colors.textMuted }]}>
+                <Text
+                  style={[styles.streak, { color: theme.colors.textMuted }]}
+                >
                   {t('stats.dayStreak', { count: stats.currentStreak })}
                 </Text>
               )}
               {showFrequency && (
-                <Text style={[styles.freqLabel, { color: theme.colors.textMuted }]}>
+                <Text
+                  style={[styles.freqLabel, { color: theme.colors.textMuted }]}
+                >
                   {habit.frequency === 'n_times_per_week'
-                    ? t('stats.freqPerWeek', { count: habit.frequencyValue ?? 3 })
+                    ? t('stats.freqPerWeek', {
+                        count: habit.frequencyValue ?? 3,
+                      })
                     : habit.frequency === 'n_times_per_month'
-                    ? t('stats.freqPerMonth', { count: habit.frequencyValue ?? 1 })
+                    ? t('stats.freqPerMonth', {
+                        count: habit.frequencyValue ?? 1,
+                      })
                     : habit.frequency === 'n_times_in_m_days'
-                    ? t('stats.freqInDays', { count: habit.frequencyValue ?? 1, window: habit.frequencyWindow ?? 7 })
+                    ? t('stats.freqInDays', {
+                        count: habit.frequencyValue ?? 1,
+                        window: habit.frequencyWindow ?? 7,
+                      })
                     : t('frequency.daily')}
                 </Text>
               )}
@@ -149,7 +172,9 @@ export default function HabitCard({
                     { backgroundColor: habit.color, borderColor: habit.color },
                   ]}
                 >
-                  <Text style={[styles.checkMarkDone, { color: '#FFFFFF' }]}>✓</Text>
+                  <Text style={[styles.checkMarkDone, { color: '#FFFFFF' }]}>
+                    ✓
+                  </Text>
                 </Inset>
               ) : isHighVolume ? (
                 <Raised
@@ -158,10 +183,22 @@ export default function HabitCard({
                   style={[
                     styles.checkCircle,
                     styles.checkCircleEmpty,
-                    { borderColor: habit.color, backgroundColor: theme.colors.background },
+                    {
+                      borderColor: habit.color,
+                      backgroundColor: theme.colors.background,
+                    },
                   ]}
                 >
-                  <View style={{ position: 'absolute', top: 2.5, left: 2.5, width: 35, height: 35 }}>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 2.5,
+                      left: 2.5,
+                      width: 35,
+                      height: 35,
+                    }}
+                    pointerEvents="none"
+                  >
                     <Svg width={35} height={35} viewBox="0 0 35 35">
                       <Circle
                         cx={17.5}
@@ -179,14 +216,20 @@ export default function HabitCard({
                         strokeWidth={3}
                         fill="none"
                         strokeDasharray={ringCircumference}
-                        strokeDashoffset={ringCircumference * (1 - windowProgress)}
+                        strokeDashoffset={
+                          ringCircumference * (1 - windowProgress)
+                        }
                         strokeLinecap="round"
                         rotation="-90"
                         origin="17.5, 17.5"
                       />
                     </Svg>
                   </View>
-                  <Text style={[styles.plusMark, { color: habit.color }]}>+</Text>
+                  <View style={styles.plusWrap} pointerEvents="none">
+                    <Text style={[styles.plusMark, { color: habit.color }]}>
+                      +
+                    </Text>
+                  </View>
                 </Raised>
               ) : habit.frequency === 'n_times_in_m_days' ? (
                 <Raised
@@ -195,10 +238,21 @@ export default function HabitCard({
                   style={[
                     styles.checkCircle,
                     styles.checkCircleEmpty,
-                    { borderColor: habit.color, backgroundColor: theme.colors.background },
+                    {
+                      borderColor: habit.color,
+                      backgroundColor: theme.colors.background,
+                    },
                   ]}
                 >
-                  <View style={{ position: 'absolute', top: 2.5, left: 2.5, width: 35, height: 35 }}>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 2.5,
+                      left: 2.5,
+                      width: 35,
+                      height: 35,
+                    }}
+                  >
                     <Svg width={35} height={35} viewBox="0 0 35 35">
                       {Array.from({ length: target }, (_, i) => {
                         const strokeW = 3;
@@ -236,7 +290,10 @@ export default function HabitCard({
                   style={[
                     styles.checkCircle,
                     styles.checkCircleEmpty,
-                    { borderColor: habit.color, backgroundColor: theme.colors.background },
+                    {
+                      borderColor: habit.color,
+                      backgroundColor: theme.colors.background,
+                    },
                   ]}
                 />
               )}
@@ -340,10 +397,23 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 18,
   },
+  plusWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   plusMark: {
     fontWeight: '800',
     fontSize: 22,
-    lineHeight: 24,
+    lineHeight: 22,
     textAlign: 'center',
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    marginTop: 3,
+    marginLeft: 2,
   },
 });
