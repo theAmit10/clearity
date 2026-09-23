@@ -12,15 +12,10 @@ import {
   StyleSheet,
   FlatList,
   LayoutChangeEvent,
-  Modal,
-  TextInput,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
-import { toDateKey, isFuture, addDays } from '../services/dateUtils';
+import { toDateKey, isFuture } from '../services/dateUtils';
 import { useHabitStore, computeEffectiveDateSet } from '../store/habitStore';
-import { Raised, Inset } from './neumorphic/NeumorphicView';
+import { Raised } from './neumorphic/NeumorphicView';
 import CalendarIcon from './CalendarIcon';
 import { NeumorphicButton } from './neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -79,14 +74,10 @@ export default function MonthlyCalendar({
     t('calendar.monthsLong'),
   ] as unknown as [string[], string[]];
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
-  const addMissedNote = useHabitStore(s => s.addMissedNote);
-  const removeMissedNote = useHabitStore(s => s.removeMissedNote);
+  const decrementCompletion = useHabitStore(s => s.decrementCompletion);
   const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
   const completions = habit?.completions ?? {};
   const missedNotes = habit?.missedNotes ?? {};
-
-  const [missedModal, setMissedModal] = useState<{ dateKey: string } | null>(null);
-  const [missedNoteText, setMissedNoteText] = useState('');
 
   const effectiveSet = useMemo(() => {
     if (!habit || !habit.frequency || habit.frequency === 'daily') return null;
@@ -169,16 +160,12 @@ export default function MonthlyCalendar({
     [containerWidth, months],
   );
 
+  // Long-press steps one completion back (undo a mistaken tap).
   const handleLongPress = useCallback(
     (dateKey: string) => {
-      if (missedNotes[dateKey]) {
-        setMissedNoteText(missedNotes[dateKey]);
-      } else {
-        setMissedNoteText('');
-      }
-      setMissedModal({ dateKey });
+      decrementCompletion(habitId, dateKey);
     },
-    [missedNotes],
+    [decrementCompletion, habitId],
   );
 
   const renderMonth = useCallback(
@@ -422,82 +409,6 @@ export default function MonthlyCalendar({
           </View>
         </View>
       </View>
-
-      <Modal
-        visible={!!missedModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMissedModal(null)}
-      >
-        <KeyboardAvoidingView
-          style={styles.modalOverlay}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <Pressable style={styles.modalOverlay} onPress={() => setMissedModal(null)}>
-            <Pressable onPress={() => {}}>
-              <Raised radius={16} distance={8} style={styles.modalCard}>
-                <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
-                  {missedNotes[missedModal?.dateKey ?? ''] ? t('calendarModal.editNote') : t('calendarModal.markMissed')}
-                </Text>
-                <Text style={[styles.modalDate, { color: colors.textMuted }]}>
-                  {missedModal?.dateKey}
-                </Text>
-                <Inset radius={10} style={styles.modalInset}>
-                  <TextInput
-                    style={[styles.modalInput, { color: colors.textPrimary }]}
-                    value={missedNoteText}
-                    onChangeText={setMissedNoteText}
-                    placeholder={t('calendarModal.notePlaceholder')}
-                    placeholderTextColor={colors.textMuted}
-                    multiline
-                    autoFocus
-                  />
-                </Inset>
-                <View style={styles.modalActions}>
-                  {missedNotes[missedModal?.dateKey ?? ''] && (
-                    <NeumorphicButton
-                      radius={12}
-                      distance={4}
-                      style={styles.modalDeleteBtn}
-                      onPress={() => {
-                        if (missedModal) {
-                          removeMissedNote(habitId, missedModal.dateKey);
-                          setMissedModal(null);
-                        }
-                      }}
-                    >
-                      <Text style={[styles.modalDeleteText, { color: '#FF3B30' }]}>{t('common.remove')}</Text>
-                    </NeumorphicButton>
-                  )}
-                  <NeumorphicButton
-                    radius={12}
-                    distance={4}
-                    style={[styles.modalCancelBtn]}
-                    onPress={() => setMissedModal(null)}
-                  >
-                    <Text style={[styles.modalCancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
-                  </NeumorphicButton>
-                  <NeumorphicButton
-                    radius={12}
-                    distance={4}
-                    backgroundColor={color}
-                    onPress={() => {
-                      if (missedModal && missedNoteText.trim()) {
-                        addMissedNote(habitId, missedModal.dateKey, missedNoteText.trim());
-                        setMissedModal(null);
-                      } else if (missedModal && !missedNoteText.trim()) {
-                        Alert.alert(t('calendarModal.pleaseEnterExplanation'));
-                      }
-                    }}
-                  >
-                    <Text style={[styles.modalSaveText, { color: '#FFFFFF' }]}>{t('common.save')}</Text>
-                  </NeumorphicButton>
-                </View>
-              </Raised>
-            </Pressable>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Modal>
     </Raised>
   );
 }
@@ -569,63 +480,6 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     opacity: 0.7,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  modalCard: {
-    width: 300,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  modalDate: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 14,
-  },
-  modalInset: {
-    marginBottom: 14,
-    padding: 4,
-  },
-  modalInput: {
-    fontSize: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    minHeight: 60,
-    textAlignVertical: 'top',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 4,
-  },
-  modalDeleteBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  modalDeleteText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalCancelBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  modalCancelText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  modalSaveText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
   bottomNav: {
     flexDirection: 'row',

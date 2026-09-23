@@ -38,6 +38,7 @@ interface HabitState {
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
   toggleCompletion: (id: string, dateKey?: string) => Promise<void>;
+  decrementCompletion: (id: string, dateKey?: string) => Promise<void>;
   addMissedNote: (id: string, dateKey: string, note: string) => Promise<void>;
   removeMissedNote: (id: string, dateKey: string) => Promise<void>;
   replaceAllHabits: (habits: Habit[]) => Promise<void>;
@@ -261,6 +262,27 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       }
 
       delete missedNotes[key];
+      return { ...h, completions, missedNotes };
+    });
+    set({ habits });
+    persist(habits);
+    updateWidget(habits);
+  },
+
+  decrementCompletion: async (id, dateKey) => {
+    const key = dateKey ?? todayKey();
+    const habits = get().habits.map(h => {
+      if (h.id !== id) return h;
+      const completions = { ...h.completions };
+      const missedNotes = { ...(h.missedNotes ?? {}) };
+      const current = completions[key] || 0;
+      if (current <= 0) return h;
+      if (current <= 1) {
+        delete completions[key];
+        delete missedNotes[key];
+      } else {
+        completions[key] = current - 1;
+      }
       return { ...h, completions, missedNotes };
     });
     set({ habits });
