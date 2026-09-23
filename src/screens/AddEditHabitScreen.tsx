@@ -42,6 +42,9 @@ const FREQUENCY_OPTIONS: { key: FrequencyType; label: TranslationKey }[] = [
   { key: 'n_times_in_m_days', label: 'frequency.custom' },
 ];
 
+const MAX_CUSTOM_TIMES = 100;
+const MAX_CUSTOM_WINDOW = 30;
+
 export default function AddEditHabitScreen({ route, navigation }: any) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -75,8 +78,8 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
 
   const freqV = parseInt(frequencyValue, 10);
   const freqW = parseInt(frequencyWindow, 10);
-  const timesValid = frequency !== 'n_times_in_m_days' || (freqV >= 1 && freqV <= 12);
-  const windowValid = frequency !== 'n_times_in_m_days' || (freqW >= 1 && freqW <= 30);
+  const timesValid = frequency !== 'n_times_in_m_days' || (freqV >= 1 && freqV <= MAX_CUSTOM_TIMES);
+  const windowValid = frequency !== 'n_times_in_m_days' || (freqW >= 1 && freqW <= MAX_CUSTOM_WINDOW);
   const canSave = name.trim().length > 0 && timesValid && windowValid;
 
   const handleSave = async () => {
@@ -91,10 +94,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
       frequency,
       frequencyValue: frequency === 'daily' ? undefined
         : frequency === 'n_times_in_m_days'
-        ? Math.min(12, Math.max(1, parseInt(frequencyValue, 10) || 1))
+        ? Math.min(MAX_CUSTOM_TIMES, Math.max(1, parseInt(frequencyValue, 10) || 1))
         : parseInt(frequencyValue, 10) || undefined,
       frequencyWindow: frequency === 'n_times_in_m_days'
-        ? Math.min(30, Math.max(1, parseInt(frequencyWindow, 10) || 1))
+        ? Math.min(MAX_CUSTOM_WINDOW, Math.max(1, parseInt(frequencyWindow, 10) || 1))
         : undefined,
     };
     if (existing) {

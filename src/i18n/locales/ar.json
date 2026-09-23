@@ -186,7 +186,7 @@
     "timesPerMonth": "مرات في الشهر",
     "timesEvery": "مرات كل",
     "days": "أيام",
-    "maxFreqHint": "حد أقصى 12 مرة كل 30 يومًا",
+    "maxFreqHint": "حد أقصى 100 مرة كل 30 يومًا",
     "planExpiredTitle": "انتهت صلاحية خطتك",
     "planExpiredBody": "جدّد اشتراك Pro لمواصلة إنشاء عادات غير محدودة.",
     "habitLimitTitle": "تم بلوغ الحد الأقصى للعادات",

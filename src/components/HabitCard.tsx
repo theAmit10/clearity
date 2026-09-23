@@ -8,14 +8,14 @@ import Animated, {
 import { Habit } from '../types/habit';
 import { computeStats, useHabitStore } from '../store/habitStore';
 import HeatmapGrid from './HeatmapGrid';
-import { todayKey } from '../services/dateUtils';
+import { todayKey, toDateKey, addDays } from '../services/dateUtils';
 import { Raised, Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { getHabitIcon } from '../constants/habitIcons';
 import { getCategoryMeta, BUILT_IN_CATEGORIES } from '../constants/habitCategories';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 
 const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
 
@@ -47,9 +47,29 @@ export default function HabitCard({
         : getCategoryMeta(habit.category, customCategories)?.name ?? habit.category
       : '';
   const stats = computeStats(habit);
-  const count = habit.completions[todayKey()] || 0;
+  const todayStr = todayKey();
+  const count = habit.completions[todayStr] || 0;
   const target = habit.frequency === 'n_times_in_m_days' ? (habit.frequencyValue ?? 1) : 1;
-  const doneToday = count >= target;
+  // High-volume custom habits (X > 12) use a "+" button + circular
+  // window-progress ring instead of per-tap segments.
+  const isHighVolume =
+    habit.frequency === 'n_times_in_m_days' && target > 12;
+  const windowSize = habit.frequencyWindow ?? 7;
+  let windowSum = count;
+  if (isHighVolume) {
+    windowSum = 0;
+    const today = new Date(todayStr + 'T00:00:00');
+    for (let i = windowSize - 1; i >= 0; i--) {
+      const key = toDateKey(addDays(today, -i));
+      windowSum += habit.completions[key] || 0;
+    }
+  }
+  const doneWindow = windowSum >= target;
+  const doneToday = isHighVolume ? doneWindow : count >= target;
+  const windowProgress = target > 0 ? Math.min(1, windowSum / target) : 0;
+  // High-volume ring geometry (35px box, matches the segmented SVG size).
+  const ringR = (35 - 3 - 4) / 2;
+  const ringCircumference = 2 * Math.PI * ringR;
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -131,6 +151,43 @@ export default function HabitCard({
                 >
                   <Text style={[styles.checkMarkDone, { color: '#FFFFFF' }]}>✓</Text>
                 </Inset>
+              ) : isHighVolume ? (
+                <Raised
+                  radius={20}
+                  distance={4}
+                  style={[
+                    styles.checkCircle,
+                    styles.checkCircleEmpty,
+                    { borderColor: habit.color, backgroundColor: theme.colors.background },
+                  ]}
+                >
+                  <View style={{ position: 'absolute', top: 2.5, left: 2.5, width: 35, height: 35 }}>
+                    <Svg width={35} height={35} viewBox="0 0 35 35">
+                      <Circle
+                        cx={17.5}
+                        cy={17.5}
+                        r={ringR}
+                        stroke={`${habit.color}26`}
+                        strokeWidth={3}
+                        fill="none"
+                      />
+                      <Circle
+                        cx={17.5}
+                        cy={17.5}
+                        r={ringR}
+                        stroke={habit.color}
+                        strokeWidth={3}
+                        fill="none"
+                        strokeDasharray={ringCircumference}
+                        strokeDashoffset={ringCircumference * (1 - windowProgress)}
+                        strokeLinecap="round"
+                        rotation="-90"
+                        origin="17.5, 17.5"
+                      />
+                    </Svg>
+                  </View>
+                  <Text style={[styles.plusMark, { color: habit.color }]}>+</Text>
+                </Raised>
               ) : habit.frequency === 'n_times_in_m_days' ? (
                 <Raised
                   radius={20}
@@ -282,5 +339,11 @@ const styles = StyleSheet.create({
   checkMarkDone: {
     fontWeight: '800',
     fontSize: 18,
+  },
+  plusMark: {
+    fontWeight: '800',
+    fontSize: 22,
+    lineHeight: 24,
+    textAlign: 'center',
   },
 });

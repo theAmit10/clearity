@@ -186,7 +186,7 @@
     "timesPerMonth": "回／月",
     "timesEvery": "回／",
     "days": "日",
-    "maxFreqHint": "30日間で最大12回まで",
+    "maxFreqHint": "30日間で最大100回まで",
     "planExpiredTitle": "プランの有効期限が切れています",
     "planExpiredBody": "無制限に習慣を作成するには、Proサブスクリプションを更新してください。",
     "habitLimitTitle": "習慣の上限に達しました",

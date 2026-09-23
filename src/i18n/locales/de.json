@@ -186,7 +186,7 @@
     "timesPerMonth": "Mal pro Monat",
     "timesEvery": "Mal alle",
     "days": "Tage",
-    "maxFreqHint": "Maximal 12 Mal in 30 Tagen",
+    "maxFreqHint": "Maximal 100 Mal in 30 Tagen",
     "planExpiredTitle": "Dein Abo ist abgelaufen",
     "planExpiredBody": "Verlängere dein Pro-Abo, um weiterhin unbegrenzt Gewohnheiten zu erstellen.",
     "habitLimitTitle": "Gewohnheitslimit erreicht",

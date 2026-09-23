@@ -186,7 +186,7 @@
     "timesPerMonth": "次／月",
     "timesEvery": "次／每",
     "days": "天",
-    "maxFreqHint": "30天内最多12次",
+    "maxFreqHint": "30天内最多100次",
     "planExpiredTitle": "你的套餐已过期",
     "planExpiredBody": "续订 Pro 订阅以继续创建无限数量的习惯。",
     "habitLimitTitle": "已达到习惯数量上限",

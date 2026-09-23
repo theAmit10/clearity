@@ -186,7 +186,7 @@
     "timesPerMonth": "회 / 월",
     "timesEvery": "회 /",
     "days": "일",
-    "maxFreqHint": "30일 동안 최대 12회",
+    "maxFreqHint": "30일 동안 최대 100회",
     "planExpiredTitle": "플랜이 만료되었습니다",
     "planExpiredBody": "무제한으로 습관을 만들려면 Pro 구독을 갱신하세요.",
     "habitLimitTitle": "습관 한도에 도달했습니다",

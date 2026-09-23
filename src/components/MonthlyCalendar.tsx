@@ -240,7 +240,7 @@ export default function MonthlyCalendar({
                       isToday && [styles.todayRing, { borderColor: colors.textPrimary }],
                     ]}
                   >
-                    {isMulti && !isCompleted && multiTarget > 0 && (
+                    {isMulti && !isCompleted && multiTarget > 0 && multiTarget <= 12 && (
                       <View style={{ position: 'absolute', top: 0, left: 0, width: circleSize, height: circleSize }}>
                         <Svg width={circleSize} height={circleSize} viewBox={`0 0 ${circleSize} ${circleSize}`}>
                           {Array.from({ length: multiTarget }, (_, i) => {
@@ -277,6 +277,11 @@ export default function MonthlyCalendar({
                     <Text style={[styles.dayText, { color: colors.textPrimary }, isCompleted && { color }]}>
                       {day}
                     </Text>
+                    {isMulti && multiTarget > 12 && !isCompleted && multiCount > 0 && (
+                      <Text style={[styles.multiCountText, { color }]}>
+                        +{multiCount}
+                      </Text>
+                    )}
                     {isMulti && (
                       <>
                         {hasMissedNote && (
@@ -518,6 +523,12 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 15,
     fontWeight: '700',
+  },
+  multiCountText: {
+    position: 'absolute',
+    bottom: 3,
+    fontSize: 9,
+    fontWeight: '800',
   },
   futureCircle: {
     backgroundColor: 'transparent',

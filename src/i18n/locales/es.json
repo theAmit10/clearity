@@ -186,7 +186,7 @@
     "timesPerMonth": "veces al mes",
     "timesEvery": "veces cada",
     "days": "días",
-    "maxFreqHint": "Máx. 12 veces en 30 días",
+    "maxFreqHint": "Máx. 100 veces en 30 días",
     "planExpiredTitle": "Tu plan ha expirado",
     "planExpiredBody": "Renueva tu suscripción Pro para seguir creando hábitos ilimitados.",
     "habitLimitTitle": "Límite de hábitos alcanzado",
