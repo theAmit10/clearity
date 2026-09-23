@@ -3,6 +3,11 @@ import { Platform } from 'react-native';
 import Purchases from 'react-native-purchases';
 import { getOfferings } from '../services/revenueCat';
 import { logEvent } from '../services/logger';
+import {
+  LIFETIME_OFFER_STRIKE_MULTIPLIER,
+  isLifetimeOfferActive,
+  getLifetimeOfferDaysLeft,
+} from '../services/offerConfig';
 
 export function formatCurrency(amount: number, currencyCode?: string) {
   if (!currencyCode) return amount.toFixed(2);
@@ -75,9 +80,14 @@ export function usePaywallPricing() {
         return;
       }
       setOffering(offerings.current);
+      // Schedule model: ONE lifetime product whose store price is scheduled
+      // ($9.99 until Oct 23, 2026, then $19.99). The offer treatment is gated
+      // by the date window only (UI ends Oct 22, a day before the price
+      // flips) — no promo offering to look up.
+      const effectiveLifetime = offerings.current.lifetime;
       // v2 defaults to lifetime (Forever Pass) to mirror the reference.
       const pkg =
-        offerings.current.lifetime ||
+        effectiveLifetime ||
         offerings.current.annual ||
         offerings.current.weekly;
       if (pkg) setSelectedPackage(pkg);
@@ -138,7 +148,25 @@ export function usePaywallPricing() {
 
   let lifetimeStrike: string | null = null;
   let lifetimeSavingsPct: number | null = null;
-  if (lifetimePkg && annualPkg) {
+  // Schedule model: the live lifetime price IS the sale price during the
+  // window. The full-price reference is not exposed by any store API, so it
+  // is derived as 2x live (matches the declared 9.99 → 19.99 schedule; may
+  // differ by a cent, e.g. $19.98 vs $19.99 — never shown as store truth,
+  // only as the visual reference next to SAVE %). Annual/weekly untouched.
+  const lifetimeOfferActive =
+    isLifetimeOfferActive() && !!lifetimePkg;
+  if (lifetimeOfferActive && lifetimePkg) {
+    const salePrice = lifetimePkg.product.price as number;
+    const reference = salePrice * LIFETIME_OFFER_STRIKE_MULTIPLIER;
+    const pct = computeSavings(salePrice, reference);
+    if (pct) {
+      lifetimeSavingsPct = pct;
+      lifetimeStrike = formatCurrency(
+        reference,
+        lifetimePkg.product.currencyCode,
+      );
+    }
+  } else if (lifetimePkg && annualPkg) {
     const twoYearsAnnual = annualPkg.product.price * 2;
     const pct = computeSavings(lifetimePkg.product.price, twoYearsAnnual);
     if (pct) {
@@ -154,7 +182,14 @@ export function usePaywallPricing() {
     offering,
     weeklyPkg,
     annualPkg,
+    // Lifetime is the single scheduled product: sale price during the
+    // window, full price after. Annual/weekly are always full price.
     lifetimePkg,
+    lifetimeOfferActive,
+    // Schedule-declared discount % (9.99 → 19.99). Null when the offer is
+    // off — the single source of truth for badge + analytics.
+    lifetimeOfferPct: lifetimeOfferActive ? lifetimeSavingsPct : null,
+    lifetimeOfferDaysLeft: getLifetimeOfferDaysLeft(),
     selectedPackage,
     setSelectedPackage,
     pricingState,

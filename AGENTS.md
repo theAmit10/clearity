@@ -109,6 +109,10 @@ The conversion moment is **subscription_activated** — a user becoming Pro. Eng
 
 Ordered steps: `paywall_shown` → `purchase_started` → `purchase_completed` → `subscription_activated`. Break down by `source` (which trigger converts), `variant` (classic vs v2), and `package` (weekly/annual/lifetime). `subscription_activated` is the conversion endpoint — it fires on every inactive → active entitlement flip (purchase, restore, auto-renewal) and is deduped within 60s so it never double-counts. RevenueCat remains the revenue source of truth; Mixpanel mirrors it for funnel analysis only.
 
+### Limited-time lifetime offer (UI ends Oct 22, 2026)
+
+V2 paywall funnel events carry `offer_id` (`lifetime50_2026`), `discount_pct`, `days_left`, `hours_left` while the date window in `src/services/offerConfig.ts` is active — no new events, `package` disambiguates which plan converted. Schedule model: one lifetime product with a store price schedule ($9.99 until Oct 23, 2026, then $19.99; both stores) — `discount_pct` is the declared schedule discount, and the strike is derived as 2x the live price via `computeSavings` in `src/hooks/usePaywallPricing.ts` (may differ by a cent from the true future price). The in-app treatment ends Oct 22 EOD UTC, a day before the price flips, so the countdown can never outlive the price. The hero shows a live DD:HH:MM:SS countdown (`src/hooks/useOfferCountdown.ts`, 1s tick, cleared on unmount) plus a `LIMITED TIME` ribbon on the Forever card; annual/weekly cards are unchanged. After the end date the stores revert the price automatically and the treatment hides with no app update.
+
 ### Super properties
 
 Every event carries `app_version`, `platform`, `paywall_variant`, `is_pro` (registered in `App.tsx` via `setAnalyticsDefaults`, refreshed on change; pre-init values are queued and flushed in `initAnalytics`). Paywall entry points must pass a `source` from the `PaywallSource` union in `src/services/paywallRouter.ts` — never open the paywall without one (except previews, which skip `paywall_shown`/`paywall_dismissed`).

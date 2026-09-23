@@ -598,8 +598,8 @@
   },
   "paywallV2": {
     "brand": "Habitic Unlimited",
-    "headlineTop": "Track every habit.",
-    "headlineBottom": "Without breaking the streak.",
+    "headlineTop": "Consistency is a choice.",
+    "headlineBottom": "Make showing up easier.",
     "takingShape": "Your Habitic is taking shape:",
     "habits": "Habits",
     "checkIns": "Check-ins",
@@ -636,7 +636,15 @@
     "unlockWeekly": "Unlock Weekly",
     "oneTimeNote": "One-time purchase. No recurring payment.",
     "perYearNote": "Per year. Cancel anytime.",
-    "perWeekNote": "Per week. Cancel anytime."
+    "perWeekNote": "Per week. Cancel anytime.",
+    "offerEndsDate": "Ends {{date}}",
+    "limitedTime": "LIMITED-TIME OFFER",
+    "cdDays": "DAYS",
+    "cdHours": "HRS",
+    "cdMins": "MIN",
+    "cdSecs": "SEC",
+    "offerEndsShort": "ENDS IN {{count}}D",
+    "offerCtaNote": "{{pct}}% OFF ends {{date}}. One-time purchase."
   },
   "diagnostics": {
     "title": "Diagnostics",

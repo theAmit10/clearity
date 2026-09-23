@@ -28,6 +28,11 @@ import {
 } from '../services/revenueCat';
 import { useHabitStore } from '../store/habitStore';
 import { usePaywallPricing } from '../hooks/usePaywallPricing';
+import { useOfferCountdown } from '../hooks/useOfferCountdown';
+import {
+  getLifetimeOfferProps,
+  getLifetimeOfferEndLabel,
+} from '../services/offerConfig';
 import { logEvent } from '../services/logger';
 import {
   trackEvent,
@@ -60,6 +65,9 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     weeklyPkg,
     annualPkg,
     lifetimePkg,
+    lifetimeOfferActive,
+    lifetimeOfferPct,
+    lifetimeOfferDaysLeft,
     selectedPackage,
     setSelectedPackage,
     pricingState,
@@ -67,6 +75,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     annualStrike,
     annualSavingsPct,
     lifetimeStrike,
+    lifetimeSavingsPct,
   } = usePaywallPricing();
 
   const isProUser = storeIsPro || remoteIsPro;
@@ -77,10 +86,26 @@ export default function PaywallV2Screen({ navigation, route }: any) {
   const isPreview = paywallSource === 'preview';
   const mountedAt = useRef(Date.now());
 
+  // Schedule offer (date window) + ticking countdown. Everything below —
+  // banner, ribbon, CTA, analytics — keys off `offerLive` so a mid-session
+  // expiry hides the whole treatment together.
+  const offerVerified = lifetimeOfferActive && lifetimeOfferPct != null;
+  const countdown = useOfferCountdown(offerVerified);
+  const offerLive = offerVerified && !countdown.expired;
+
   const funnelBase = {
     variant: 'v2',
     source: paywallSource,
     mode: paywallMode,
+    // Lifetime schedule offer (UI ends Oct 22, 2026; store price flips Oct 23): attached while the date
+    // window is live. `discount_pct` is the declared schedule discount
+    // (9.99 → 19.99); `package` on purchase events disambiguates plans.
+    ...(offerLive
+      ? {
+          ...getLifetimeOfferProps(),
+          hours_left: countdown.days * 24 + countdown.hours,
+        }
+      : {}),
   };
 
   useEffect(() => {
@@ -376,16 +401,26 @@ export default function PaywallV2Screen({ navigation, route }: any) {
   const selectedId = selectedPackage?.identifier;
   const isLifetime = selectedId === lifetimePkg?.identifier;
   const isAnnual = selectedId === annualPkg?.identifier;
+  const isLifetimeOffer =
+    isLifetime && offerLive && lifetimeOfferPct != null;
   const ctaLabel = isAnnual
     ? t('paywallV2.unlockYearly')
     : selectedId === weeklyPkg?.identifier
     ? t('paywallV2.unlockWeekly')
+    : isLifetimeOffer && lifetimePkg
+    ? `${t('paywallV2.unlockForever')} — ${lifetimePkg.product.priceString}`
     : t('paywallV2.unlockForever');
-  const ctaNote = isAnnual
-    ? t('paywallV2.perYearNote')
-    : selectedId === weeklyPkg?.identifier
-    ? t('paywallV2.perWeekNote')
-    : t('paywallV2.oneTimeNote');
+  const ctaNote =
+    isLifetimeOffer && lifetimeOfferPct != null
+      ? t('paywallV2.offerCtaNote', {
+          pct: lifetimeOfferPct,
+          date: getLifetimeOfferEndLabel(),
+        })
+      : isAnnual
+      ? t('paywallV2.perYearNote')
+      : selectedId === weeklyPkg?.identifier
+      ? t('paywallV2.perWeekNote')
+      : t('paywallV2.oneTimeNote');
 
   return (
     <View style={styles.container}>
@@ -413,6 +448,42 @@ export default function PaywallV2Screen({ navigation, route }: any) {
           <Text style={[styles.headline, styles.headlineMuted]}>
             {t('paywallV2.headlineBottom')}
           </Text>
+          {offerLive && lifetimeOfferPct != null && (
+            <View style={styles.offerHero}>
+              <Text style={styles.offerEyebrow}>
+                {t('paywallV2.limitedTime')}
+              </Text>
+              <Text style={styles.offerTitle}>
+                {`${lifetimeOfferPct}% OFF ${t('paywallV2.foreverPass')}`}
+              </Text>
+              <View style={styles.countdownRow}>
+                <CountdownBox
+                  value={countdown.days}
+                  label={t('paywallV2.cdDays')}
+                />
+                <Text style={styles.countdownSep}>:</Text>
+                <CountdownBox
+                  value={countdown.hours}
+                  label={t('paywallV2.cdHours')}
+                />
+                <Text style={styles.countdownSep}>:</Text>
+                <CountdownBox
+                  value={countdown.mins}
+                  label={t('paywallV2.cdMins')}
+                />
+                <Text style={styles.countdownSep}>:</Text>
+                <CountdownBox
+                  value={countdown.secs}
+                  label={t('paywallV2.cdSecs')}
+                />
+              </View>
+              <Text style={styles.offerCaption}>
+                {t('paywallV2.offerEndsDate', {
+                  date: getLifetimeOfferEndLabel(),
+                })}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Personalized proof */}
@@ -472,6 +543,18 @@ export default function PaywallV2Screen({ navigation, route }: any) {
                   price={lifetimePkg.product.priceString}
                   subtitle={t('paywallV2.foreverSub')}
                   strike={lifetimeStrike}
+                  savingsPct={lifetimeSavingsPct}
+                  ribbon={
+                    isLifetimeOffer ? t('paywallV2.limitedTime') : null
+                  }
+                  strikeInline={isLifetimeOffer}
+                  savingsSuffix={
+                    isLifetimeOffer
+                      ? t('paywallV2.offerEndsShort', {
+                          count: lifetimeOfferDaysLeft,
+                        })
+                      : null
+                  }
                   bullets={[
                     t('paywallV2.fullAccessForever'),
                     t('paywallV2.futureUpdates'),
@@ -641,6 +724,17 @@ export default function PaywallV2Screen({ navigation, route }: any) {
   );
 }
 
+function CountdownBox({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.countdownBox}>
+      <Text style={styles.countdownValue}>
+        {String(value).padStart(2, '0')}
+      </Text>
+      <Text style={styles.countdownLabel}>{label}</Text>
+    </View>
+  );
+}
+
 function PlanOption({
   selected,
   title,
@@ -649,6 +743,9 @@ function PlanOption({
   subtitle,
   strike,
   savingsPct,
+  ribbon,
+  strikeInline,
+  savingsSuffix,
   bullets,
   footnote,
   onSelect,
@@ -660,6 +757,9 @@ function PlanOption({
   subtitle: string;
   strike?: string | null;
   savingsPct?: number | null;
+  ribbon?: string | null;
+  strikeInline?: boolean;
+  savingsSuffix?: string | null;
   bullets?: string[];
   footnote?: string;
   onSelect: () => void;
@@ -672,6 +772,11 @@ function PlanOption({
         selected ? styles.planSelected : styles.planUnselected,
       ]}
     >
+      {!!ribbon && (
+        <View style={styles.planRibbon}>
+          <Text style={styles.planRibbonText}>{ribbon}</Text>
+        </View>
+      )}
       <View style={styles.planTopRow}>
         <View style={styles.planTitleRow}>
           <View
@@ -684,9 +789,24 @@ function PlanOption({
             {extra ? <Text style={styles.planExtra}>{extra}</Text> : null}
           </Text>
         </View>
-        <Text style={styles.planPrice}>{price}</Text>
+        <View style={styles.planPriceWrap}>
+          <Text
+            style={[styles.planPrice, strikeInline && styles.planPriceOffer]}
+          >
+            {price}
+          </Text>
+          {strikeInline && !!strike && (
+            <Text style={styles.planStrikeInline}>{strike}</Text>
+          )}
+        </View>
       </View>
-      {savingsPct ? (
+      {savingsPct && strikeInline ? (
+        <View style={styles.savePill}>
+          <Text style={styles.savePillText}>
+            SAVE {savingsPct}%{savingsSuffix ? ` · ${savingsSuffix}` : ''}
+          </Text>
+        </View>
+      ) : savingsPct ? (
         <Text style={styles.planSavings}>
           SAVE {savingsPct}%{strike ? ` · ${strike}` : ''}
         </Text>
@@ -764,6 +884,66 @@ const styles = StyleSheet.create({
     lineHeight: 40,
   },
   headlineMuted: { color: '#E8C9B3', marginTop: 2 },
+  offerHero: {
+    marginTop: 18,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+  },
+  offerEyebrow: {
+    color: '#E8C9B3',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+  offerTitle: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 4,
+  },
+  countdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  countdownBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    minWidth: 62,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+  },
+  countdownValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#111',
+    fontVariant: ['tabular-nums'],
+  },
+  countdownLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    color: '#8A8A8E',
+    marginTop: 2,
+  },
+  countdownSep: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '800',
+    paddingBottom: 16,
+  },
+  offerCaption: {
+    color: '#E8C9B3',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 10,
+  },
   proofSection: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 22,
@@ -819,6 +999,38 @@ const styles = StyleSheet.create({
   planTitle: { fontSize: 19, fontWeight: '800', color: '#111' },
   planExtra: { color: '#8A8A8E', fontWeight: '400' },
   planPrice: { fontSize: 20, fontWeight: '800', color: '#111' },
+  planPriceWrap: { alignItems: 'flex-end' },
+  planPriceOffer: { fontSize: 24, color: ACCENT },
+  planStrikeInline: {
+    color: '#8A8A8E',
+    fontSize: 14,
+    textDecorationLine: 'line-through',
+    marginTop: 2,
+  },
+  planRibbon: {
+    position: 'absolute',
+    top: -13,
+    alignSelf: 'center',
+    backgroundColor: ACCENT,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  planRibbonText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  savePill: {
+    alignSelf: 'flex-start',
+    backgroundColor: ACCENT,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: 8,
+  },
+  savePillText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' },
   planSub: { color: '#8A8A8E', fontSize: 15, marginTop: 6 },
   planStrike: {
     color: '#8A8A8E',
