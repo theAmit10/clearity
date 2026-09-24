@@ -7,7 +7,7 @@ import type { HabitNotificationConfig, AdminNotificationConfig, GoalNotification
 import type { Goal } from '../types/goal';
 import { t } from '../i18n';
 
-const CHANNEL_ID = 'habit_reminders';
+export const CHANNEL_ID = 'habit_reminders';
 
 export async function setupChannel() {
   await notifee.createChannel({

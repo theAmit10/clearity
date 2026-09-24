@@ -379,6 +379,7 @@ export default function SettingsScreen({ navigation }: any) {
         <SettingsRevealItem scrollY={scrollY} viewportHeight={viewportHeight}>
           <ProUpsellCard
             expired={proExpired}
+            offerVisible={!isPro}
             onPress={() => {
               if (isPro) {
                 // Pro users keep the hero card; tapping shows their plan

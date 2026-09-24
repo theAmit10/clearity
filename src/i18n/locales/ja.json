@@ -329,7 +329,8 @@
     "diagnosticsRow": "Paywall version",
     "proCard": {
       "headlineTop": "Consistency is a choice.",
-      "headlineBottom": "Make yours easier."
+      "headlineBottom": "Make yours easier.",
+      "offerBadge": "{{pct}}% OFF ends {{date}}"
     },
     "featureRequest": "Request a feature"
   },
@@ -645,6 +646,16 @@
     "cdSecs": "SEC",
     "offerEndsShort": "ENDS IN {{count}}D",
     "offerCtaNote": "{{pct}}% OFF ends {{date}}. One-time purchase."
+  },
+  "offerBanner": {
+    "badge": "LIMITED TIME",
+    "title": "{{pct}}% OFF Forever Pass",
+    "subtitle": "Ends {{date}} · {{count}}d left",
+    "dismiss": "Dismiss"
+  },
+  "offerPush": {
+    "title": "{{pct}}% OFF Forever Pass ends {{date}}",
+    "body": "One-time purchase. Last chance at this price."
   },
   "diagnostics": {
     "title": "Diagnostics",

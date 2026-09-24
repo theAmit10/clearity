@@ -30,6 +30,11 @@ import PaywallV2Screen from '../screens/PaywallV2Screen';
 import DiagnosticsScreen from '../screens/DiagnosticsScreen';
 import { useTheme } from '../theme/ThemeProvider';
 import NeumorphicTabBar from './NeumorphicTabBar';
+import { getStoredVariantSync } from '../store/paywallVariantStore';
+import {
+  drainOfferPushTap,
+  markOfferPushTap,
+} from '../services/offerReminder';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -202,7 +207,24 @@ function SettingsStack() {
   );
 }
 
-const navigationRef = createNavigationContainerRef();
+export const navigationRef = createNavigationContainerRef();
+
+/**
+ * Global opener for the offer-push tap (source `offer_push`).
+ * Paywall routes live inside each tab stack; Home always exists.
+ * If navigation isn't ready yet the tap is parked and drained onReady.
+ */
+export function openPushPaywall(): void {
+  if (!navigationRef.isReady()) {
+    markOfferPushTap();
+    return;
+  }
+  const route = getStoredVariantSync() === 'v2' ? 'PaywallV2' : 'Paywall';
+  const nav = navigationRef as unknown as {
+    navigate: (screen: string, params?: Record<string, unknown>) => void;
+  };
+  nav.navigate('Home', { screen: route, params: { source: 'offer_push' } });
+}
 
 // Preview host for Diagnostics — dismisses without persisting the
 // onboarding-seen flag and without firing onboarding analytics (those live
@@ -242,6 +264,9 @@ export default function RootNavigator({
     <NavigationContainer
       ref={navigationRef}
       theme={navigationTheme}
+      onReady={() => {
+        if (drainOfferPushTap()) openPushPaywall();
+      }}
     >
       <Tab.Navigator
         screenOptions={{ headerShown: false }}

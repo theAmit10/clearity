@@ -10,7 +10,11 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  ZoomIn,
+} from 'react-native-reanimated';
 import Svg, {
   Defs,
   LinearGradient,
@@ -189,11 +193,76 @@ function SkipButton({
   );
 }
 
-function PageTitle({ top, bottom }: { top: string; bottom: string }) {
+function Reveal({
+  delay = 0,
+  duration = 380,
+  active = true,
+  style,
+  children,
+}: {
+  delay?: number;
+  duration?: number;
+  active?: boolean;
+  style?: any;
+  children: React.ReactNode;
+}) {
   return (
-    <Animated.View entering={FadeInDown.duration(380)}>
+    <Animated.View
+      // Changing key on active/index (set by callers) remounts and replays.
+      entering={
+        active ? FadeInDown.delay(delay).duration(duration) : undefined
+      }
+      style={style}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+function RevealText({
+  delay = 0,
+  duration = 340,
+  active = true,
+  style,
+  children,
+}: {
+  delay?: number;
+  duration?: number;
+  active?: boolean;
+  style?: any;
+  children: React.ReactNode;
+}) {
+  return (
+    <Animated.Text
+      entering={active ? FadeIn.delay(delay).duration(duration) : undefined}
+      style={style}
+    >
+      {children}
+    </Animated.Text>
+  );
+}
+
+function PageTitle({
+  top,
+  bottom,
+  delay = 0,
+  active = true,
+}: {
+  top: string;
+  bottom: string;
+  delay?: number;
+  active?: boolean;
+}) {
+  return (
+    <Animated.View
+      entering={
+        active ? FadeInDown.delay(delay).duration(400) : undefined
+      }
+    >
       <Text style={styles.title}>{top}</Text>
-      <Text style={[styles.title, styles.titleMuted]}>{bottom}</Text>
+      <RevealText delay={delay + 60} duration={360} active={active} style={[styles.title, styles.titleMuted]}>
+        {bottom}
+      </RevealText>
     </Animated.View>
   );
 }
@@ -221,56 +290,96 @@ export default function OnboardingScreen({ onFinish }: Props) {
     onFinish('skipped', index);
   }, [index, onFinish]);
 
+  const isActive = (i: number) => i === index;
+  // Key suffix flips between "on-<index>" and "off" so the active page
+  // remounts on every landing and its `entering` animations replay.
+  const pageKey = (i: number, tag: string) =>
+    `${tag}-${isActive(i) ? `on-${index}` : 'off'}`;
+
   const pages: React.ReactNode[] = [
     /* ── Page 1: welcome ─────────────────────────────── */
-    <View key="p1" style={[styles.page, { width }]}>
+    <View key={pageKey(0, 'p1')} style={[styles.page, { width }]}>
       <View style={styles.heroSpacer} />
-      <Animated.View entering={FadeInDown.duration(380)}>
+      <Animated.View
+        key={pageKey(0, 'p1-logo')}
+        entering={
+          isActive(0) ? ZoomIn.delay(0).duration(450) : undefined
+        }
+      >
         <Image
           source={require('../assets/app-logo.png')}
           style={styles.heroLogo}
           resizeMode="contain"
         />
       </Animated.View>
-      <Text style={styles.brand}>{t('onboarding.brand')}</Text>
+      <RevealText
+        key={pageKey(0, 'p1-brand')}
+        delay={80}
+        duration={340}
+        active={isActive(0)}
+        style={styles.brand}
+      >
+        {t('onboarding.brand')}
+      </RevealText>
       <View style={styles.flexSpacer} />
       <PageTitle
+        key={pageKey(0, 'p1-title')}
         top={t('onboarding.page1Top')}
         bottom={t('onboarding.page1Bottom')}
+        delay={160}
+        active={isActive(0)}
       />
       <View style={styles.ctaZone}>
-        <PillButton
-          testID="onboarding-continue"
-          label={t('onboarding.getStarted')}
-          onPress={handlePrimary}
-        />
+        <Reveal
+          key={pageKey(0, 'p1-cta')}
+          delay={320}
+          active={isActive(0)}
+        >
+          <PillButton
+            testID="onboarding-continue"
+            label={t('onboarding.getStarted')}
+            onPress={handlePrimary}
+          />
+        </Reveal>
       </View>
     </View>,
 
     /* ── Page 2: everything in one place ─────────────── */
-    <View key="p2" style={[styles.page, { width }]}>
+    <View key={pageKey(1, 'p2')} style={[styles.page, { width }]}>
       <View style={styles.topPad} />
       <PageTitle
+        key={pageKey(1, 'p2-title')}
         top={t('onboarding.page2Top')}
         bottom={t('onboarding.page2Bottom')}
+        delay={0}
+        active={isActive(1)}
       />
-      <Animated.Text
-        entering={FadeIn.delay(120).duration(320)}
+      <RevealText
+        key={pageKey(1, 'p2-body')}
+        delay={90}
+        active={isActive(1)}
         style={styles.body}
       >
         {t('onboarding.page2Body')}
-      </Animated.Text>
-      <Animated.View
-        entering={FadeIn.delay(200).duration(380)}
-        style={styles.cardsRow}
-      >
-        <View style={styles.glassCard}>
+      </RevealText>
+      <View style={styles.cardsRow}>
+        <Reveal
+          key={pageKey(1, 'p2-card-left')}
+          delay={180}
+          active={isActive(1)}
+          style={styles.glassCard}
+        >
           <Text style={styles.cardLabel}>▦ {t('onboarding.today')}</Text>
           <Text style={styles.cardBig}>3/4</Text>
           <View style={styles.cardDivider} />
           <Text style={styles.cardSub}>{t('onboarding.doneToday')}</Text>
-        </View>
-        <View style={styles.glassCard}>
+        </Reveal>
+        <Reveal
+          key={pageKey(1, 'p2-card-right')}
+          delay={260}
+          active={isActive(1)}
+          style={styles.glassCard}
+        >
           <View style={styles.iconCluster}>
             <View style={[styles.clusterDot, styles.dotBlack]}>
               <Text style={styles.clusterGlyph}>✓</Text>
@@ -288,34 +397,50 @@ export default function OnboardingScreen({ onFinish }: Props) {
           <Text style={styles.cardBig}>
             4 <Text style={styles.cardActive}>{t('onboarding.active')}</Text>
           </Text>
-        </View>
-      </Animated.View>
+        </Reveal>
+      </View>
       <View style={styles.flexSpacer} />
       <View style={styles.ctaZone}>
-        <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
-        <PillButton
-          testID="onboarding-continue"
-          label={t('onboarding.continue')}
-          onPress={handlePrimary}
-        />
+        <Reveal
+          key={pageKey(1, 'p2-skip')}
+          delay={300}
+          duration={340}
+          active={isActive(1)}
+        >
+          <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
+        </Reveal>
+        <Reveal key={pageKey(1, 'p2-cta')} delay={360} active={isActive(1)}>
+          <PillButton
+            testID="onboarding-continue"
+            label={t('onboarding.continue')}
+            onPress={handlePrimary}
+          />
+        </Reveal>
       </View>
     </View>,
 
     /* ── Page 3: stay ahead of streaks ───────────────── */
-    <View key="p3" style={[styles.page, { width }]}>
+    <View key={pageKey(2, 'p3')} style={[styles.page, { width }]}>
       <View style={styles.topPad} />
       <PageTitle
+        key={pageKey(2, 'p3-title')}
         top={t('onboarding.page3Top')}
         bottom={t('onboarding.page3Bottom')}
+        delay={0}
+        active={isActive(2)}
       />
-      <Animated.Text
-        entering={FadeIn.delay(120).duration(320)}
+      <RevealText
+        key={pageKey(2, 'p3-body')}
+        delay={90}
+        active={isActive(2)}
         style={styles.body}
       >
         {t('onboarding.page3Body')}
-      </Animated.Text>
-      <Animated.View
-        entering={FadeIn.delay(200).duration(380)}
+      </RevealText>
+      <Reveal
+        key={pageKey(2, 'p3-card')}
+        delay={180}
+        active={isActive(2)}
         style={styles.upNextWrap}
       >
         <View style={styles.upNextBadge}>
@@ -323,7 +448,13 @@ export default function OnboardingScreen({ onFinish }: Props) {
         </View>
         <Text style={styles.upNextTitle}>{t('onboarding.upNext')}</Text>
         <View style={styles.upNextRow}>
-          <View style={styles.upNextCard}>
+          <Reveal
+            key={pageKey(2, 'p3-inner-left')}
+            delay={260}
+            duration={340}
+            active={isActive(2)}
+            style={styles.upNextCard}
+          >
             <View style={styles.upNextHead}>
               <View style={[styles.habitDot, styles.dotBlack]}>
                 <Text style={styles.clusterGlyph}>✓</Text>
@@ -338,8 +469,14 @@ export default function OnboardingScreen({ onFinish }: Props) {
             <Text style={styles.upNextMeta}>
               {t('onboarding.example1Meta')}
             </Text>
-          </View>
-          <View style={styles.upNextCard}>
+          </Reveal>
+          <Reveal
+            key={pageKey(2, 'p3-inner-right')}
+            delay={320}
+            duration={340}
+            active={isActive(2)}
+            style={styles.upNextCard}
+          >
             <View style={styles.upNextHead}>
               <View style={[styles.habitDot, styles.dotBlue]}>
                 <Text style={styles.clusterGlyph}>≈</Text>
@@ -354,38 +491,55 @@ export default function OnboardingScreen({ onFinish }: Props) {
             <Text style={styles.upNextMeta}>
               {t('onboarding.example2Meta')}
             </Text>
-          </View>
+          </Reveal>
         </View>
-      </Animated.View>
+      </Reveal>
       <View style={styles.flexSpacer} />
       <View style={styles.ctaZone}>
-        <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
-        <PillButton
-          testID="onboarding-continue"
-          label={t('onboarding.continue')}
-          onPress={handlePrimary}
-        />
+        <Reveal
+          key={pageKey(2, 'p3-skip')}
+          delay={340}
+          duration={340}
+          active={isActive(2)}
+        >
+          <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
+        </Reveal>
+        <Reveal key={pageKey(2, 'p3-cta')} delay={400} active={isActive(2)}>
+          <PillButton
+            testID="onboarding-continue"
+            label={t('onboarding.continue')}
+            onPress={handlePrimary}
+          />
+        </Reveal>
       </View>
     </View>,
 
     /* ── Page 4: free tier ───────────────────────────── */
-    <View key="p4" style={[styles.page, { width }]}>
+    <View key={pageKey(3, 'p4')} style={[styles.page, { width }]}>
       <View style={styles.topPad} />
       <PageTitle
+        key={pageKey(3, 'p4-title')}
         top={t('onboarding.page4Top')}
         bottom={t('onboarding.page4Bottom', {
           habitCount: FREE_HABIT_LIMIT,
           goalCount: FREE_GOAL_LIMIT,
         })}
+        delay={0}
+        active={isActive(3)}
       />
-      <Animated.Text
-        entering={FadeIn.delay(120).duration(320)}
+      <RevealText
+        key={pageKey(3, 'p4-body')}
+        delay={90}
+        active={isActive(3)}
         style={styles.body}
       >
         {t('onboarding.page4Body')}
-      </Animated.Text>
+      </RevealText>
       <Animated.View
-        entering={FadeIn.delay(200).duration(380)}
+        key={pageKey(3, 'p4-moon')}
+        entering={
+          isActive(3) ? ZoomIn.delay(180).duration(500) : undefined
+        }
         style={styles.moonWrap}
       >
         <View style={styles.moon}>
@@ -396,12 +550,21 @@ export default function OnboardingScreen({ onFinish }: Props) {
       </Animated.View>
       <View style={styles.flexSpacer} />
       <View style={styles.ctaZone}>
-        <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
-        <PillButton
-          testID="onboarding-continue"
-          label={t('onboarding.continue')}
-          onPress={handlePrimary}
-        />
+        <Reveal
+          key={pageKey(3, 'p4-skip')}
+          delay={300}
+          duration={340}
+          active={isActive(3)}
+        >
+          <SkipButton label={t('onboarding.skip')} onPress={handleSkip} />
+        </Reveal>
+        <Reveal key={pageKey(3, 'p4-cta')} delay={360} active={isActive(3)}>
+          <PillButton
+            testID="onboarding-continue"
+            label={t('onboarding.continue')}
+            onPress={handlePrimary}
+          />
+        </Reveal>
       </View>
     </View>,
   ];

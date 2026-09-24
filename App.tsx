@@ -13,7 +13,17 @@ import { installGlobalErrorHandler } from './src/services/logger';
 import {
   setupChannel,
   rescheduleAll,
+  onNotificationEvent,
 } from './src/services/notification';
+import {
+  syncOfferReminder,
+  cancelOfferReminder,
+  isOfferPushNotification,
+  markOfferPushTap,
+  wasOpenedFromOfferPush,
+} from './src/services/offerReminder';
+import { openPushPaywall } from './src/navigation/RootNavigator';
+import { EventType } from '@notifee/react-native';
 import {
   initAnalytics,
   trackEvent,
@@ -61,7 +71,29 @@ function AppContent() {
       if (s.variant !== p?.variant) updatePaywallVariantProp(s.variant);
     });
     const unsubPro = useHabitStore.subscribe((s, p) => {
-      if (s.isPro !== p?.isPro) updateProProp(s.isPro);
+      if (s.isPro !== p?.isPro) {
+        updateProProp(s.isPro);
+        // Offer reminder is free-users-only: cancel on Pro, re-sync on free.
+        if (s.isPro) cancelOfferReminder();
+        else syncOfferReminder();
+      }
+    });
+    // Foreground tap on the daily offer reminder → paywall (source offer_push).
+    const unsubOfferPush = onNotificationEvent((event: any) => {
+      try {
+        const tapped =
+          event?.type === EventType.PRESS ||
+          event?.type === EventType.ACTION_PRESS;
+        if (tapped && isOfferPushNotification(event?.detail?.notification?.id)) {
+          openPushPaywall();
+        }
+      } catch {
+        // tap routing is non-critical
+      }
+    });
+    // Killed-state tap: park it; RootNavigator drains it onReady.
+    wasOpenedFromOfferPush().then(fromPush => {
+      if (fromPush) markOfferPushTap();
     });
     init();
     initGoals();
@@ -75,6 +107,7 @@ function AppContent() {
     return () => {
       unsubVariant();
       unsubPro();
+      if (typeof unsubOfferPush === 'function') unsubOfferPush();
     };
   }, []);
 
@@ -112,8 +145,11 @@ function AppContent() {
       try {
         await setupChannel();
         const habitConfigs = habitNotifications;
+        // NOTE: rescheduleAll cancels every pending notification, so the
+        // offer reminder must sync AFTER it.
         await rescheduleAll(habitConfigs, adminNotifications);
         await useGoalStore.getState().rescheduleActive();
+        await syncOfferReminder();
       } catch (err) {
         // notification setup is non-critical
       }

@@ -3,6 +3,11 @@ import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { useTranslation } from '../i18n';
+import {
+  isLifetimeOfferActive,
+  getLifetimeOfferEndLabel,
+  LIFETIME_OFFER_DISCOUNT_PCT,
+} from '../services/offerConfig';
 
 /* Subo-style hero banner: brand row (app logo + Habitic Unlimited) over a
  * big two-line headline. Background is a diagonal linear gradient
@@ -46,9 +51,12 @@ function mixAccent(accent: string, ratio: number): string {
 export function ProUpsellCard({
   expired,
   onPress,
+  offerVisible = false,
 }: {
   expired?: boolean;
   onPress: () => void;
+  /** Pass `!isPro` — the pill additionally gates on the offer date window. */
+  offerVisible?: boolean;
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -72,6 +80,7 @@ export function ProUpsellCard({
 
   const line1 = t('settings.proCard.headlineTop');
   const line2 = t('settings.proCard.headlineBottom');
+  const showOffer = offerVisible && isLifetimeOfferActive();
   const a11yLabel = expired
     ? `${line1} ${line2}. ${t('common.renewPro')}`
     : `${line1} ${line2}. ${t('common.upgradeToPro')}`;
@@ -122,6 +131,17 @@ export function ProUpsellCard({
           />
           <Text style={styles.brandText}>{t('paywallV2.brand')}</Text>
         </View>
+
+        {showOffer && (
+          <View style={styles.offerPill}>
+            <Text style={styles.offerPillText}>
+              {t('settings.proCard.offerBadge', {
+                pct: LIFETIME_OFFER_DISCOUNT_PCT,
+                date: getLifetimeOfferEndLabel(),
+              })}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.headlineWrap}>
           <Text
@@ -177,6 +197,20 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 20,
     fontWeight: '600',
+  },
+  offerPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E07A2E',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 10,
+  },
+  offerPillText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   headlineWrap: {
     gap: 2,

@@ -17,6 +17,8 @@ import { getHabitIcon } from '../constants/habitIcons';
 import type { HabitCategory } from '../types/habit';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
+import { OfferBanner } from '../components/OfferBanner';
+import { openPaywall } from '../services/paywallRouter';
 
 const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
 
@@ -33,6 +35,10 @@ export default function HomeScreen({ navigation }: any) {
   const reorderHabits = useHabitStore(s => s.reorderHabits);
   const showCategories = useHabitStore(s => s.showCategories);
   const customCategories = useHabitStore(s => s.customCategories);
+  const isPro = useHabitStore(s => s.isPro);
+  // Session-only dismissal — plain state, never persisted, so the banner
+  // returns on next app launch (while the offer window is live).
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const activeHabits = useMemo(
     () => allHabits.filter(h => !h.archived),
     [allHabits],
@@ -114,6 +120,15 @@ export default function HomeScreen({ navigation }: any) {
           </Text>
         </NeumorphicButton>
       </View>
+
+      {!isPro && !bannerDismissed && (
+        <OfferBanner
+          onPress={() =>
+            openPaywall(navigation, { source: 'offer_banner_home' })
+          }
+          onClose={() => setBannerDismissed(true)}
+        />
+      )}
 
       <View style={styles.body}>
         {showCategories && categorySet.length > 1 && habits.length !== 0 && (

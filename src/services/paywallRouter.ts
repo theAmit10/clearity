@@ -13,6 +13,8 @@ export type PaywallSource =
   | 'settings_widgets'
   | 'settings_analytics'
   | 'settings_theme'
+  | 'offer_banner_home'
+  | 'offer_push'
   | 'preview'
   | 'unknown';
 
