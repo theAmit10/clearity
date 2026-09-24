@@ -10,17 +10,14 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  ZoomIn,
-} from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import Svg, {
   Defs,
   LinearGradient,
   Stop,
   Rect,
   RadialGradient,
+  Circle,
 } from 'react-native-svg';
 import BellAlertIcon from 'react-native-heroicons/outline/BellAlertIcon';
 import { useTranslation } from '../i18n';
@@ -66,7 +63,17 @@ const CREAM_TEXT = '#1C1C1E'; // matches Home/Settings text exactly
 const ACCENT = '#34C759'; // your streak-flame / checkmark green
 const ACCENT_SOFT = 'rgba(52,199,89,0.14)'; // for glows, highlighted rows, progress fills
 
-// Glass / overlay
+// Light-mode ink (pages 2+3 sit on a pale green gradient, so pure white text
+// and white-glass cards wash out — these give AA contrast on light).
+const TITLE_DARK = '#14201A';
+const BODY_DARK = '#4C5C52';
+const LIGHT_CARD_BG = '#FFFFFF';
+const LIGHT_CARD_BG_SOFT = 'rgba(255,255,255,0.94)';
+const LIGHT_CARD_BORDER = '#DFEAE2';
+const LIGHT_DIVIDER = '#E2ECE4';
+const LIGHT_LABEL = '#5F6F64';
+
+// Glass / overlay (legacy dark-mode tokens — kept for p1/p4, unused by p2/p3 now)
 // const GLASS_BG = 'rgba(52,199,89,0.14)';
 const GLASS_BG = 'rgba(255,255,255,0.06)';
 const GLASS_BORDER = 'rgba(255,255,255,0.12)';
@@ -209,9 +216,7 @@ function Reveal({
   return (
     <Animated.View
       // Changing key on active/index (set by callers) remounts and replays.
-      entering={
-        active ? FadeInDown.delay(delay).duration(duration) : undefined
-      }
+      entering={active ? FadeInDown.delay(delay).duration(duration) : undefined}
       style={style}
     >
       {children}
@@ -242,25 +247,101 @@ function RevealText({
   );
 }
 
+function GradientDot({
+  size = 38,
+  from,
+  to,
+  id,
+  glyph,
+}: {
+  size?: number;
+  from: string;
+  to: string;
+  id: string;
+  glyph: string;
+}) {
+  const radius = size / 2;
+  return (
+    <View
+      // eslint-disable-next-line react-native/no-inline-styles
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radius,
+        backgroundColor: to,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        shadowColor: '#0F2418',
+        shadowOpacity: 0.22,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.95)',
+      }}
+    >
+      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={from} stopOpacity="1" />
+            <Stop offset="1" stopColor={to} stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Circle cx={radius} cy={radius} r={radius} fill={`url(#${id})`} />
+      </Svg>
+      {/* glossy highlight */}
+      <View
+        pointerEvents="none"
+        // eslint-disable-next-line react-native/no-inline-styles
+        style={{
+          position: 'absolute',
+          top: size * 0.08,
+          left: size * 0.16,
+          width: size * 0.5,
+          height: size * 0.26,
+          borderRadius: size * 0.2,
+          backgroundColor: 'rgba(255,255,255,0.38)',
+        }}
+      />
+      <Text
+        // eslint-disable-next-line react-native/no-inline-styles
+        style={{
+          color: '#FFFFFF',
+          fontSize: size * 0.4,
+          fontWeight: '800',
+        }}
+      >
+        {glyph}
+      </Text>
+    </View>
+  );
+}
+
 function PageTitle({
   top,
   bottom,
   delay = 0,
   active = true,
+  dark = false,
 }: {
   top: string;
   bottom: string;
   delay?: number;
   active?: boolean;
+  dark?: boolean;
 }) {
   return (
     <Animated.View
-      entering={
-        active ? FadeInDown.delay(delay).duration(400) : undefined
-      }
+      entering={active ? FadeInDown.delay(delay).duration(400) : undefined}
     >
-      <Text style={styles.title}>{top}</Text>
-      <RevealText delay={delay + 60} duration={360} active={active} style={[styles.title, styles.titleMuted]}>
+      <Text style={[styles.title, dark && styles.titleDark]}>{top}</Text>
+      <RevealText
+        delay={delay + 60}
+        duration={360}
+        active={active}
+        style={[styles.title, dark ? styles.titleDarkMuted : styles.titleMuted]}
+      >
         {bottom}
       </RevealText>
     </Animated.View>
@@ -302,9 +383,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
       <View style={styles.heroSpacer} />
       <Animated.View
         key={pageKey(0, 'p1-logo')}
-        entering={
-          isActive(0) ? ZoomIn.delay(0).duration(450) : undefined
-        }
+        entering={isActive(0) ? ZoomIn.delay(0).duration(450) : undefined}
       >
         <Image
           source={require('../assets/app-logo.png')}
@@ -330,11 +409,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
         active={isActive(0)}
       />
       <View style={styles.ctaZone}>
-        <Reveal
-          key={pageKey(0, 'p1-cta')}
-          delay={320}
-          active={isActive(0)}
-        >
+        <Reveal key={pageKey(0, 'p1-cta')} delay={320} active={isActive(0)}>
           <PillButton
             testID="onboarding-continue"
             label={t('onboarding.getStarted')}
@@ -353,12 +428,13 @@ export default function OnboardingScreen({ onFinish }: Props) {
         bottom={t('onboarding.page2Bottom')}
         delay={0}
         active={isActive(1)}
+        dark
       />
       <RevealText
         key={pageKey(1, 'p2-body')}
         delay={90}
         active={isActive(1)}
-        style={styles.body}
+        style={[styles.body, styles.bodyDark]}
       >
         {t('onboarding.page2Body')}
       </RevealText>
@@ -367,35 +443,60 @@ export default function OnboardingScreen({ onFinish }: Props) {
           key={pageKey(1, 'p2-card-left')}
           delay={180}
           active={isActive(1)}
-          style={styles.glassCard}
+          style={styles.lightCard}
         >
-          <Text style={styles.cardLabel}>▦ {t('onboarding.today')}</Text>
-          <Text style={styles.cardBig}>3/4</Text>
-          <View style={styles.cardDivider} />
-          <Text style={styles.cardSub}>{t('onboarding.doneToday')}</Text>
+          <Text style={styles.lightCardLabel}>▦ {t('onboarding.today')}</Text>
+          <Text style={styles.lightCardBig} numberOfLines={1}>
+            3/4
+          </Text>
+          <View style={styles.lightDivider} />
+          <Text style={styles.lightCardSub}>{t('onboarding.doneToday')}</Text>
         </Reveal>
         <Reveal
           key={pageKey(1, 'p2-card-right')}
           delay={260}
           active={isActive(1)}
-          style={styles.glassCard}
+          style={styles.lightCard}
         >
           <View style={styles.iconCluster}>
-            <View style={[styles.clusterDot, styles.dotBlack]}>
-              <Text style={styles.clusterGlyph}>✓</Text>
+            <GradientDot
+              size={36}
+              id="p2-dot-black"
+              from="#3A3A40"
+              to="#0E0E11"
+              glyph="✓"
+            />
+            <View style={styles.dotOverlap}>
+              <GradientDot
+                size={36}
+                id="p2-dot-blue"
+                from="#6FB3FF"
+                to="#2F6FED"
+                glyph="≈"
+              />
             </View>
-            <View style={[styles.clusterDot, styles.dotBlue]}>
-              <Text style={styles.clusterGlyph}>≈</Text>
+            <View style={styles.dotOverlap}>
+              <GradientDot
+                size={36}
+                id="p2-dot-green"
+                from="#5BE584"
+                to="#1FA84F"
+                glyph="♪"
+              />
             </View>
-            <View style={[styles.clusterDot, styles.dotGreen]}>
-              <Text style={styles.clusterGlyph}>♪</Text>
-            </View>
-            <View style={[styles.clusterDot, styles.dotPink]}>
-              <Text style={styles.clusterGlyph}>T</Text>
+            <View style={styles.dotOverlap}>
+              <GradientDot
+                size={36}
+                id="p2-dot-pink"
+                from="#F27BB5"
+                to="#C83E8B"
+                glyph="T"
+              />
             </View>
           </View>
-          <Text style={styles.cardBig}>
-            4 <Text style={styles.cardActive}>{t('onboarding.active')}</Text>
+          <Text style={styles.lightCardBig} numberOfLines={1}>
+            4{' '}
+            <Text style={styles.lightCardActive}>{t('onboarding.active')}</Text>
           </Text>
         </Reveal>
       </View>
@@ -428,12 +529,13 @@ export default function OnboardingScreen({ onFinish }: Props) {
         bottom={t('onboarding.page3Bottom')}
         delay={0}
         active={isActive(2)}
+        dark
       />
       <RevealText
         key={pageKey(2, 'p3-body')}
         delay={90}
         active={isActive(2)}
-        style={styles.body}
+        style={[styles.body, styles.bodyDark]}
       >
         {t('onboarding.page3Body')}
       </RevealText>
@@ -441,32 +543,36 @@ export default function OnboardingScreen({ onFinish }: Props) {
         key={pageKey(2, 'p3-card')}
         delay={180}
         active={isActive(2)}
-        style={styles.upNextWrap}
+        style={styles.lightUpNextWrap}
       >
         <View style={styles.upNextBadge}>
           <BellAlertIcon size={22} color="#1A0F0E" />
         </View>
-        <Text style={styles.upNextTitle}>{t('onboarding.upNext')}</Text>
+        <Text style={styles.lightUpNextTitle}>{t('onboarding.upNext')}</Text>
         <View style={styles.upNextRow}>
           <Reveal
             key={pageKey(2, 'p3-inner-left')}
             delay={260}
             duration={340}
             active={isActive(2)}
-            style={styles.upNextCard}
+            style={styles.lightUpNextCard}
           >
             <View style={styles.upNextHead}>
-              <View style={[styles.habitDot, styles.dotBlack]}>
-                <Text style={styles.clusterGlyph}>✓</Text>
-              </View>
-              <Text style={styles.upNextWhen}>
+              <GradientDot
+                size={36}
+                id="p3-dot-black"
+                from="#3A3A40"
+                to="#0E0E11"
+                glyph="✓"
+              />
+              <Text style={styles.lightUpNextWhen}>
                 • {t('onboarding.example1Meta').split('· ')[1] ?? ''}
               </Text>
             </View>
-            <Text style={styles.upNextName}>
+            <Text style={styles.lightUpNextName}>
               {t('onboarding.example1Name')}
             </Text>
-            <Text style={styles.upNextMeta}>
+            <Text style={styles.lightUpNextMeta}>
               {t('onboarding.example1Meta')}
             </Text>
           </Reveal>
@@ -475,20 +581,24 @@ export default function OnboardingScreen({ onFinish }: Props) {
             delay={320}
             duration={340}
             active={isActive(2)}
-            style={styles.upNextCard}
+            style={styles.lightUpNextCard}
           >
             <View style={styles.upNextHead}>
-              <View style={[styles.habitDot, styles.dotBlue]}>
-                <Text style={styles.clusterGlyph}>≈</Text>
-              </View>
-              <Text style={styles.upNextWhen}>
+              <GradientDot
+                size={36}
+                id="p3-dot-blue"
+                from="#6FB3FF"
+                to="#2F6FED"
+                glyph="≈"
+              />
+              <Text style={styles.lightUpNextWhen}>
                 • {t('onboarding.example2Meta').split('· ')[1] ?? ''}
               </Text>
             </View>
-            <Text style={styles.upNextName}>
+            <Text style={styles.lightUpNextName}>
               {t('onboarding.example2Name')}
             </Text>
-            <Text style={styles.upNextMeta}>
+            <Text style={styles.lightUpNextMeta}>
               {t('onboarding.example2Meta')}
             </Text>
           </Reveal>
@@ -537,9 +647,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
       </RevealText>
       <Animated.View
         key={pageKey(3, 'p4-moon')}
-        entering={
-          isActive(3) ? ZoomIn.delay(180).duration(500) : undefined
-        }
+        entering={isActive(3) ? ZoomIn.delay(180).duration(500) : undefined}
         style={styles.moonWrap}
       >
         <View style={styles.moon}>
@@ -571,7 +679,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor={BG_TOP} />
+      <StatusBar barStyle="dark-content" backgroundColor={BG_TOP} />
       <GradientBackground />
       <FlatList
         ref={listRef}
@@ -631,6 +739,12 @@ const styles = StyleSheet.create({
   titleMuted: {
     color: TITLE_MUTED,
   },
+  titleDark: {
+    color: TITLE_DARK,
+  },
+  titleDarkMuted: {
+    color: '#3E5546',
+  },
   body: {
     textAlign: 'center',
     color: BODY,
@@ -640,10 +754,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 8,
   },
+  bodyDark: {
+    color: BODY_DARK,
+  },
   cardsRow: {
     flexDirection: 'row',
-    gap: 14,
-    marginTop: 44,
+    gap: 12,
+    marginTop: 32,
   },
   glassCard: {
     flex: 1,
@@ -654,6 +771,50 @@ const styles = StyleSheet.create({
     padding: 16,
     minHeight: 168,
     justifyContent: 'center',
+  },
+  lightCard: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: LIGHT_CARD_BG_SOFT,
+    borderColor: LIGHT_CARD_BORDER,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 16,
+    minHeight: 172,
+    justifyContent: 'center',
+    shadowColor: '#0F2418',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+  lightCardLabel: {
+    color: LIGHT_LABEL,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  lightCardBig: {
+    color: TITLE_DARK,
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    flexShrink: 1,
+  },
+  lightCardActive: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: LIGHT_LABEL,
+  },
+  lightDivider: {
+    height: 1,
+    backgroundColor: LIGHT_DIVIDER,
+    marginVertical: 12,
+  },
+  lightCardSub: {
+    color: LIGHT_LABEL,
+    fontSize: 13,
+    fontWeight: '600',
   },
   cardLabel: {
     color: BODY,
@@ -686,7 +847,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    height: 44,
+    height: 40,
+  },
+  dotOverlap: {
+    marginLeft: -10,
   },
   clusterDot: {
     width: 40,
@@ -722,6 +886,52 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 24,
     padding: 18,
+  },
+  lightUpNextWrap: {
+    marginTop: 32,
+    backgroundColor: LIGHT_CARD_BG_SOFT,
+    borderColor: LIGHT_CARD_BORDER,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 18,
+    shadowColor: '#0F2418',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
+  lightUpNextTitle: {
+    color: TITLE_DARK,
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  lightUpNextCard: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: LIGHT_CARD_BG,
+    borderColor: LIGHT_CARD_BORDER,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+  },
+  lightUpNextWhen: {
+    color: LIGHT_LABEL,
+    fontSize: 12,
+    fontWeight: '700',
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+  lightUpNextName: {
+    color: TITLE_DARK,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  lightUpNextMeta: {
+    color: LIGHT_LABEL,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
   },
   upNextBadge: {
     position: 'absolute',
@@ -810,7 +1020,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    color: BODY,
+    color: BODY_DARK,
     fontSize: 19,
     fontWeight: '600',
   },
