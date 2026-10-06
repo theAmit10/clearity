@@ -39,6 +39,7 @@ import {
   saveOnboardingSeen,
 } from './src/services/storage';
 import type { OnboardingResult } from './src/screens/OnboardingScreen';
+import type { IntroFilmResult } from './src/components/intro/IntroFilm';
 import crashlytics from '@react-native-firebase/crashlytics';
 
 function AppContent() {
@@ -51,7 +52,7 @@ function AppContent() {
   const habitNotifications = useHabitStore(s => s.habitNotifications);
   const adminNotifications = useHabitStore(s => s.adminNotifications);
   const [onboardingState, setOnboardingState] = useState<
-    'checking' | 'show' | 'done'
+    'checking' | 'film' | 'show' | 'done'
   >('checking');
   const { theme } = useTheme();
 
@@ -99,10 +100,10 @@ function AppContent() {
     initGoals();
     loadOnboardingSeen()
       .then(seen => {
-        setOnboardingState(seen === true ? 'done' : 'show');
+        setOnboardingState(seen === true ? 'done' : 'film');
       })
       .catch(() => {
-        setOnboardingState('show');
+        setOnboardingState('film');
       });
     return () => {
       unsubVariant();
@@ -112,10 +113,26 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (onboardingState === 'show') {
+    if (onboardingState === 'film') {
+      trackEvent('intro_film_started');
+    } else if (onboardingState === 'show') {
       trackEvent('onboarding_started');
     }
   }, [onboardingState]);
+
+  const handleIntroFinish = useCallback(
+    (result: IntroFilmResult, atScene: number) => {
+      if (result === 'completed') {
+        trackEvent('intro_film_completed');
+      } else {
+        trackEvent('intro_film_skipped', { at_scene: atScene + 1 });
+      }
+      // Onboarding-seen persists only on real onboarding finish; a kill
+      // during the film replays the film next launch.
+      setOnboardingState('show');
+    },
+    [],
+  );
 
   const handleOnboardingFinish = useCallback(
     async (result: OnboardingResult, atIndex: number) => {
@@ -180,6 +197,8 @@ function AppContent() {
 
   return (
     <RootNavigator
+      showIntroFilm={onboardingState === 'film'}
+      onIntroFinish={handleIntroFinish}
       showOnboarding={onboardingState === 'show'}
       onOnboardingFinish={handleOnboardingFinish}
     />

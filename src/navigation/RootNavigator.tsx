@@ -14,6 +14,7 @@ import HabitDetailScreen from '../screens/HabitDetailScreen';
 import OnboardingScreen, {
   type OnboardingResult,
 } from '../screens/OnboardingScreen';
+import IntroFilm, { type IntroFilmResult } from '../components/intro/IntroFilm';
 import AddEditHabitScreen from '../screens/AddEditHabitScreen';
 import NewCategoryScreen from '../screens/NewCategoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -169,6 +170,11 @@ function SettingsStack() {
         options={{ headerShown: false, presentation: 'modal' }}
       />
       <Stack.Screen
+        name="IntroFilmPreview"
+        component={IntroFilmPreviewScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
         name="Diagnostics"
         component={DiagnosticsScreen}
         options={{ headerShown: false }}
@@ -233,10 +239,19 @@ function OnboardingPreviewScreen({ navigation }: any) {
   return <OnboardingScreen onFinish={() => navigation.goBack()} />;
 }
 
+// Same preview contract for the intro film: no analytics, no persistence.
+function IntroFilmPreviewScreen({ navigation }: any) {
+  return <IntroFilm onDone={() => navigation.goBack()} />;
+}
+
 export default function RootNavigator({
+  showIntroFilm,
+  onIntroFinish,
   showOnboarding,
   onOnboardingFinish,
 }: {
+  showIntroFilm?: boolean;
+  onIntroFinish?: (result: IntroFilmResult, atScene: number) => void;
   showOnboarding?: boolean;
   onOnboardingFinish?: (result: OnboardingResult, atIndex: number) => void;
 }) {
@@ -251,6 +266,14 @@ export default function RootNavigator({
       border: 'transparent',
     },
   };
+
+  if (showIntroFilm) {
+    return (
+      <IntroFilm
+        onDone={(result, atScene) => onIntroFinish?.(result, atScene)}
+      />
+    );
+  }
 
   if (showOnboarding) {
     return (

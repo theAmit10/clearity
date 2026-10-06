@@ -100,6 +100,9 @@ If auth is added in the future:
 | `onboarding_started` | Onboarding shows on first launch | — | `App.tsx` |
 | `onboarding_completed` | User taps Continue on the last onboarding screen | — | `App.tsx` |
 | `onboarding_skipped` | User taps Skip on an onboarding screen | `at_screen` | `App.tsx` |
+| `intro_film_started` | Intro film shows before onboarding on first launch | — | `App.tsx` |
+| `intro_film_completed` | Intro film plays to the end (auto-handoff to onboarding) | — | `App.tsx` |
+| `intro_film_skipped` | User taps Skip during the intro film | `at_scene` | `App.tsx` |
 
 ### Value Moment
 
