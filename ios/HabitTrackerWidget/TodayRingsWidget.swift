@@ -99,10 +99,19 @@ struct RingsEntryView: View {
     )
   }
 
+  /// Subtle glass sheen: lighter at the top, settling into the card black.
+  private var cardFill: LinearGradient {
+    LinearGradient(
+      colors: [Color(hex: "#2A2A2A")!, Color(hex: "#141414")!],
+      startPoint: .top,
+      endPoint: .bottom
+    )
+  }
+
   var body: some View {
     ZStack {
       cardShape
-        .fill(Color(hex: "#141414")!)
+        .fill(cardFill)
       if entry.rings.isEmpty {
         VStack(spacing: 6) {
           Image(systemName: "circle.dotted")
@@ -123,7 +132,7 @@ struct RingsEntryView: View {
       }
     }
     .padding(7)
-    .containerBackground(.clear, for: .widget)
+    .containerBackground(.black, for: .widget)
   }
 }
 
