@@ -1,9 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, StatusBar, AccessibilityInfo } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  StatusBar,
+  AccessibilityInfo,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import Video from 'react-native-video';
 import { logEvent } from '../../services/logger';
@@ -12,7 +20,13 @@ export type IntroFilmResult = 'completed' | 'skipped';
 
 interface Props {
   onDone: (result: IntroFilmResult, atScene: number) => void;
+  /** Fired once ~1.5s before the end so the caller can bloom the next
+   *  screen in over the tail. Defaults to noop (previews unaffected). */
+  onTail?: () => void;
 }
+
+/** Seconds before `onEnd` when the handoff bloom begins. */
+const TAIL_LEAD_S = 1.5;
 
 /**
  * Fullscreen intro film from the bundled `video.mp4` (with sound).
@@ -21,11 +35,14 @@ interface Props {
  * Analytics live in the caller's finish handler (like OnboardingScreen)
  * so previews stay event-free.
  */
-export default function IntroFilm({ onDone }: Props) {
+export default function IntroFilm({ onDone, onTail }: Props) {
   const [reduceMotion, setReduceMotion] = useState(false);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
+  const tailRef = useRef(onTail);
+  tailRef.current = onTail;
   const finishedRef = useRef(false);
+  const tailFiredRef = useRef(false);
   const durationRef = useRef(0);
 
   useEffect(() => {
@@ -41,8 +58,12 @@ export default function IntroFilm({ onDone }: Props) {
   }, []);
 
   const progress = useSharedValue(0);
+  const dim = useSharedValue(1);
   const barStyle = useAnimatedStyle(() => ({
     width: `${Math.min(1, Math.max(0, progress.value)) * 100}%`,
+  }));
+  const videoStyle = useAnimatedStyle(() => ({
+    opacity: dim.value,
   }));
 
   const handleSkip = useCallback(() => {
@@ -62,7 +83,10 @@ export default function IntroFilm({ onDone }: Props) {
             testID="introfilm-continue"
             onPress={() => finish('completed')}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.pill, pressed && styles.pillPressed]}
+            style={({ pressed }) => [
+              styles.pill,
+              pressed && styles.pillPressed,
+            ]}
           >
             <Text style={styles.pillText}>Continue</Text>
           </Pressable>
@@ -74,33 +98,46 @@ export default function IntroFilm({ onDone }: Props) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
-      <Video
-        testID="introfilm-video"
-        source={require('../../assets/video.mp4')}
-        style={styles.video}
-        resizeMode="cover"
-        controls={false}
-        paused={false}
-        repeat={false}
-        playInBackground={false}
-        muted={false}
-        volume={1.0}
-        // Respect the iPhone mute switch: silent when silenced.
-        ignoreSilentSwitch="obey"
-        progressUpdateInterval={250}
-        onLoad={e => {
-          durationRef.current = e.duration;
-        }}
-        onProgress={e => {
-          const total = durationRef.current;
-          progress.value = total > 0 ? e.currentTime / total : 0;
-        }}
-        onEnd={() => finish('completed')}
-        onError={err => {
-          logEvent('error', 'Intro film failed to play', err);
-          finish('completed');
-        }}
-      />
+      <Animated.View style={[styles.video, videoStyle]}>
+        <Video
+          testID="introfilm-video"
+          source={require('../../assets/video.mp4')}
+          style={styles.videoInner}
+          resizeMode="cover"
+          controls={false}
+          paused={false}
+          repeat={false}
+          playInBackground={false}
+          muted={false}
+          volume={1.0}
+          // Respect the iPhone mute switch: silent when silenced.
+          ignoreSilentSwitch="obey"
+          progressUpdateInterval={250}
+          onLoad={e => {
+            durationRef.current = e.duration;
+          }}
+          onProgress={e => {
+            const total = durationRef.current;
+            progress.value = total > 0 ? e.currentTime / total : 0;
+            // Tail: fade the picture out (audio keeps playing) and let the
+            // caller bloom the onboarding atoms over the last stretch.
+            if (
+              !tailFiredRef.current &&
+              total > 0 &&
+              total - e.currentTime <= TAIL_LEAD_S
+            ) {
+              tailFiredRef.current = true;
+              dim.value = withTiming(0, { duration: 1000 });
+              tailRef.current?.();
+            }
+          }}
+          onEnd={() => finish('completed')}
+          onError={err => {
+            logEvent('error', 'Intro film failed to play', err);
+            finish('completed');
+          }}
+        />
+      </Animated.View>
       <View style={styles.overlay} pointerEvents="box-none">
         <View style={styles.topRow}>
           <Pressable
@@ -134,6 +171,9 @@ const styles = StyleSheet.create({
   video: {
     ...StyleSheet.absoluteFill,
   },
+  videoInner: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     paddingHorizontal: 28,
@@ -149,7 +189,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 10,
   },
   bottomTrack: {
     height: 3,

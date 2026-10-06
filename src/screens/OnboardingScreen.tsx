@@ -28,6 +28,9 @@ export type OnboardingResult = 'completed' | 'skipped';
 
 interface Props {
   onFinish: (result: OnboardingResult, atIndex: number) => void;
+  /** When false (film-tail overlay), CTA/Skip presses are ignored until
+   *  the film unmounts. Defaults to true. */
+  interactive?: boolean;
 }
 
 function PillButton({
@@ -157,7 +160,7 @@ function PagerDots({ index, total }: { index: number; total: number }) {
   );
 }
 
-export default function OnboardingScreen({ onFinish }: Props) {
+export default function OnboardingScreen({ onFinish, interactive = true }: Props) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<number>>(null);
@@ -171,7 +174,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
   }, []);
 
   const handlePrimary = useCallback(() => {
-    if (morphingRef.current) return;
+    if (!interactive || morphingRef.current) return;
     if (index >= 3) {
       onFinish('completed', 3);
       return;
@@ -187,11 +190,12 @@ export default function OnboardingScreen({ onFinish }: Props) {
         morphingRef.current = false;
       },
     );
-  }, [index, goTo, onFinish]);
+  }, [index, goTo, onFinish, interactive]);
 
   const handleSkip = useCallback(() => {
+    if (!interactive) return;
     onFinish('skipped', index);
-  }, [index, onFinish]);
+  }, [index, onFinish, interactive]);
 
   const isActive = (i: number) => i === index;
   // Key suffix flips between "on-<index>" and "off" so the active page
@@ -270,10 +274,15 @@ export default function OnboardingScreen({ onFinish }: Props) {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor={BG} />
-      {/* Shared-element atom canvas — mounted once, never remounts. */}
-      <View style={styles.canvasWrap} pointerEvents="none">
+      {/* Shared-element atom canvas — mounted once, never remounts.
+          Blooms in on mount so the film-tail handoff materializes. */}
+      <Animated.View
+        entering={FadeIn.duration(900)}
+        style={styles.canvasWrap}
+        pointerEvents="none"
+      >
         <MorphField ref={morphRef} />
-      </View>
+      </Animated.View>
       <FlatList
         ref={listRef}
         data={[0, 1, 2, 3]}

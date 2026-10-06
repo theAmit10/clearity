@@ -4,6 +4,7 @@ import { View, ActivityIndicator, StyleSheet, LogBox, AppState } from 'react-nat
 
 LogBox.ignoreLogs([/InteractionManager has been deprecated/]);
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import RootNavigator from './src/navigation/RootNavigator';
 import ErrorBoundary from './src/components/ErrorBoundary';
@@ -54,6 +55,9 @@ function AppContent() {
   const [onboardingState, setOnboardingState] = useState<
     'checking' | 'film' | 'show' | 'done'
   >('checking');
+  // True once the film's tail starts: the onboarding atoms bloom over the
+  // fading video, but the film stays mounted until `onEnd` stops audio.
+  const [filmHandoff, setFilmHandoff] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -129,10 +133,15 @@ function AppContent() {
       }
       // Onboarding-seen persists only on real onboarding finish; a kill
       // during the film replays the film next launch.
+      setFilmHandoff(false);
       setOnboardingState('show');
     },
     [],
   );
+
+  const handleIntroTail = useCallback(() => {
+    setFilmHandoff(true);
+  }, []);
 
   const handleOnboardingFinish = useCallback(
     async (result: OnboardingResult, atIndex: number) => {
@@ -199,6 +208,8 @@ function AppContent() {
     <RootNavigator
       showIntroFilm={onboardingState === 'film'}
       onIntroFinish={handleIntroFinish}
+      onIntroTail={handleIntroTail}
+      handoffToOnboarding={filmHandoff}
       showOnboarding={onboardingState === 'show'}
       onOnboardingFinish={handleOnboardingFinish}
     />
@@ -209,9 +220,11 @@ export default function App() {
   return (
     <ThemeProvider>
       <ErrorBoundary>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
           <AppContent />
-        </GestureHandlerRootView>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
       </ErrorBoundary>
     </ThemeProvider>
   );

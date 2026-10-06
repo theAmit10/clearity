@@ -1,4 +1,6 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import {
   NavigationContainer,
   DefaultTheme,
@@ -247,11 +249,15 @@ function IntroFilmPreviewScreen({ navigation }: any) {
 export default function RootNavigator({
   showIntroFilm,
   onIntroFinish,
+  onIntroTail,
+  handoffToOnboarding,
   showOnboarding,
   onOnboardingFinish,
 }: {
   showIntroFilm?: boolean;
   onIntroFinish?: (result: IntroFilmResult, atScene: number) => void;
+  onIntroTail?: () => void;
+  handoffToOnboarding?: boolean;
   showOnboarding?: boolean;
   onOnboardingFinish?: (result: OnboardingResult, atIndex: number) => void;
 }) {
@@ -269,9 +275,25 @@ export default function RootNavigator({
 
   if (showIntroFilm) {
     return (
-      <IntroFilm
-        onDone={(result, atScene) => onIntroFinish?.(result, atScene)}
-      />
+      <View style={handoffStyles.host}>
+        <IntroFilm
+          onDone={(result, atScene) => onIntroFinish?.(result, atScene)}
+          onTail={() => onIntroTail?.()}
+        />
+        {handoffToOnboarding && (
+          <Animated.View
+            entering={FadeIn.duration(900)}
+            style={handoffStyles.overlay}
+            pointerEvents="box-none"
+          >
+            {/* Not interactive until the film unmounts at `onEnd`. */}
+            <OnboardingScreen
+              interactive={false}
+              onFinish={(result, atIndex) => onOnboardingFinish?.(result, atIndex)}
+            />
+          </Animated.View>
+        )}
+      </View>
     );
   }
 
@@ -302,6 +324,16 @@ export default function RootNavigator({
     </NavigationContainer>
   );
 }
+
+const handoffStyles = StyleSheet.create({
+  host: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+  },
+});
 
 // import React from 'react';
 // import { NavigationContainer } from '@react-navigation/native';

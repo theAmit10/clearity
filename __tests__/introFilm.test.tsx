@@ -80,3 +80,45 @@ test('playback error falls through to onboarding instead of hanging', () => {
   expect(onDone).toHaveBeenCalledTimes(1);
   expect(onDone).toHaveBeenCalledWith('completed', 0);
 });
+
+test('tail fires once inside the last 1.5s, never before', () => {
+  const onTail = jest.fn();
+  act(() => {
+    ReactTestRenderer.create(<IntroFilm onDone={() => {}} onTail={onTail} />);
+  });
+  act(() => {
+    handlers.onLoad({ duration: 10 });
+  });
+  act(() => {
+    handlers.onProgress({ currentTime: 5 });
+  });
+  expect(onTail).not.toHaveBeenCalled();
+  act(() => {
+    handlers.onProgress({ currentTime: 8.4 });
+  });
+  expect(onTail).not.toHaveBeenCalled();
+  act(() => {
+    handlers.onProgress({ currentTime: 8.6 });
+  });
+  expect(onTail).toHaveBeenCalledTimes(1);
+  act(() => {
+    handlers.onProgress({ currentTime: 9.5 });
+  });
+  expect(onTail).toHaveBeenCalledTimes(1);
+});
+
+test('no tail without a known duration (falls back to hard cut on end)', () => {
+  const onTail = jest.fn();
+  const onDone = jest.fn();
+  act(() => {
+    ReactTestRenderer.create(<IntroFilm onDone={onDone} onTail={onTail} />);
+  });
+  act(() => {
+    handlers.onProgress({ currentTime: 99 });
+  });
+  expect(onTail).not.toHaveBeenCalled();
+  act(() => {
+    handlers.onEnd();
+  });
+  expect(onDone).toHaveBeenCalledWith('completed', 0);
+});
