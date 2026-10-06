@@ -4,7 +4,8 @@ export type ParticleVariant =
   | 'rings'
   | 'funnel'
   | 'check'
-  | 'target';
+  | 'target'
+  | 'mountain';
 
 export interface ParticleDot {
   /** 0..100 in viewBox space */
@@ -24,6 +25,7 @@ export const PARTICLE_DOT_COUNT: Record<ParticleVariant, number> = {
   // Morph identity count — keep in sync with MORPH_COUNT below.
   check: 650,
   target: 650,
+  mountain: 650,
 };
 
 /** Fixed identity count for the shared-element morph engine: dot `i`
@@ -44,9 +46,10 @@ export const MORPH_ORDER: ParticleVariant[] = [
  * for the page-2 pulse loop. Segment indices in MorphField address this
  * array; page taps only ever use 0..3.
  */
-export const MORPH_LAYOUT_KEYS: ParticleVariant[] = [...MORPH_ORDER, 'check', 'target'];
+export const MORPH_LAYOUT_KEYS: ParticleVariant[] = [...MORPH_ORDER, 'check', 'target', 'mountain'];
 export const CHECK_LAYOUT_INDEX = MORPH_ORDER.length;
 export const TARGET_LAYOUT_INDEX = MORPH_ORDER.length + 1;
+export const MOUNTAIN_LAYOUT_INDEX = MORPH_ORDER.length + 2;
 
 /** Checkmark arms in viewBox space: [x1, y1, x2, y2]. Exported for tests. */
 export const CHECK_SEGMENTS: [number, number, number, number][] = [
@@ -59,6 +62,11 @@ export const TARGET_CENTER: [number, number] = [50, 44];
 export const TARGET_RADII = [10, 20, 30];
 /** Share of target dots forming the dense bullseye (rest trace the rings). */
 const TARGET_BULLSEYE_SHARE = 0.12;
+
+/** Solid mountain silhouette: peak + base corners. Exported for tests. */
+export const MOUNTAIN_PEAK: [number, number] = [50, 20];
+export const MOUNTAIN_BASE_LEFT: [number, number] = [16, 72];
+export const MOUNTAIN_BASE_RIGHT: [number, number] = [84, 72];
 
 export interface MorphMotion {
   phase: number;
@@ -267,6 +275,34 @@ function targetLayout(count: number, rand: () => number): ParticleDot[] {
   return dots;
 }
 
+/**
+ * Solid mountain silhouette: dots packed uniformly inside the peak triangle
+ * via scanline sampling, with an opacity lift near the summit for a
+ * snowcap glint.
+ */
+function mountainLayout(count: number, rand: () => number): ParticleDot[] {
+  const dots: ParticleDot[] = [];
+  const [px, py] = MOUNTAIN_PEAK;
+  const [blx, bly] = MOUNTAIN_BASE_LEFT;
+  const [brx] = MOUNTAIN_BASE_RIGHT;
+  for (let i = 0; i < count; i++) {
+    const t = Math.sqrt(rand()); // uniform area fill (wider rows get more dots)
+    const y = py + (bly - py) * t;
+    const left = px + (blx - px) * t;
+    const right = px + (brx - px) * t;
+    const x = left + rand() * (right - left);
+    // Snowcap: brighter toward the summit.
+    const snow = 1 - t;
+    dots.push({
+      x,
+      y,
+      r: 0.5 + rand() * 0.7,
+      opacity: 0.3 + rand() * 0.45 + snow * 0.25,
+    });
+  }
+  return dots;
+}
+
 export function getParticleLayout(
   variant: ParticleVariant,
   count?: number,
@@ -287,6 +323,8 @@ export function getParticleLayout(
       return checkLayout(n, rand);
     case 'target':
       return targetLayout(n, rand);
+    case 'mountain':
+      return mountainLayout(n, rand);
   }
 }
 
@@ -320,6 +358,7 @@ export function getMorphSet(count: number = MORPH_COUNT): {
     funnel: orderDots(getParticleLayout('funnel', count + 80)),
     check: orderDots(getParticleLayout('check', count + 80)),
     target: orderDots(getParticleLayout('target', count + 80)),
+    mountain: orderDots(getParticleLayout('mountain', count + 80)),
   } as Record<ParticleVariant, ParticleDot[]>;
 
   const rand = mulberry32(0xC10C);

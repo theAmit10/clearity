@@ -3,6 +3,9 @@ import {
   CHECK_SEGMENTS,
   TARGET_CENTER,
   TARGET_RADII,
+  MOUNTAIN_PEAK,
+  MOUNTAIN_BASE_LEFT,
+  MOUNTAIN_BASE_RIGHT,
   getMorphSet,
   getParticleLayout,
 } from '../src/components/onboarding/particleLayouts';
@@ -74,4 +77,45 @@ test('morph set includes a stable target formation', () => {
   const second = getMorphSet(MORPH_COUNT);
   expect(first.layouts.target).toHaveLength(MORPH_COUNT);
   expect(first.layouts.target).toEqual(second.layouts.target);
+});
+
+function insideMountain(x: number, y: number): boolean {
+  // Barycentric half-plane check against the peak triangle.
+  const [px, py] = MOUNTAIN_PEAK;
+  const [blx, bly] = MOUNTAIN_BASE_LEFT;
+  const [brx, bry] = MOUNTAIN_BASE_RIGHT;
+  const sign = (
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    cx: number,
+    cy: number,
+  ) => (ax - cx) * (by - cy) - (bx - cx) * (ay - cy);
+  const d1 = sign(x, y, px, py, blx, bly);
+  const d2 = sign(x, y, blx, bly, brx, bry);
+  const d3 = sign(x, y, brx, bry, px, py);
+  const hasNeg = d1 < 0 || d2 < 0 || d3 < 0;
+  const hasPos = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(hasNeg && hasPos);
+}
+
+test('mountain layout returns the morph identity count', () => {
+  expect(getParticleLayout('mountain', MORPH_COUNT)).toHaveLength(
+    MORPH_COUNT,
+  );
+});
+
+test('mountain dots pack inside the peak triangle', () => {
+  const dots = getParticleLayout('mountain', MORPH_COUNT);
+  for (const d of dots) {
+    expect(insideMountain(d.x, d.y)).toBe(true);
+  }
+});
+
+test('morph set includes a stable mountain formation', () => {
+  const first = getMorphSet(MORPH_COUNT);
+  const second = getMorphSet(MORPH_COUNT);
+  expect(first.layouts.mountain).toHaveLength(MORPH_COUNT);
+  expect(first.layouts.mountain).toEqual(second.layouts.mountain);
 });

@@ -207,7 +207,7 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
     i === 0 ? t('onboarding.getStarted') : t('onboarding.continue');
 
   const bodies: (string | null)[] = [
-    null,
+    t('onboarding.page1Body'),
     t('onboarding.page2Body'),
     t('onboarding.page3Body'),
     t('onboarding.page4Body'),

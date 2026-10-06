@@ -24,6 +24,7 @@ import {
   MORPH_LAYOUT_KEYS,
   CHECK_LAYOUT_INDEX,
   TARGET_LAYOUT_INDEX,
+  MOUNTAIN_LAYOUT_INDEX,
   getMorphSet,
 } from './particleLayouts';
 import MorphDot from './MorphDot';
@@ -50,6 +51,7 @@ interface PulseConfig {
 const PULSE_BY_PAGE: Record<number, PulseConfig> = {
   1: { layout: CHECK_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
   2: { layout: TARGET_LAYOUT_INDEX, form: 1800, hold: 2000, disperse: 1800, rest: 1400 },
+  3: { layout: MOUNTAIN_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
 };
 
 const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
