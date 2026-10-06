@@ -49,8 +49,16 @@ const COLORS = [
   '#2E7D32',
   '#8E8E93',
   '#6E6E73',
-  '#1C1C1E',
+  '#48484A',
 ];
+
+// Legacy '#1C1C1E' was near-invisible on the dark background (#1E1E1E).
+// Remap it for display so previously saved goals stay visible.
+const LEGACY_BLACK = '#1C1C1E';
+const VISIBLE_DARK = '#48484A';
+function resolveVisibleColor(color: string, isDark: boolean): string {
+  return isDark && color === LEGACY_BLACK ? VISIBLE_DARK : color;
+}
 
 function formatDateTime(d: Date): string {
   return d.toLocaleString(undefined, {
@@ -74,7 +82,10 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const [title, setTitle] = useState(existing?.title ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
-  const [color, setColor] = useState(existing?.color ?? COLORS[0]);
+  const [color, setColor] = useState(
+    existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? COLORS[0]),
+  );
+  const displayColor = resolveVisibleColor(color, theme.isDark);
   const [startAt, setStartAt] = useState<Date>(
     existing ? new Date(existing.startAt) : new Date(),
   );
@@ -234,13 +245,13 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
                   forcePressed={selected}
                   style={[
                     styles.iconOption,
-                    selected && { backgroundColor: `${color}26` },
+                    selected && { backgroundColor: `${displayColor}26` },
                   ]}
                   onPress={() => setIcon(key)}
                 >
                   <Icon
                     size={22}
-                    color={selected ? color : theme.colors.textMuted}
+                    color={selected ? displayColor : theme.colors.textMuted}
                   />
                 </NeumorphicButton>
               );
@@ -414,7 +425,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
                           distance={4}
                           disabled={!pickerDoneValid}
                           backgroundColor={
-                            pickerDoneValid ? color : theme.colors.insetFill
+                            pickerDoneValid ? displayColor : theme.colors.insetFill
                           }
                           style={styles.modalActionBtn}
                           onPress={commitPicker}
@@ -443,7 +454,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
               radius={16}
               distance={6}
               disabled={!canSave}
-              backgroundColor={canSave ? color : theme.colors.insetFill}
+              backgroundColor={canSave ? displayColor : theme.colors.insetFill}
               style={styles.saveButton}
               onPress={handleSave}
             >

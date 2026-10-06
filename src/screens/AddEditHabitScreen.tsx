@@ -32,8 +32,16 @@ const COLORS = [
   '#5856D6', '#5E5CE6', '#AF52DE', '#BF5AF2',
   '#FF2D55', '#FF375F',
   '#A2845E', '#C2703D', '#556B2F', '#2E7D32',
-  '#8E8E93', '#6E6E73', '#1C1C1E',
+  '#8E8E93', '#6E6E73', '#48484A',
 ];
+
+// Legacy '#1C1C1E' was near-invisible on the dark background (#1E1E1E).
+// Remap it for display so previously saved habits stay visible.
+const LEGACY_BLACK = '#1C1C1E';
+const VISIBLE_DARK = '#48484A';
+function resolveVisibleColor(color: string, isDark: boolean): string {
+  return isDark && color === LEGACY_BLACK ? VISIBLE_DARK : color;
+}
 
 const FREQUENCY_OPTIONS: { key: FrequencyType; label: TranslationKey }[] = [
   { key: 'daily', label: 'frequency.daily' },
@@ -62,7 +70,10 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [name, setName] = useState(existing?.name ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
-  const [color, setColor] = useState(existing?.color ?? COLORS[0]);
+  const [color, setColor] = useState(
+    existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? COLORS[0]),
+  );
+  const displayColor = resolveVisibleColor(color, theme.isDark);
   const [goal, setGoal] = useState(existing?.goal ?? '');
   const [frequency, setFrequency] = useState<FrequencyType>(existing?.frequency ?? 'daily');
   const [frequencyValue, setFrequencyValue] = useState(existing?.frequencyValue?.toString() ?? '');
@@ -216,13 +227,13 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                   forcePressed={selected}
                   style={[
                     styles.iconOption,
-                    selected && { backgroundColor: `${color}26` },
+                    selected && { backgroundColor: `${displayColor}26` },
                   ]}
                   onPress={() => setIcon(key)}
                 >
                   <Icon
                     size={22}
-                    color={selected ? color : theme.colors.textMuted}
+                    color={selected ? displayColor : theme.colors.textMuted}
                   />
                 </NeumorphicButton>
               );
@@ -268,14 +279,14 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                   forcePressed={selected}
                   style={[
                     styles.freqPill,
-                    selected && { backgroundColor: `${color}26` },
+                    selected && { backgroundColor: `${displayColor}26` },
                   ]}
                   onPress={() => setFrequency(opt.key)}
                 >
                   <Text
                     style={[
                       styles.freqPillText,
-                      { color: selected ? color : theme.colors.textMuted },
+                      { color: selected ? displayColor : theme.colors.textMuted },
                     ]}
                   >
                     {t(opt.label)}
@@ -362,15 +373,15 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
                   forcePressed={selected}
                   style={[
                     styles.catPill,
-                    selected && { backgroundColor: `${color}26` },
+                    selected && { backgroundColor: `${displayColor}26` },
                   ]}
                   onPress={() => setCategory(prev => prev === cat.key ? 'none' : cat.key)}
                 >
-                  <CatIcon size={20} color={selected ? color : theme.colors.textMuted} />
+                  <CatIcon size={20} color={selected ? displayColor : theme.colors.textMuted} />
                   <Text
                     style={[
                       styles.catPillText,
-                      { color: selected ? color : theme.colors.textMuted },
+                      { color: selected ? displayColor : theme.colors.textMuted },
                     ]}
                   >
                     {cat.isCustom ? cat.name : t(`categories.${cat.key}` as TranslationKey)}
@@ -421,7 +432,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             radius={16}
             distance={6}
             disabled={!canSave}
-            backgroundColor={canSave ? color : theme.colors.insetFill}
+            backgroundColor={canSave ? displayColor : theme.colors.insetFill}
             style={styles.saveButton}
             onPress={handleSave}
           >
