@@ -43,6 +43,9 @@ widget_group.set_path('HabitTrackerWidget')
 # Add existing files to group
 widget_group.new_file('HabitTrackerWidgetBundle.swift')
 widget_group.new_file('WeekHeatmapWidget.swift')
+widget_group.new_file('TodayRingsShared.swift')
+widget_group.new_file('TodayRingsWidget.swift')
+widget_group.new_file('RingsLockScreenWidget.swift')
 plist_ref = widget_group.new_file('Info.plist')
 
 # Create product reference for widget
@@ -65,12 +68,17 @@ widget_target.product_name = WIDGET_PRODUCT_NAME
 
 # Remove default sources and add our files
 widget_target.source_build_phase.files.clear if widget_target.source_build_phase.files
-widget_target.source_build_phase.add_file_reference(
-  widget_group.files.find { |f| f.path == 'HabitTrackerWidgetBundle.swift' }
-)
-widget_target.source_build_phase.add_file_reference(
-  widget_group.files.find { |f| f.path == 'WeekHeatmapWidget.swift' }
-)
+%w[
+  HabitTrackerWidgetBundle.swift
+  WeekHeatmapWidget.swift
+  TodayRingsShared.swift
+  TodayRingsWidget.swift
+  RingsLockScreenWidget.swift
+].each do |filename|
+  widget_target.source_build_phase.add_file_reference(
+    widget_group.files.find { |f| f.path == filename }
+  )
+end
 
 # Add Info.plist
 widget_target.build_configurations.each do |config|

@@ -25,6 +25,7 @@
 		E5A1B2C3D4E5F60718293A01 /* YearHeatmapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */; };
 		F1A2B3C4D5E60718293A410 /* TodayRingsShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */; };
 		F1A2B3C4D5E60718293A420 /* TodayRingsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */; };
+		F1A2B3C4D5E60718293A430 /* RingsLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A431 /* RingsLockScreenWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +74,7 @@
 		E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = YearHeatmapWidget.swift; sourceTree = "<group>"; };
 		ECB68286C4CC2E1B6BBFCC87 /* Pods-Habita.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Habita.debug.xcconfig"; path = "Target Support Files/Pods-Habita/Pods-Habita.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F1A2B3C4D5E60718293A431 /* RingsLockScreenWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RingsLockScreenWidget.swift; sourceTree = "<group>"; };
 		F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayRingsShared.swift; sourceTree = "<group>"; };
 		F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayRingsWidget.swift; sourceTree = "<group>"; };
 		F3E112B365D6D93D60F7F265 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WidgetKit.framework; sourceTree = SDKROOT; };
@@ -138,6 +140,7 @@
 				E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */,
 				F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */,
 				F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */,
+				F1A2B3C4D5E60718293A431 /* RingsLockScreenWidget.swift */,
 				7A577561DDD909B3DE3C9D34 /* Info.plist */,
 			);
 			path = HabitTrackerWidget;
@@ -458,6 +461,7 @@
 				E5A1B2C3D4E5F60718293A01 /* YearHeatmapWidget.swift in Sources */,
 				F1A2B3C4D5E60718293A410 /* TodayRingsShared.swift in Sources */,
 				F1A2B3C4D5E60718293A420 /* TodayRingsWidget.swift in Sources */,
+				F1A2B3C4D5E60718293A430 /* RingsLockScreenWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
