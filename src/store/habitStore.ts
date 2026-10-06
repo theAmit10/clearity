@@ -34,6 +34,8 @@ interface HabitState {
   proExpired: boolean;
   init: () => Promise<void>;
   refreshProStatus: () => Promise<void>;
+  /** Apply ops queued by native widget taps (absolute values). No-op when none. */
+  syncWidgetToggles: () => Promise<number>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
   updateHabit: (id: string, patch: Partial<Habit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
@@ -109,6 +111,55 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         previous_state: prev.proExpired ? 'expired' : 'free',
       });
     }
+  },
+
+  syncWidgetToggles: async () => {
+    const ops = await WidgetModule.consumePendingToggles();
+    if (ops.length === 0) return 0;
+    // Last-write-wins per habit+date so rapid double-taps converge.
+    const latest = new Map<string, (typeof ops)[number]>();
+    for (const op of ops) {
+      latest.set(`${op.habitId}\u0000${op.dateKey}`, op);
+    }
+    const knownIds = new Set(get().habits.map(h => h.id));
+    let applied = 0;
+    const habits = get().habits.map(h => {
+      let changed = false;
+      const completions = { ...h.completions };
+      const missedNotes = { ...(h.missedNotes ?? {}) };
+      for (const op of latest.values()) {
+        if (op.habitId !== h.id) continue;
+        if (op.value > 0) {
+          if (completions[op.dateKey] !== op.value) {
+            completions[op.dateKey] = op.value;
+            changed = true;
+          }
+        } else if (op.dateKey in completions) {
+          delete completions[op.dateKey];
+          changed = true;
+        }
+        if (op.dateKey in missedNotes) {
+          delete missedNotes[op.dateKey];
+          changed = true;
+        }
+      }
+      if (changed) {
+        applied++;
+        return { ...h, completions, missedNotes };
+      }
+      return h;
+    });
+    // Drop ops for unknown/deleted habits — nothing to apply.
+    const unknown = [...latest.values()].filter(op => !knownIds.has(op.habitId)).length;
+    if (applied > 0) {
+      set({ habits });
+      persist(habits);
+      updateWidget(habits);
+      logEvent('info', 'Widget toggles applied', { applied, unknown });
+    } else if (unknown > 0) {
+      logEvent('info', 'Widget toggles dropped (unknown habits)', { unknown });
+    }
+    return applied;
   },
 
   init: async () => {
@@ -193,6 +244,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const active = h.filter((x: { archived: boolean }) => !x.archived);
       const payload = WidgetModule.buildPayload(active);
       WidgetModule.updateWidgetData(payload).catch(() => {});
+      // Apply any widget taps that happened while the app was closed.
+      // Fire-and-forget: failures are non-critical (queue stays native-side
+      // only until consumed, and consume clears it atomically where supported).
+      get().syncWidgetToggles().catch(() => {});
     } catch (err) {
       logEvent('error', 'Failed to load habits', err);
       set({ habits: [], loaded: true });

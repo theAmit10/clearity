@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, LogBox } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, LogBox, AppState } from 'react-native';
 
 LogBox.ignoreLogs([/InteractionManager has been deprecated/]);
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -138,6 +138,18 @@ function AppContent() {
     if (!loaded) return;
     crashlytics().setCrashlyticsCollectionEnabled(crashlyticsEnabled);
   }, [crashlyticsEnabled, loaded]);
+
+  // Widget taps queue natively while the app is backgrounded — drain the
+  // queue every time the app comes to the foreground.
+  useEffect(() => {
+    if (!loaded) return;
+    const sub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        useHabitStore.getState().syncWidgetToggles().catch(() => {});
+      }
+    });
+    return () => sub.remove();
+  }, [loaded]);
 
   useEffect(() => {
     if (!loaded || !goalsLoaded) return;

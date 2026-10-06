@@ -17,7 +17,7 @@ import {
   settingsCardTransition,
 } from '../components/SettingsRevealItem';
 import { useHabitStore } from '../store/habitStore';
-import { WidgetModule } from '../native/WidgetModule';
+import { WidgetModule, MAX_RINGS_SELECTION } from '../native/WidgetModule';
 import { useTheme } from '../theme/ThemeProvider';
 import ProGate from '../components/ProGate';
 import { useTranslation } from '../i18n';
@@ -28,16 +28,29 @@ export default function WidgetSettingsScreen({ navigation }: any) {
   const habits = useHabitStore(s => s.habits);
   const isPro = useHabitStore(s => s.isPro);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [ringsIds, setRingsIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const ids = await WidgetModule.getSelectedHabitIds();
+        const [ids, ringIds] = await Promise.all([
+          WidgetModule.getSelectedHabitIds(),
+          WidgetModule.getRingsHabitIds(),
+        ]);
         const validIds = ids.filter(id => habits.some(h => h.id === id));
         setSelectedIds(validIds);
+        const validRings = ringIds
+          .filter(id => habits.some(h => h.id === id))
+          .slice(0, MAX_RINGS_SELECTION);
+        setRingsIds(validRings);
         if (validIds.length !== ids.length) {
           await WidgetModule.setSelectedHabitIds(validIds);
+        }
+        if (validRings.length !== ringIds.length) {
+          await WidgetModule.setRingsHabitIds(validRings);
+        }
+        if (validIds.length !== ids.length || validRings.length !== ringIds.length) {
           const activeHabits = habits.filter(h => !h.archived);
           await WidgetModule.updateWidgetData(WidgetModule.buildPayload(activeHabits));
         }
@@ -71,6 +84,24 @@ export default function WidgetSettingsScreen({ navigation }: any) {
     const activeHabits = habits.filter(h => !h.archived);
     const payload = WidgetModule.buildPayload(activeHabits);
     await WidgetModule.updateWidgetData(payload);
+  };
+
+  const toggleRingsHabit = async (habitId: string) => {
+    const next = ringsIds.includes(habitId)
+      ? ringsIds.filter(id => id !== habitId)
+      : [...ringsIds, habitId];
+
+    if (next.length > MAX_RINGS_SELECTION) {
+      Alert.alert(
+        t('widgetSettings.limitTitle'),
+        t('widgetSettings.ringsLimitBody', { count: MAX_RINGS_SELECTION }),
+      );
+      return;
+    }
+
+    setRingsIds(next);
+    await WidgetModule.setRingsHabitIds(next);
+    await refreshWidgetData();
   };
 
   if (!isPro) {
@@ -148,6 +179,50 @@ export default function WidgetSettingsScreen({ navigation }: any) {
           </Animated.View>
         </View>
 
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.iosSecondaryLabel }]}>{t('widgetSettings.ringsTitle')}</Text>
+          <Text style={[styles.sectionHint, { color: theme.colors.iosSecondaryLabel }]}>
+            {t('widgetSettings.ringsDescription', { count: MAX_RINGS_SELECTION })}
+          </Text>
+          <View style={[styles.sectionBody, { backgroundColor: theme.colors.surface }]}>
+            {activeHabits.length === 0 && (
+              <Text style={[styles.emptyText, { color: theme.colors.iosSecondaryLabel }]}>
+                {t('widgetSettings.noActiveHabits')}
+              </Text>
+            )}
+            {activeHabits.map((habit, i) => {
+              const isSelected = ringsIds.includes(habit.id);
+              return (
+                <View
+                  key={habit.id}
+                  style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.colors.iosSeparator }]}
+                >
+                  <View style={styles.rowLeft}>
+                    <View
+                      style={[
+                        styles.colorDot,
+                        { backgroundColor: habit.color },
+                      ]}
+                    />
+                    <View>
+                      <Text style={[styles.habitName, { color: theme.colors.iosLabel }]}>{habit.name}</Text>
+                      <Text style={[styles.habitMeta, { color: theme.colors.iosSecondaryLabel }]}>
+                        {t('widgetSettings.daysTracked', { count: Object.keys(habit.completions).length })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={isSelected}
+                    onValueChange={() => toggleRingsHabit(habit.id)}
+                    trackColor={{ false: theme.colors.iosSeparator, true: theme.colors.iosGreen }}
+                    thumbColor={theme.colors.surface}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
         <View style={[styles.infoBox, { backgroundColor: theme.colors.iosBlue + '1A' }]}>
           <Text style={[styles.infoTitle, { color: theme.colors.iosLabel }]}>{t('widgetSettings.howItWorks')}</Text>
           <Text style={[styles.infoText, { color: theme.colors.iosLabel + '99' }]}>
@@ -200,6 +275,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
     textTransform: 'uppercase',
+  },
+  sectionHint: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 12,
   },
   emptyText: {
     fontSize: 15,

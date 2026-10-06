@@ -2,10 +2,16 @@ import { NativeModules } from 'react-native';
 
 const { WidgetModule: NativeWidgetModule } = NativeModules;
 
+export type HabitFrequency = 'daily' | 'n_times_per_week' | 'n_times_per_month' | 'n_times_in_m_days';
+
 export interface WidgetHabitData {
   id: string;
   name: string;
   color: string;
+  icon: string;
+  frequency: HabitFrequency;
+  frequencyValue?: number;
+  frequencyWindow?: number;
   completions: Record<string, number>;
 }
 
@@ -13,6 +19,15 @@ export interface WidgetDataPayload {
   habits: WidgetHabitData[];
   weekStart: string;
   weekEnd: string;
+}
+
+/** Absolute-value op written natively when the user taps a widget ring. */
+export interface WidgetPendingToggle {
+  habitId: string;
+  dateKey: string;
+  /** Desired completion value for dateKey (0 = clear). */
+  value: number;
+  timestamp: number;
 }
 
 function getWeekRange(): { weekStart: string; weekEnd: string } {
@@ -32,6 +47,8 @@ function getWeekRange(): { weekStart: string; weekEnd: string } {
 
   return { weekStart: fmt(start), weekEnd: fmt(end) };
 }
+
+export const MAX_RINGS_SELECTION = 10;
 
 export const WidgetModule = {
   setSelectedHabitIds: async (ids: string[]): Promise<void> => {
@@ -55,6 +72,33 @@ export const WidgetModule = {
     return id || null;
   },
 
+  setRingsHabitIds: async (ids: string[]): Promise<void> => {
+    if (!NativeWidgetModule?.setRingsHabitIds) return;
+    return NativeWidgetModule.setRingsHabitIds(ids);
+  },
+
+  getRingsHabitIds: async (): Promise<string[]> => {
+    if (!NativeWidgetModule?.getRingsHabitIds) return [];
+    return NativeWidgetModule.getRingsHabitIds();
+  },
+
+  /** Drain ops queued natively by widget taps. Returns [] when unsupported. */
+  consumePendingToggles: async (): Promise<WidgetPendingToggle[]> => {
+    try {
+      if (!NativeWidgetModule?.consumePendingToggles) return [];
+      const raw = await NativeWidgetModule.consumePendingToggles();
+      if (!raw) return [];
+      const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!Array.isArray(list)) return [];
+      return list.filter(
+        (op: any) =>
+          op && typeof op.habitId === 'string' && typeof op.dateKey === 'string' && typeof op.value === 'number',
+      );
+    } catch {
+      return [];
+    }
+  },
+
   updateWidgetData: async (payload: WidgetDataPayload): Promise<void> => {
     if (!NativeWidgetModule) return;
     const json = JSON.stringify(payload);
@@ -67,7 +111,16 @@ export const WidgetModule = {
   },
 
   buildPayload: (
-    habits: { id: string; name: string; color: string; completions: Record<string, number> }[],
+    habits: {
+      id: string;
+      name: string;
+      color: string;
+      icon: string;
+      frequency: HabitFrequency;
+      frequencyValue?: number;
+      frequencyWindow?: number;
+      completions: Record<string, number>;
+    }[],
   ): WidgetDataPayload => {
     const { weekStart, weekEnd } = getWeekRange();
     const yearStart = `${new Date().getFullYear()}-01-01`;
@@ -83,6 +136,10 @@ export const WidgetModule = {
         id: h.id,
         name: h.name,
         color: h.color,
+        icon: h.icon ?? 'fire',
+        frequency: h.frequency ?? 'daily',
+        frequencyValue: h.frequencyValue,
+        frequencyWindow: h.frequencyWindow,
         completions: yearCompletions,
       };
     });

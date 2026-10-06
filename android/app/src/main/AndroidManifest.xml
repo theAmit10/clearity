@@ -37,5 +37,24 @@
           android:name="android.appwidget.provider"
           android:resource="@xml/habit_widget_info" />
       </receiver>
+
+      <receiver
+        android:name=".widget.RingsWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/rings_widget_info" />
+      </receiver>
+
+      <receiver
+        android:name=".widget.HabitRingsActionReceiver"
+        android:exported="false">
+        <intent-filter>
+          <action android:name="com.codethenic.habita.widget.RINGS_TOGGLE" />
+        </intent-filter>
+      </receiver>
     </application>
 </manifest>

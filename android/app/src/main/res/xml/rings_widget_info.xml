@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="270dp"
+    android:minHeight="150dp"
+    android:minResizeWidth="200dp"
+    android:minResizeHeight="120dp"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/rings_widget"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
