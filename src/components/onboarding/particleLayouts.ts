@@ -1,4 +1,10 @@
-export type ParticleVariant = 'sphere' | 'scatter' | 'rings' | 'funnel' | 'check';
+export type ParticleVariant =
+  | 'sphere'
+  | 'scatter'
+  | 'rings'
+  | 'funnel'
+  | 'check'
+  | 'target';
 
 export interface ParticleDot {
   /** 0..100 in viewBox space */
@@ -17,6 +23,7 @@ export const PARTICLE_DOT_COUNT: Record<ParticleVariant, number> = {
   funnel: 800,
   // Morph identity count — keep in sync with MORPH_COUNT below.
   check: 650,
+  target: 650,
 };
 
 /** Fixed identity count for the shared-element morph engine: dot `i`
@@ -37,14 +44,21 @@ export const MORPH_ORDER: ParticleVariant[] = [
  * for the page-2 pulse loop. Segment indices in MorphField address this
  * array; page taps only ever use 0..3.
  */
-export const MORPH_LAYOUT_KEYS: ParticleVariant[] = [...MORPH_ORDER, 'check'];
+export const MORPH_LAYOUT_KEYS: ParticleVariant[] = [...MORPH_ORDER, 'check', 'target'];
 export const CHECK_LAYOUT_INDEX = MORPH_ORDER.length;
+export const TARGET_LAYOUT_INDEX = MORPH_ORDER.length + 1;
 
 /** Checkmark arms in viewBox space: [x1, y1, x2, y2]. Exported for tests. */
 export const CHECK_SEGMENTS: [number, number, number, number][] = [
   [32, 46, 45, 60],
   [45, 60, 70, 30],
 ];
+
+/** Target rings: center + radii in viewBox space. Exported for tests. */
+export const TARGET_CENTER: [number, number] = [50, 44];
+export const TARGET_RADII = [10, 20, 30];
+/** Share of target dots forming the dense bullseye (rest trace the rings). */
+const TARGET_BULLSEYE_SHARE = 0.12;
 
 export interface MorphMotion {
   phase: number;
@@ -214,6 +228,45 @@ function checkLayout(count: number, rand: () => number): ParticleDot[] {
   return dots;
 }
 
+/**
+ * Goal target: dots sampled along concentric rings proportional to
+ * circumference, plus a dense bullseye cluster at the center.
+ */
+function targetLayout(count: number, rand: () => number): ParticleDot[] {
+  const dots: ParticleDot[] = [];
+  const [ccx, ccy] = TARGET_CENTER;
+  const circumference = TARGET_RADII.map(r => 2 * Math.PI * r);
+  const ringTotal = circumference.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < count; i++) {
+    if (rand() < TARGET_BULLSEYE_SHARE) {
+      dots.push({
+        x: ccx + gaussian(rand) * 2,
+        y: ccy + gaussian(rand) * 2,
+        r: 0.55 + rand() * 0.75,
+        opacity: 0.5 + rand() * 0.5,
+      });
+      continue;
+    }
+    let pick = rand() * ringTotal;
+    let ring = 0;
+    while (ring < TARGET_RADII.length - 1 && pick > circumference[ring]) {
+      pick -= circumference[ring];
+      ring += 1;
+    }
+    const radius = TARGET_RADII[ring];
+    const a = (pick / circumference[ring]) * Math.PI * 2;
+    // Radial jitter keeps the stroke thin like the check formation.
+    const rr = radius + gaussian(rand) * 1.0;
+    dots.push({
+      x: ccx + Math.cos(a) * rr,
+      y: ccy + Math.sin(a) * rr,
+      r: 0.5 + rand() * 0.7,
+      opacity: 0.35 + rand() * 0.6,
+    });
+  }
+  return dots;
+}
+
 export function getParticleLayout(
   variant: ParticleVariant,
   count?: number,
@@ -232,6 +285,8 @@ export function getParticleLayout(
       return funnelLayout(n, rand);
     case 'check':
       return checkLayout(n, rand);
+    case 'target':
+      return targetLayout(n, rand);
   }
 }
 
@@ -264,6 +319,7 @@ export function getMorphSet(count: number = MORPH_COUNT): {
     rings: orderDots(getParticleLayout('rings', count + 80)),
     funnel: orderDots(getParticleLayout('funnel', count + 80)),
     check: orderDots(getParticleLayout('check', count + 80)),
+    target: orderDots(getParticleLayout('target', count + 80)),
   } as Record<ParticleVariant, ParticleDot[]>;
 
   const rand = mulberry32(0xC10C);

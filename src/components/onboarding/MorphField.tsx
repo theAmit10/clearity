@@ -23,6 +23,7 @@ import {
   MORPH_COUNT,
   MORPH_LAYOUT_KEYS,
   CHECK_LAYOUT_INDEX,
+  TARGET_LAYOUT_INDEX,
   getMorphSet,
 } from './particleLayouts';
 import MorphDot from './MorphDot';
@@ -35,14 +36,21 @@ export interface MorphHandle {
 
 const MORPH_MS = 1100;
 
-// Check-formation pulse loop on the check-ins screen (form → hold →
-// disperse → rest). Drives the same `progress` value as page morphs.
-const PULSE_FORM_MS = 1400;
-const PULSE_HOLD_MS = 1200;
-const PULSE_DISPERSE_MS = 1400;
-const PULSE_REST_MS = 1600;
+// Formation pulse loops (form → hold → disperse → rest), keyed by page.
+// Page 1 assembles the check; page 2 assembles the goal target on a
+// slower, weightier cadence. Drives the same `progress` value as page morphs.
 const PULSE_SETTLE_MS = 250;
-const PULSE_PAGE = 1;
+interface PulseConfig {
+  layout: number;
+  form: number;
+  hold: number;
+  disperse: number;
+  rest: number;
+}
+const PULSE_BY_PAGE: Record<number, PulseConfig> = {
+  1: { layout: CHECK_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
+  2: { layout: TARGET_LAYOUT_INDEX, form: 1800, hold: 2000, disperse: 1800, rest: 1400 },
+};
 
 const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
   const { layouts, motion } = useMemo(() => getMorphSet(MORPH_COUNT), []);
@@ -141,23 +149,25 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
     );
   };
 
-  const startPulse = () => {
+  const startPulse = (page: number) => {
+    const cfg = PULSE_BY_PAGE[page];
+    if (!cfg) return;
     pulsingRef.current = true;
-    setSegment({ from: PULSE_PAGE, to: CHECK_LAYOUT_INDEX });
+    setSegment({ from: page, to: cfg.layout });
     progress.value = 0;
     progress.value = withRepeat(
       withSequence(
         withTiming(1, {
-          duration: PULSE_FORM_MS,
+          duration: cfg.form,
           easing: Easing.inOut(Easing.cubic),
         }),
         // Same-value holds act as timed pauses.
-        withTiming(1, { duration: PULSE_HOLD_MS }),
+        withTiming(1, { duration: cfg.hold }),
         withTiming(0, {
-          duration: PULSE_DISPERSE_MS,
+          duration: cfg.disperse,
           easing: Easing.inOut(Easing.cubic),
         }),
-        withTiming(0, { duration: PULSE_REST_MS }),
+        withTiming(0, { duration: cfg.rest }),
       ),
       -1,
     );
@@ -167,7 +177,7 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
     currentRef.current = next;
     setSegment({ from: next, to: next });
     onDone();
-    if (next === PULSE_PAGE && !reduceMotion) startPulse();
+    if (PULSE_BY_PAGE[next] && !reduceMotion) startPulse(next);
   };
 
   if (reduceMotion) {

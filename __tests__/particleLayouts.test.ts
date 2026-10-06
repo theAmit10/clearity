@@ -1,6 +1,8 @@
 import {
   MORPH_COUNT,
   CHECK_SEGMENTS,
+  TARGET_CENTER,
+  TARGET_RADII,
   getMorphSet,
   getParticleLayout,
 } from '../src/components/onboarding/particleLayouts';
@@ -39,4 +41,37 @@ test('morph set includes a stable check formation', () => {
   const second = getMorphSet(MORPH_COUNT);
   expect(first.layouts.check).toHaveLength(MORPH_COUNT);
   expect(first.layouts.check).toEqual(second.layouts.check);
+});
+
+function distanceToTarget(x: number, y: number): number {
+  const [ccx, ccy] = TARGET_CENTER;
+  const centerDist = Math.hypot(x - ccx, y - ccy);
+  let best = centerDist; // bullseye dots cluster near the center
+  for (const r of TARGET_RADII) {
+    best = Math.min(best, Math.abs(centerDist - r));
+  }
+  return best;
+}
+
+test('target layout returns the morph identity count', () => {
+  expect(getParticleLayout('target', MORPH_COUNT)).toHaveLength(MORPH_COUNT);
+});
+
+test('target dots trace rings with a dense bullseye', () => {
+  const dots = getParticleLayout('target', MORPH_COUNT);
+  for (const d of dots) {
+    expect(distanceToTarget(d.x, d.y)).toBeLessThan(6);
+  }
+  const [ccx, ccy] = TARGET_CENTER;
+  const bullseye = dots.filter(
+    d => Math.hypot(d.x - ccx, d.y - ccy) < TARGET_RADII[0] / 2,
+  ).length;
+  expect(bullseye).toBeGreaterThan(MORPH_COUNT * 0.05);
+});
+
+test('morph set includes a stable target formation', () => {
+  const first = getMorphSet(MORPH_COUNT);
+  const second = getMorphSet(MORPH_COUNT);
+  expect(first.layouts.target).toHaveLength(MORPH_COUNT);
+  expect(first.layouts.target).toEqual(second.layouts.target);
 });
