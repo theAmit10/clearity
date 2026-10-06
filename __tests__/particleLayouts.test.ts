@@ -6,8 +6,11 @@ import {
   MOUNTAIN_PEAK,
   MOUNTAIN_BASE_LEFT,
   MOUNTAIN_BASE_RIGHT,
+  MORPH_LAYOUT_KEYS,
   getMorphSet,
   getParticleLayout,
+  getCachedParticleTables,
+  warmParticleTables,
 } from '../src/components/onboarding/particleLayouts';
 
 function distanceToCheck(x: number, y: number): number {
@@ -118,4 +121,20 @@ test('morph set includes a stable mountain formation', () => {
   const second = getMorphSet(MORPH_COUNT);
   expect(first.layouts.mountain).toHaveLength(MORPH_COUNT);
   expect(first.layouts.mountain).toEqual(second.layouts.mountain);
+});
+
+test('cached tables are computed once with correct dimensions', () => {
+  warmParticleTables();
+  const first = getCachedParticleTables();
+  const second = getCachedParticleTables();
+  expect(second).toBe(first);
+  const L = MORPH_LAYOUT_KEYS.length;
+  expect(first.count).toBe(MORPH_COUNT);
+  expect(first.layouts).toBe(L);
+  expect(first.pos.length).toBe(L * MORPH_COUNT * 2);
+  expect(first.mot.length).toBe(MORPH_COUNT * 4);
+  expect(first.style.length).toBe(MORPH_COUNT * 2);
+  for (let i = 0; i < first.pos.length; i++) {
+    expect(Number.isFinite(first.pos[i])).toBe(true);
+  }
 });

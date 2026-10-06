@@ -20,26 +20,25 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import {
-  MORPH_COUNT,
-  MORPH_LAYOUT_KEYS,
   CHECK_LAYOUT_INDEX,
   TARGET_LAYOUT_INDEX,
   MOUNTAIN_LAYOUT_INDEX,
-  getMorphSet,
+  getCachedParticleTables,
 } from './particleLayouts';
 import MorphDot from './MorphDot';
 
 export interface MorphHandle {
   /** Animate atoms from the current shape to `next`. `onMid` swaps copy
-   *  ~55% through; `onDone` fires when settled. No-ops while reduced motion. */
+   *  ~55% through; `onDone` fires when settled. Updates shared values
+   *  only — no React re-render. No-ops while reduced motion. */
   morphTo: (next: number, onMid: () => void, onDone: () => void) => void;
 }
 
 const MORPH_MS = 1100;
 
 // Formation pulse loops (form → hold → disperse → rest), keyed by page.
-// Page 1 assembles the check; page 2 assembles the goal target on a
-// slower, weightier cadence. Drives the same `progress` value as page morphs.
+// Page 1 assembles the check, page 2 the goal target, page 3 the mountain.
+// Drives the same `progress` value as page morphs.
 const PULSE_SETTLE_MS = 250;
 interface PulseConfig {
   layout: number;
@@ -54,12 +53,22 @@ const PULSE_BY_PAGE: Record<number, PulseConfig> = {
   3: { layout: MOUNTAIN_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
 };
 
+/**
+ * Page → formation mapping. Pages 0..3 address their own shape; the theme
+ * page (4) returns to the sphere — a full-circle "coming home" morph.
+ */
+const layoutFor = (page: number): number => (page >= 0 && page <= 3 ? page : 0);
+
 const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
-  const { layouts, motion } = useMemo(() => getMorphSet(MORPH_COUNT), []);
-  const [segment, setSegment] = useState({ from: 0, to: 0 });
+  // Module-cached tables (warmed during the intro film): mounting here is
+  // pure view creation, no layout math on the tap path.
+  const tables = useMemo(() => getCachedParticleTables(), []);
+  const tablesSV = useSharedValue(tables);
   const currentRef = useRef(0);
   const pulsingRef = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Static rest shape for the reduce-motion branch only.
+  const [restIndex, setRestIndex] = useState(0);
 
   const [reduceMotion, setReduceMotion] = useState(false);
   useEffect(() => {
@@ -77,8 +86,11 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
 
   // Shared clock (seconds) — one UI-thread loop feeds all dots.
   const time = useSharedValue(0);
-  // Absolute-page morph progress within the current segment (0 → 1).
+  // Morph progress within the current from→to pair (0 → 1).
   const progress = useSharedValue(1);
+  // Layout pair — the ONLY values morphs and pulses mutate.
+  const fromIdx = useSharedValue(0);
+  const toIdx = useSharedValue(0);
 
   const frame = useFrameCallback(frameInfo => {
     'worklet';
@@ -136,7 +148,9 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
 
   const beginMorph = (next: number, onMid: () => void, onDone: () => void) => {
     const from = currentRef.current;
-    setSegment({ from, to: next });
+    fromIdx.value = layoutFor(from);
+    toIdx.value = layoutFor(next);
+    setRestIndex(layoutFor(next));
     progress.value = 0;
     timers.current.push(setTimeout(onMid, Math.round(MORPH_MS * 0.55)));
     progress.value = withTiming(
@@ -155,7 +169,8 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
     const cfg = PULSE_BY_PAGE[page];
     if (!cfg) return;
     pulsingRef.current = true;
-    setSegment({ from: page, to: cfg.layout });
+    fromIdx.value = page;
+    toIdx.value = cfg.layout;
     progress.value = 0;
     progress.value = withRepeat(
       withSequence(
@@ -177,13 +192,25 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
 
   const handleSettled = (next: number, onDone: () => void) => {
     currentRef.current = next;
-    setSegment({ from: next, to: next });
+    fromIdx.value = layoutFor(next);
+    toIdx.value = layoutFor(next);
     onDone();
     if (PULSE_BY_PAGE[next] && !reduceMotion) startPulse(next);
   };
 
+  const indices = useMemo(
+    () => Array.from({ length: tables.count }, (_unused, i) => i),
+    [tables],
+  );
+
   if (reduceMotion) {
-    const dots = layouts[MORPH_LAYOUT_KEYS[segment.to]];
+    const C = tables.count;
+    const dots = indices.map(i => ({
+      x: tables.pos[(restIndex * C + i) * 2],
+      y: tables.pos[(restIndex * C + i) * 2 + 1],
+      r: tables.style[i * 2],
+      opacity: tables.style[i * 2 + 1],
+    }));
     return (
       <Svg
         width="100%"
@@ -196,7 +223,7 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
             key={i}
             cx={d.x}
             cy={d.y}
-            r={d.r * 0.32}
+            r={d.r}
             fill="#FFFFFF"
             opacity={d.opacity}
           />
@@ -204,9 +231,6 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
       </Svg>
     );
   }
-
-  const fromDots = layouts[MORPH_LAYOUT_KEYS[segment.from]];
-  const toDots = layouts[MORPH_LAYOUT_KEYS[segment.to]];
 
   return (
     <Animated.View style={[styles.fill, driftStyle]}>
@@ -216,21 +240,17 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
         viewBox="0 0 100 100"
         preserveAspectRatio="xMidYMid slice"
       >
-        {fromDots.map((d, i) => (
+        {indices.map(i => (
           <MorphDot
             key={i}
-            ax={d.x}
-            ay={d.y}
-            bx={toDots[i].x}
-            by={toDots[i].y}
-            r={d.r * 0.32}
-            opacity={d.opacity}
-            phase={motion[i].phase}
-            speed={motion[i].speed}
-            amp={motion[i].amp}
-            stagger={motion[i].stagger}
+            index={i}
+            r={tables.style[i * 2]}
+            opacity={tables.style[i * 2 + 1]}
             progress={progress}
             time={time}
+            fromIdx={fromIdx}
+            toIdx={toIdx}
+            tables={tablesSV}
           />
         ))}
       </Svg>

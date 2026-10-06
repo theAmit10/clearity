@@ -6,6 +6,7 @@ import {
   Pressable,
   StatusBar,
   AccessibilityInfo,
+  InteractionManager,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -15,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Video from 'react-native-video';
 import { logEvent } from '../../services/logger';
+import { warmParticleTables } from '../onboarding/particleLayouts';
 
 export type IntroFilmResult = 'completed' | 'skipped';
 
@@ -44,11 +46,20 @@ export default function IntroFilm({ onDone, onTail }: Props) {
   const finishedRef = useRef(false);
   const tailFiredRef = useRef(false);
   const durationRef = useRef(0);
+  // Flipped synchronously on Skip so decoder teardown doesn't contend
+  // with the onboarding mount frame.
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled()
       .then(setReduceMotion)
       .catch(() => {});
+    // Precompute the onboarding particle tables while the film plays, so
+    // a Skip lands on a cache hit instead of ~3,600 dots of math on the tap.
+    const task = InteractionManager.runAfterInteractions(() => {
+      warmParticleTables();
+    });
+    return () => task.cancel();
   }, []);
 
   const finish = useCallback((result: IntroFilmResult) => {
@@ -67,6 +78,7 @@ export default function IntroFilm({ onDone, onTail }: Props) {
   }));
 
   const handleSkip = useCallback(() => {
+    setPaused(true);
     finish('skipped');
   }, [finish]);
 
@@ -105,7 +117,7 @@ export default function IntroFilm({ onDone, onTail }: Props) {
           style={styles.videoInner}
           resizeMode="cover"
           controls={false}
-          paused={false}
+          paused={paused}
           repeat={false}
           playInBackground={false}
           muted={false}

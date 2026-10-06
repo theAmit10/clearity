@@ -374,3 +374,63 @@ export function getMorphSet(count: number = MORPH_COUNT): {
 
   return { layouts, motion };
 }
+
+/**
+ * Flat, worklet-friendly particle tables: positions for every layout
+ * (`pos[(layout * count + i) * 2 (+1)]`) plus per-dot motion params
+ * (`mot[i * 4 (+0..3)]` = phase, speed, amp, stagger). Dots read these
+ * through a single shared value, so morphs never re-render React.
+ */
+export interface ParticleTables {
+  pos: Float32Array;
+  mot: Float32Array;
+  /** Per-dot static style from the sphere formation: (r, opacity) pairs. */
+  style: Float32Array;
+  count: number;
+  layouts: number;
+}
+
+export function buildParticleTables(
+  count: number = MORPH_COUNT,
+): ParticleTables {
+  const { layouts, motion } = getMorphSet(count);
+  const keys = MORPH_LAYOUT_KEYS;
+  const pos = new Float32Array(keys.length * count * 2);
+  keys.forEach((key, layout) => {
+    const dots = layouts[key];
+    for (let i = 0; i < count; i++) {
+      pos[(layout * count + i) * 2] = dots[i].x;
+      pos[(layout * count + i) * 2 + 1] = dots[i].y;
+    }
+  });
+  const mot = new Float32Array(count * 4);
+  for (let i = 0; i < count; i++) {
+    mot[i * 4] = motion[i].phase;
+    mot[i * 4 + 1] = motion[i].speed;
+    mot[i * 4 + 2] = motion[i].amp;
+    mot[i * 4 + 3] = motion[i].stagger;
+  }
+  const style = new Float32Array(count * 2);
+  const base = layouts.sphere;
+  for (let i = 0; i < count; i++) {
+    style[i * 2] = base[i].r * 0.32;
+    style[i * 2 + 1] = base[i].opacity;
+  }
+  return { pos, mot, style, count, layouts: keys.length };
+}
+
+let cachedTables: ParticleTables | null = null;
+
+/** Computed once per app launch; every consumer shares the reference. */
+export function getCachedParticleTables(): ParticleTables {
+  if (!cachedTables) cachedTables = buildParticleTables();
+  return cachedTables;
+}
+
+/**
+ * Precompute the tables off the critical path — call while the intro film
+ * plays so the onboarding mount is a cache hit. Safe to call repeatedly.
+ */
+export function warmParticleTables(): void {
+  getCachedParticleTables();
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,10 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useTranslation } from '../i18n';
 import { FREE_HABIT_LIMIT, FREE_GOAL_LIMIT } from '../constants/appInfo';
 import MorphField, { type MorphHandle } from '../components/onboarding/MorphField';
+import HabitCard from '../components/HabitCard';
+import type { Habit } from '../types/habit';
+import { todayKey } from '../services/dateUtils';
+import { useTheme } from '../theme/ThemeProvider';
 
 /* Reference-style palette: pure black + white dots, white headline */
 const BG = '#000000';
@@ -31,6 +35,39 @@ interface Props {
   /** When false (film-tail overlay), CTA/Skip presses are ignored until
    *  the film unmounts. Defaults to true. */
   interactive?: boolean;
+}
+
+function ThemeOption({
+  label,
+  selected,
+  onSelect,
+  testID,
+  dark,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+  testID?: string;
+  dark?: boolean;
+}) {
+  return (
+    <Pressable
+      testID={testID}
+      onPress={onSelect}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.themeOption,
+        dark ? styles.themeOptionDark : styles.themeOptionLight,
+        selected && styles.themeOptionSelected,
+        pressed && styles.pillPressed,
+      ]}
+    >
+      <Text style={[styles.themeOptionText, dark && styles.themeOptionTextDark]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
 }
 
 function PillButton({
@@ -163,10 +200,34 @@ function PagerDots({ index, total }: { index: number; total: number }) {
 export default function OnboardingScreen({ onFinish, interactive = true }: Props) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const { themeName, setTheme } = useTheme();
   const listRef = useRef<FlatList<number>>(null);
   const morphRef = useRef<MorphHandle>(null);
   const morphingRef = useRef(false);
   const [index, setIndex] = useState(0);
+
+  // Static sample habit so users can see each theme on real UI.
+  const previewHabit: Habit = useMemo(
+    () => ({
+      id: 'onboarding-preview',
+      name: 'Read 10 pages',
+      icon: 'fire',
+      color: '#34C759',
+      frequency: 'daily',
+      category: 'none',
+      createdAt: new Date().toISOString(),
+      archived: false,
+      completions: { [todayKey()]: 1 },
+    }),
+    [],
+  );
+
+  const selectTheme = useCallback(
+    (name: 'light' | 'dark') => {
+      setTheme(name).catch(() => {});
+    },
+    [setTheme],
+  );
 
   const goTo = useCallback((next: number) => {
     setIndex(next);
@@ -175,8 +236,8 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
 
   const handlePrimary = useCallback(() => {
     if (!interactive || morphingRef.current) return;
-    if (index >= 3) {
-      onFinish('completed', 3);
+    if (index >= 4) {
+      onFinish('completed', 4);
       return;
     }
     const next = index + 1;
@@ -211,6 +272,7 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
     t('onboarding.page2Body'),
     t('onboarding.page3Body'),
     t('onboarding.page4Body'),
+    t('onboarding.page5Body'),
   ];
 
   const headlines: { top: string; bottom: string }[] = [
@@ -224,9 +286,10 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
         goalCount: FREE_GOAL_LIMIT,
       }),
     },
+    { top: t('onboarding.page5Top'), bottom: t('onboarding.page5Bottom') },
   ];
 
-  const pages: React.ReactNode[] = [0, 1, 2, 3].map(i => (
+  const pages: React.ReactNode[] = [0, 1, 2, 3, 4].map(i => (
     <View key={pageKey(i, `p${i}`)} style={[styles.page, { width }]}>
       {i > 0 && (
         <View style={styles.skipRow}>
@@ -235,8 +298,9 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
       )}
       {i === 0 && <View style={styles.skipRowPlaceholder} />}
       {/* Spacer — the living atoms render once in the persistent canvas
-          behind the pager, so page changes morph rather than remount. */}
-      <View style={styles.artSpacer} />
+          behind the pager, so page changes morph rather than remount.
+          Compact on the theme page to fit the card + toggle. */}
+      <View style={[styles.artSpacer, i === 4 && styles.artSpacerCompact]} />
       <View style={styles.copy}>
         <PageHeadline
           key={pageKey(i, `p${i}-title`)}
@@ -256,9 +320,39 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
           </RevealText>
         ) : null}
       </View>
+      {i === 4 && (
+        <Reveal key={pageKey(i, 'p4-theme')} delay={240} active={isActive(i)}>
+          <View style={styles.themePreview}>
+            <HabitCard
+              habit={previewHabit}
+              onToggleToday={() => {}}
+              onPress={() => {}}
+            />
+          </View>
+          <View style={styles.themeRow}>
+            <View style={styles.themeOptionHalf}>
+              <ThemeOption
+                testID="onboarding-theme-light"
+                label={t('onboarding.themeLight')}
+                selected={themeName === 'light'}
+                onSelect={() => selectTheme('light')}
+              />
+            </View>
+            <View style={styles.themeOptionHalf}>
+              <ThemeOption
+                testID="onboarding-theme-dark"
+                label={t('onboarding.themeDark')}
+                selected={themeName === 'dark'}
+                onSelect={() => selectTheme('dark')}
+                dark
+              />
+            </View>
+          </View>
+        </Reveal>
+      )}
       <View style={styles.ctaZone}>
         <Reveal key={pageKey(i, `p${i}-dots`)} delay={280} active={isActive(i)}>
-          <PagerDots index={index} total={4} />
+          <PagerDots index={index} total={5} />
         </Reveal>
         <Reveal key={pageKey(i, `p${i}-cta`)} delay={340} active={isActive(i)}>
           <PillButton
@@ -285,7 +379,7 @@ export default function OnboardingScreen({ onFinish, interactive = true }: Props
       </Animated.View>
       <FlatList
         ref={listRef}
-        data={[0, 1, 2, 3]}
+        data={[0, 1, 2, 3, 4]}
         keyExtractor={i => String(i)}
         horizontal
         pagingEnabled
@@ -320,6 +414,10 @@ const styles = StyleSheet.create({
     minHeight: 280,
     marginTop: 4,
   },
+  artSpacerCompact: {
+    flex: 0,
+    minHeight: 24,
+  },
   canvasWrap: {
     position: 'absolute',
     left: 0,
@@ -330,6 +428,43 @@ const styles = StyleSheet.create({
   copy: {
     paddingTop: 12,
     minHeight: 168,
+  },
+  themePreview: {
+    marginTop: 16,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  themeOptionHalf: {
+    flex: 1,
+  },
+  themeOption: {
+    borderRadius: 18,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  themeOptionLight: {
+    backgroundColor: '#F4F5F7',
+  },
+  themeOptionDark: {
+    backgroundColor: '#1C1C1E',
+    borderColor: 'rgba(255,255,255,0.16)',
+  },
+  themeOptionSelected: {
+    borderColor: '#34C759',
+  },
+  themeOptionText: {
+    color: '#1C1C1E',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  themeOptionTextDark: {
+    color: '#FFFFFF',
   },
   title: {
     color: TITLE,
