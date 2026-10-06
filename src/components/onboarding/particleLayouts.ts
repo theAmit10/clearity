@@ -1,4 +1,4 @@
-export type ParticleVariant = 'sphere' | 'scatter' | 'rings' | 'funnel';
+export type ParticleVariant = 'sphere' | 'scatter' | 'rings' | 'funnel' | 'check';
 
 export interface ParticleDot {
   /** 0..100 in viewBox space */
@@ -15,6 +15,8 @@ export const PARTICLE_DOT_COUNT: Record<ParticleVariant, number> = {
   scatter: 900,
   rings: 750,
   funnel: 800,
+  // Morph identity count — keep in sync with MORPH_COUNT below.
+  check: 650,
 };
 
 /** Fixed identity count for the shared-element morph engine: dot `i`
@@ -28,6 +30,20 @@ export const MORPH_ORDER: ParticleVariant[] = [
   'scatter',
   'rings',
   'funnel',
+];
+
+/**
+ * All morphable formations, page shapes plus the checkmark assembly used
+ * for the page-2 pulse loop. Segment indices in MorphField address this
+ * array; page taps only ever use 0..3.
+ */
+export const MORPH_LAYOUT_KEYS: ParticleVariant[] = [...MORPH_ORDER, 'check'];
+export const CHECK_LAYOUT_INDEX = MORPH_ORDER.length;
+
+/** Checkmark arms in viewBox space: [x1, y1, x2, y2]. Exported for tests. */
+export const CHECK_SEGMENTS: [number, number, number, number][] = [
+  [32, 46, 45, 60],
+  [45, 60, 70, 30],
 ];
 
 export interface MorphMotion {
@@ -164,6 +180,40 @@ function funnelLayout(count: number, rand: () => number): ParticleDot[] {
   return dots;
 }
 
+/**
+ * Thin line-art checkmark: dots sampled along the two arms proportional to
+ * arm length, with slight perpendicular jitter for a hand-drawn stroke.
+ */
+function checkLayout(count: number, rand: () => number): ParticleDot[] {
+  const dots: ParticleDot[] = [];
+  const lengths = CHECK_SEGMENTS.map(([x1, y1, x2, y2]) =>
+    Math.hypot(x2 - x1, y2 - y1),
+  );
+  const total = lengths.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < count; i++) {
+    let pick = rand() * total;
+    let seg = 0;
+    while (seg < CHECK_SEGMENTS.length - 1 && pick > lengths[seg]) {
+      pick -= lengths[seg];
+      seg += 1;
+    }
+    const [x1, y1, x2, y2] = CHECK_SEGMENTS[seg];
+    const t = pick / lengths[seg];
+    const len = lengths[seg];
+    // Unit normal for stroke thickness.
+    const nx = -(y2 - y1) / len;
+    const ny = (x2 - x1) / len;
+    const jitter = gaussian(rand) * 1.2;
+    dots.push({
+      x: x1 + (x2 - x1) * t + nx * jitter,
+      y: y1 + (y2 - y1) * t + ny * jitter,
+      r: 0.5 + rand() * 0.7,
+      opacity: 0.35 + rand() * 0.6,
+    });
+  }
+  return dots;
+}
+
 export function getParticleLayout(
   variant: ParticleVariant,
   count?: number,
@@ -180,6 +230,8 @@ export function getParticleLayout(
       return ringsLayout(n, rand);
     case 'funnel':
       return funnelLayout(n, rand);
+    case 'check':
+      return checkLayout(n, rand);
   }
 }
 
@@ -211,6 +263,7 @@ export function getMorphSet(count: number = MORPH_COUNT): {
     scatter: orderDots(getParticleLayout('scatter', count + 80)),
     rings: orderDots(getParticleLayout('rings', count + 80)),
     funnel: orderDots(getParticleLayout('funnel', count + 80)),
+    check: orderDots(getParticleLayout('check', count + 80)),
   } as Record<ParticleVariant, ParticleDot[]>;
 
   const rand = mulberry32(0xC10C);

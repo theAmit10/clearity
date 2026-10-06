@@ -15,12 +15,14 @@ import Animated, {
   useFrameCallback,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import {
   MORPH_COUNT,
-  MORPH_ORDER,
+  MORPH_LAYOUT_KEYS,
+  CHECK_LAYOUT_INDEX,
   getMorphSet,
 } from './particleLayouts';
 import MorphDot from './MorphDot';
@@ -33,10 +35,20 @@ export interface MorphHandle {
 
 const MORPH_MS = 1100;
 
+// Check-formation pulse loop on the check-ins screen (form → hold →
+// disperse → rest). Drives the same `progress` value as page morphs.
+const PULSE_FORM_MS = 1400;
+const PULSE_HOLD_MS = 1200;
+const PULSE_DISPERSE_MS = 1400;
+const PULSE_REST_MS = 1600;
+const PULSE_SETTLE_MS = 250;
+const PULSE_PAGE = 1;
+
 const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
   const { layouts, motion } = useMemo(() => getMorphSet(MORPH_COUNT), []);
   const [segment, setSegment] = useState({ from: 0, to: 0 });
   const currentRef = useRef(0);
+  const pulsingRef = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -97,30 +109,69 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
         onDone();
         return;
       }
-      setSegment({ from, to: next });
-      progress.value = 0;
-      timers.current.push(setTimeout(onMid, Math.round(MORPH_MS * 0.55)));
-      progress.value = withTiming(
-        1,
-        { duration: MORPH_MS, easing: Easing.inOut(Easing.cubic) },
-        finished => {
+      if (pulsingRef.current) {
+        // Settle the formation first — reads as an intentional disperse
+        // before travelling to the next shape. Assigning a new animation
+        // also cancels the pulse repeat.
+        pulsingRef.current = false;
+        progress.value = withTiming(0, { duration: PULSE_SETTLE_MS }, finished => {
           'worklet';
-          if (finished) {
-            runOnJS(handleSettled)(next, onDone);
-          }
-        },
-      );
+          if (finished) runOnJS(beginMorph)(next, onMid, onDone);
+        });
+        return;
+      }
+      beginMorph(next, onMid, onDone);
     },
   }));
+
+  const beginMorph = (next: number, onMid: () => void, onDone: () => void) => {
+    const from = currentRef.current;
+    setSegment({ from, to: next });
+    progress.value = 0;
+    timers.current.push(setTimeout(onMid, Math.round(MORPH_MS * 0.55)));
+    progress.value = withTiming(
+      1,
+      { duration: MORPH_MS, easing: Easing.inOut(Easing.cubic) },
+      finished => {
+        'worklet';
+        if (finished) {
+          runOnJS(handleSettled)(next, onDone);
+        }
+      },
+    );
+  };
+
+  const startPulse = () => {
+    pulsingRef.current = true;
+    setSegment({ from: PULSE_PAGE, to: CHECK_LAYOUT_INDEX });
+    progress.value = 0;
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, {
+          duration: PULSE_FORM_MS,
+          easing: Easing.inOut(Easing.cubic),
+        }),
+        // Same-value holds act as timed pauses.
+        withTiming(1, { duration: PULSE_HOLD_MS }),
+        withTiming(0, {
+          duration: PULSE_DISPERSE_MS,
+          easing: Easing.inOut(Easing.cubic),
+        }),
+        withTiming(0, { duration: PULSE_REST_MS }),
+      ),
+      -1,
+    );
+  };
 
   const handleSettled = (next: number, onDone: () => void) => {
     currentRef.current = next;
     setSegment({ from: next, to: next });
     onDone();
+    if (next === PULSE_PAGE && !reduceMotion) startPulse();
   };
 
   if (reduceMotion) {
-    const dots = layouts[MORPH_ORDER[segment.to]];
+    const dots = layouts[MORPH_LAYOUT_KEYS[segment.to]];
     return (
       <Svg
         width="100%"
@@ -142,8 +193,8 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
     );
   }
 
-  const fromDots = layouts[MORPH_ORDER[segment.from]];
-  const toDots = layouts[MORPH_ORDER[segment.to]];
+  const fromDots = layouts[MORPH_LAYOUT_KEYS[segment.from]];
+  const toDots = layouts[MORPH_LAYOUT_KEYS[segment.to]];
 
   return (
     <Animated.View style={[styles.fill, driftStyle]}>
