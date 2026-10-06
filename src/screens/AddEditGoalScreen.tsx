@@ -339,6 +339,8 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
                       value={pickerValue}
                       mode={picker.mode}
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      themeVariant={theme.isDark ? 'dark' : 'light'}
+                      textColor={theme.colors.textPrimary}
                       minimumDate={picker.field === 'end' ? startAt : undefined}
                       onChange={onPickerChange}
                     />

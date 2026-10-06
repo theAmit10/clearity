@@ -316,6 +316,8 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 value={extendDate}
                 mode="datetime"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                themeVariant={theme.isDark ? 'dark' : 'light'}
+                textColor={theme.colors.textPrimary}
                 minimumDate={new Date(new Date(goal.endAt).getTime() + 60000)}
                 onChange={(e: any, d?: Date) => {
                   if (e?.type === 'dismissed') {
@@ -533,6 +535,8 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                       value={rDate}
                       mode="datetime"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      themeVariant={theme.isDark ? 'dark' : 'light'}
+                      textColor={theme.colors.textPrimary}
                       minimumDate={new Date()}
                       onChange={(e: any, d?: Date) => {
                         if (e?.type === 'dismissed') return;

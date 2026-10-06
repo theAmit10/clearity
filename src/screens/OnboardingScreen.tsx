@@ -456,7 +456,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.16)',
   },
   themeOptionSelected: {
+    borderWidth: 3,
     borderColor: '#34C759',
+    shadowColor: '#34C759',
+    shadowOpacity: 0.55,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
   },
   themeOptionText: {
     color: '#1C1C1E',
