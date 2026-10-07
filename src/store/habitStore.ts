@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { Habit, HabitStats, HabitCategory } from '../types/habit';
 import type { HabitNotificationConfig, AdminNotificationConfig, NotificationStoreData } from '../types/notification';
-import { loadHabits, saveHabits, loadGoals, loadReviewState, saveReviewState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings, loadCustomCategories, saveCustomCategories } from '../services/storage';
+import { loadHabits, saveHabits, loadGoals, loadReviewPromptState, saveReviewPromptState, loadNotificationData, saveNotificationData, loadGeneralSettings, saveGeneralSettings, loadCustomCategories, saveCustomCategories } from '../services/storage';
+import type { ReviewPromptState } from '../services/storage';
 import { logEvent } from '../services/logger';
 import {
   trackEvent,
@@ -22,6 +23,7 @@ interface HabitState {
   habits: Habit[];
   loaded: boolean;
   reviewPromptShown: boolean;
+  reviewPrompt: ReviewPromptState;
   habitNotifications: HabitNotificationConfig[];
   adminNotifications: AdminNotificationConfig[];
   customCategories: HabitCategory[];
@@ -46,6 +48,8 @@ interface HabitState {
   replaceAllHabits: (habits: Habit[]) => Promise<void>;
   mergeHabits: (incoming: Habit[]) => Promise<void>;
   markReviewPromptShown: () => Promise<void>;
+  markStreakPromptShown: () => Promise<void>;
+  markManualReviewPromptShown: () => Promise<void>;
   reorderHabits: (reordered: Habit[]) => Promise<void>;
   addHabitNotification: (habitId: string, config: { title: string; body: string; hour: number; minute: number }) => Promise<void>;
   updateHabitNotification: (id: string, patch: Partial<HabitNotificationConfig>) => Promise<void>;
@@ -85,6 +89,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   habits: [],
   loaded: false,
   reviewPromptShown: false,
+  reviewPrompt: { firstPromptAt: null, streakPromptAt: null, promptCount: 0, lastPromptAt: null },
   habitNotifications: [],
   adminNotifications: DEFAULT_ADMIN_NOTIFICATIONS,
   customCategories: [],
@@ -164,10 +169,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   init: async () => {
     try {
-      const [stored, storedGoals, reviewShown, notifData, generalSettings, customCategories] = await Promise.all([
+      const [stored, storedGoals, reviewPromptState, notifData, generalSettings, customCategories] = await Promise.all([
         loadHabits<Habit[]>(),
         loadGoals<Goal[]>(),
-        loadReviewState(),
+        loadReviewPromptState(),
         loadNotificationData<NotificationStoreData>(),
         loadGeneralSettings(),
         loadCustomCategories<HabitCategory[]>(),
@@ -217,7 +222,8 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       set({
         habits: migrated,
         loaded: true,
-        reviewPromptShown: reviewShown,
+        reviewPromptShown: reviewPromptState.promptCount > 0,
+        reviewPrompt: reviewPromptState,
         habitNotifications: habitNotifs,
         adminNotifications: notifData?.adminNotifications ?? DEFAULT_ADMIN_NOTIFICATIONS,
         customCategories: customCategories ?? [],
@@ -405,9 +411,60 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   markReviewPromptShown: async () => {
-    set({ reviewPromptShown: true });
-    await saveReviewState(true);
+    // First-habit one-shot. Cap-guarded so a stale double-call can't inflate
+    // the lifetime count and block the future streak prompt.
+    const prev = get().reviewPrompt;
+    if (prev.promptCount >= 2) {
+      set({ reviewPromptShown: true });
+      return;
+    }
+    const now = new Date().toISOString();
+    const next: ReviewPromptState = {
+      firstPromptAt: prev.firstPromptAt ?? now,
+      streakPromptAt: prev.streakPromptAt,
+      promptCount: prev.promptCount + 1,
+      lastPromptAt: now,
+    };
+    set({ reviewPromptShown: true, reviewPrompt: next });
+    await saveReviewPromptState(next);
     logEvent('info', 'Review prompt marked as shown');
+  },
+
+  markStreakPromptShown: async () => {
+    const prev = get().reviewPrompt;
+    if (prev.promptCount >= 2) {
+      set({ reviewPromptShown: true });
+      return;
+    }
+    const now = new Date().toISOString();
+    const next: ReviewPromptState = {
+      firstPromptAt: prev.firstPromptAt,
+      streakPromptAt: now,
+      promptCount: prev.promptCount + 1,
+      lastPromptAt: now,
+    };
+    set({ reviewPromptShown: true, reviewPrompt: next });
+    await saveReviewPromptState(next);
+    logEvent('info', 'Review prompt marked as shown (streak)');
+  },
+
+  markManualReviewPromptShown: async () => {
+    // Manual Settings → Rate row. Records the attempt so the auto streak
+    // prompt respects the 90-day cooldown instead of double-prompting.
+    const prev = get().reviewPrompt;
+    if (prev.promptCount >= 2) {
+      set({ reviewPromptShown: true });
+      return;
+    }
+    const now = new Date().toISOString();
+    const next: ReviewPromptState = {
+      ...prev,
+      promptCount: prev.promptCount + 1,
+      lastPromptAt: now,
+    };
+    set({ reviewPromptShown: true, reviewPrompt: next });
+    await saveReviewPromptState(next);
+    logEvent('info', 'Review prompt marked as shown (manual)');
   },
 
   reorderHabits: async (reordered: Habit[]) => {

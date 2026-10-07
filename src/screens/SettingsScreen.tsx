@@ -237,6 +237,9 @@ export default function SettingsScreen({ navigation }: any) {
   };
 
   const handleRateApp = () => {
+    // Record the manual attempt so the auto streak prompt respects the
+    // 90-day cooldown instead of double-prompting.
+    useHabitStore.getState().markManualReviewPromptShown().catch(() => {});
     try {
       requestReview();
     } catch {

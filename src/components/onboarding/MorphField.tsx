@@ -48,9 +48,27 @@ interface PulseConfig {
   rest: number;
 }
 const PULSE_BY_PAGE: Record<number, PulseConfig> = {
-  1: { layout: CHECK_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
-  2: { layout: TARGET_LAYOUT_INDEX, form: 1800, hold: 2000, disperse: 1800, rest: 1400 },
-  3: { layout: MOUNTAIN_LAYOUT_INDEX, form: 1400, hold: 1200, disperse: 1400, rest: 1600 },
+  1: {
+    layout: CHECK_LAYOUT_INDEX,
+    form: 1400,
+    hold: 1200,
+    disperse: 1400,
+    rest: 1600,
+  },
+  2: {
+    layout: TARGET_LAYOUT_INDEX,
+    form: 1800,
+    hold: 2000,
+    disperse: 1800,
+    rest: 1400,
+  },
+  3: {
+    layout: MOUNTAIN_LAYOUT_INDEX,
+    form: 1400,
+    hold: 1200,
+    disperse: 1400,
+    rest: 1600,
+  },
 };
 
 /**
@@ -136,10 +154,14 @@ const MorphField = forwardRef<MorphHandle>(function MorphFieldInner(_, ref) {
         // before travelling to the next shape. Assigning a new animation
         // also cancels the pulse repeat.
         pulsingRef.current = false;
-        progress.value = withTiming(0, { duration: PULSE_SETTLE_MS }, finished => {
-          'worklet';
-          if (finished) runOnJS(beginMorph)(next, onMid, onDone);
-        });
+        progress.value = withTiming(
+          0,
+          { duration: PULSE_SETTLE_MS },
+          finished => {
+            'worklet';
+            if (finished) runOnJS(beginMorph)(next, onMid, onDone);
+          },
+        );
         return;
       }
       beginMorph(next, onMid, onDone);

@@ -46,13 +46,70 @@ export async function saveLogs(data: unknown): Promise<void> {
   await AsyncStorage.setItem(LOGS_KEY, JSON.stringify(data));
 }
 
-export async function loadReviewState(): Promise<boolean> {
+export interface ReviewPromptState {
+  firstPromptAt: string | null;
+  streakPromptAt: string | null;
+  promptCount: number;
+  lastPromptAt: string | null;
+}
+
+export function defaultReviewPromptState(): ReviewPromptState {
+  return { firstPromptAt: null, streakPromptAt: null, promptCount: 0, lastPromptAt: null };
+}
+
+function normalizeReviewPromptState(raw: unknown): ReviewPromptState {
+  const base = defaultReviewPromptState();
+  if (!raw || typeof raw !== 'object') return base;
+  const r = raw as Partial<ReviewPromptState>;
+  return {
+    firstPromptAt: typeof r.firstPromptAt === 'string' ? r.firstPromptAt : null,
+    streakPromptAt: typeof r.streakPromptAt === 'string' ? r.streakPromptAt : null,
+    promptCount: typeof r.promptCount === 'number' && r.promptCount >= 0 ? Math.floor(r.promptCount) : base.promptCount,
+    lastPromptAt: typeof r.lastPromptAt === 'string' ? r.lastPromptAt : null,
+  };
+}
+
+export async function loadReviewPromptState(): Promise<ReviewPromptState> {
   const raw = await AsyncStorage.getItem(REVIEW_KEY);
-  return raw === 'true';
+  if (raw == null) return defaultReviewPromptState();
+  // Legacy boolean encoding ('true'/'false') from the first-habit one-shot.
+  if (raw === 'true' || raw === 'false') {
+    const shown = raw === 'true';
+    return shown
+      ? { firstPromptAt: new Date().toISOString(), streakPromptAt: null, promptCount: 1, lastPromptAt: new Date().toISOString() }
+      : defaultReviewPromptState();
+  }
+  try {
+    return normalizeReviewPromptState(JSON.parse(raw));
+  } catch {
+    return defaultReviewPromptState();
+  }
+}
+
+export async function saveReviewPromptState(state: ReviewPromptState): Promise<void> {
+  await AsyncStorage.setItem(REVIEW_KEY, JSON.stringify(normalizeReviewPromptState(state)));
+}
+
+// Legacy boolean accessors — kept for backward compat, backed by the JSON state.
+export async function loadReviewState(): Promise<boolean> {
+  const state = await loadReviewPromptState();
+  return state.promptCount > 0;
 }
 
 export async function saveReviewState(shown: boolean): Promise<void> {
-  await AsyncStorage.setItem(REVIEW_KEY, shown ? 'true' : 'false');
+  if (!shown) {
+    await saveReviewPromptState(defaultReviewPromptState());
+    return;
+  }
+  const current = await loadReviewPromptState();
+  if (current.promptCount > 0) return;
+  const now = new Date().toISOString();
+  await saveReviewPromptState({
+    ...current,
+    firstPromptAt: current.firstPromptAt ?? now,
+    promptCount: current.promptCount + 1,
+    lastPromptAt: current.lastPromptAt ?? now,
+  });
 }
 
 export async function loadNotificationData<T>(): Promise<T | null> {

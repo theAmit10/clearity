@@ -103,6 +103,7 @@ If auth is added in the future:
 | `intro_film_started` | Intro film shows before onboarding on first launch | — | `App.tsx` |
 | `intro_film_completed` | Intro film plays to the end (auto-handoff to onboarding) | — | `App.tsx` |
 | `intro_film_skipped` | User taps Skip during the intro film | `at_scene` | `App.tsx` |
+| `review_prompt_shown` | Streak review sheet attempted (daily habit crosses exactly 5-day streak; max 2 lifetime, 90d cooldown) | `streak`, `trigger` (streak_5) | `src/services/reviewPrompt.ts` |
 
 ### Value Moment
 

@@ -19,6 +19,8 @@ import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { OfferBanner } from '../components/OfferBanner';
 import { openPaywall } from '../services/paywallRouter';
+import { todayKey } from '../services/dateUtils';
+import { maybeRequestStreakReview, STREAK_REVIEW_DELAY_MS } from '../services/reviewPrompt';
 
 const BUILT_IN_KEYS = new Set(BUILT_IN_CATEGORIES.map(c => c.key));
 
@@ -74,6 +76,21 @@ export default function HomeScreen({ navigation }: any) {
     [activeHabits, selectedCategory],
   );
 
+  const handleToggleToday = useCallback(
+    async (habit: Habit) => {
+      // Capture pre-toggle state to distinguish check from uncheck.
+      // Past-date edits never reach here (today only); the delayed service
+      // re-validates streak === 5 + still-completed + cooldown + cap.
+      const wasCompleted = !!(habit.completions?.[todayKey()] > 0);
+      await toggleCompletion(habit.id);
+      if (wasCompleted) return;
+      setTimeout(() => {
+        maybeRequestStreakReview(habit.id);
+      }, STREAK_REVIEW_DELAY_MS);
+    },
+    [toggleCompletion],
+  );
+
   const renderItem = useCallback(
     ({
       item,
@@ -88,7 +105,7 @@ export default function HomeScreen({ navigation }: any) {
         <ScaleDecorator>
           <HabitCard
             habit={item}
-            onToggleToday={() => toggleCompletion(item.id)}
+            onToggleToday={() => handleToggleToday(item)}
             onPress={() => navigation.navigate('HabitDetail', { id: item.id })}
             onLongPress={drag}
             isDragging={isActive}
@@ -96,7 +113,7 @@ export default function HomeScreen({ navigation }: any) {
         </ScaleDecorator>
       );
     },
-    [navigation, toggleCompletion],
+    [navigation, handleToggleToday],
   );
 
   return (
