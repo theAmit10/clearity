@@ -60,6 +60,17 @@
 	<array>
 		<string>itms-apps</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.codethenic.habita.paywall</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>habita</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
 

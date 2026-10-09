@@ -33,11 +33,15 @@ struct RingsEntry: TimelineEntry {
   let rings: [RingsSnapshotHabit]
   /// True when the user cleared their rings selection (show setup hint).
   let showSetupHint: Bool
+  /// True when widgets are Pro-gated (render the upsell card).
+  let showProGate: Bool
+  /// True when the gate is Renew (expired) vs Upgrade (never Pro).
+  let proExpired: Bool
 }
 
 struct RingsProvider: TimelineProvider {
   func placeholder(in context: Context) -> RingsEntry {
-    RingsEntry(date: Date(), rings: [], showSetupHint: false)
+    RingsEntry(date: Date(), rings: [], showSetupHint: false, showProGate: false, proExpired: false)
   }
 
   func getSnapshot(in context: Context, completion: @escaping (RingsEntry) -> Void) {
@@ -53,10 +57,16 @@ struct RingsProvider: TimelineProvider {
   }
 
   private func loadEntry() -> RingsEntry {
-    let (rings, configured) = RingsStore.snapshot()
+    let (rings, configured, locked, expired) = RingsStore.snapshot()
     // Never-configured + no data, or explicitly emptied selection -> hint.
     // First-run fallback in RingsStore.snapshot covers never-configured with data.
-    return RingsEntry(date: Date(), rings: rings, showSetupHint: configured && rings.isEmpty)
+    return RingsEntry(
+      date: Date(),
+      rings: rings,
+      showSetupHint: configured && rings.isEmpty && !locked,
+      showProGate: locked,
+      proExpired: expired
+    )
   }
 }
 
@@ -68,6 +78,7 @@ struct TodayRingsWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: RingsProvider()) { entry in
       RingsEntryView(entry: entry)
+        .widgetURL(entry.showProGate ? WidgetPaywall.url : nil)
     }
     .configurationDisplayName("Today Rings")
     .description("Tap a ring to complete a habit without opening the app.")
@@ -112,7 +123,9 @@ struct RingsEntryView: View {
     ZStack {
       cardShape
         .fill(cardFill)
-      if entry.rings.isEmpty {
+      if entry.showProGate {
+        WidgetProLockView(expired: entry.proExpired)
+      } else if entry.rings.isEmpty {
         VStack(spacing: 6) {
           Image(systemName: "circle.dotted")
             .font(.system(size: 20))

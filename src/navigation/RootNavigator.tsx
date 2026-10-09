@@ -38,6 +38,11 @@ import {
   drainOfferPushTap,
   markOfferPushTap,
 } from '../services/offerReminder';
+import {
+  drainWidgetPaywallTap,
+  markWidgetPaywallTap,
+} from '../services/widgetDeepLink';
+import { useHabitStore } from '../store/habitStore';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -234,6 +239,25 @@ export function openPushPaywall(): void {
   nav.navigate('Home', { screen: route, params: { source: 'offer_push' } });
 }
 
+/**
+ * Global opener for locked-widget taps (source `widget`).
+ * Locked native widgets deep-link via `habita://paywall?source=widget`.
+ * Ignored for Pro users (stale locked card tapped after renew) and parked
+ * when navigation isn't ready yet (cold start from the widget).
+ */
+export function openWidgetPaywall(): void {
+  if (useHabitStore.getState().isPro) return;
+  if (!navigationRef.isReady()) {
+    markWidgetPaywallTap();
+    return;
+  }
+  const route = getStoredVariantSync() === 'v2' ? 'PaywallV2' : 'Paywall';
+  const nav = navigationRef as unknown as {
+    navigate: (screen: string, params?: Record<string, unknown>) => void;
+  };
+  nav.navigate('Home', { screen: route, params: { source: 'widget' } });
+}
+
 // Preview host for Diagnostics — dismisses without persisting the
 // onboarding-seen flag and without firing onboarding analytics (those live
 // in App's real first-launch finish handler, not in the screen itself).
@@ -311,6 +335,7 @@ export default function RootNavigator({
       theme={navigationTheme}
       onReady={() => {
         if (drainOfferPushTap()) openPushPaywall();
+        if (drainWidgetPaywallTap()) openWidgetPaywall();
       }}
     >
       <Tab.Navigator

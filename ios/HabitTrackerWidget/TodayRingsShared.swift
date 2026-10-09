@@ -1,4 +1,36 @@
 import Foundation
+import SwiftUI
+
+// MARK: - Widget paywall deep link (source `widget`)
+//
+// Locked widgets (free / expired Pro) render WidgetProLockView instead of
+// habit data. Tapping it opens habita://paywall?source=widget (scheme
+// registered in Info.plist) and JS routes straight into the paywall.
+
+enum WidgetPaywall {
+  static let url = URL(string: "habita://paywall?source=widget")!
+}
+
+/// Shared Pro-upsell card. Copy is hardcoded English: widget extensions
+/// can't reach the app's JS i18n bundles.
+struct WidgetProLockView: View {
+  let expired: Bool
+
+  var body: some View {
+    VStack(spacing: 6) {
+      Image(systemName: "lock.fill")
+        .font(.system(size: 20, weight: .semibold))
+        .foregroundColor(Color(hex: "#9E9E9E")!)
+      Text("Widgets are Pro")
+        .font(.system(size: 13, weight: .bold, design: .rounded))
+        .foregroundColor(Color(hex: "#E8E8E8")!)
+      Text(expired ? "Tap to renew" : "Tap to upgrade")
+        .font(.system(size: 11, design: .rounded))
+        .foregroundColor(Color(hex: "#9E9E9E")!)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
 
 // MARK: - Today Rings shared model
 //
@@ -21,6 +53,10 @@ struct RingsPayload: Codable {
   var habits: [RingsHabit]
   var weekStart: String?
   var weekEnd: String?
+  /// True when widgets must render the Pro upsell instead of habit data.
+  var locked: Bool?
+  /// `expired` (Renew copy) vs anything else (Upgrade copy).
+  var lockMode: String?
 }
 
 struct RingsPendingToggle: Codable {
@@ -121,7 +157,9 @@ enum RingsStore {
 
   // MARK: - Snapshot for the widget timeline
 
-  static func snapshot() -> (rings: [RingsSnapshotHabit], configured: Bool) {
+  static func snapshot() -> (
+    rings: [RingsSnapshotHabit], configured: Bool, locked: Bool, expired: Bool
+  ) {
     let defaults = defaults()
     let storedIds = defaults?.stringArray(forKey: ringsIdsKey) // nil = never configured
     let configured = storedIds != nil
@@ -130,7 +168,12 @@ enum RingsStore {
           let data = json.data(using: .utf8),
           let payload = try? JSONDecoder().decode(RingsPayload.self, from: data)
     else {
-      return ([], configured)
+      return ([], configured, false, false)
+    }
+
+    // Locked widgets render the Pro upsell with no toggle targets.
+    if payload.locked == true {
+      return ([], configured, true, payload.lockMode == "expired")
     }
 
     let today = todayKey()
@@ -154,7 +197,7 @@ enum RingsStore {
         done: done
       )
     }
-    return (rings, configured)
+    return (rings, configured, false, false)
   }
 
   // MARK: - Toggle (mirrors toggleCompletion in habitStore.ts)
@@ -164,6 +207,7 @@ enum RingsStore {
           let json = defaults.string(forKey: habitDataKey),
           let data = json.data(using: .utf8),
           var payload = try? JSONDecoder().decode(RingsPayload.self, from: data),
+          payload.locked != true,
           let idx = payload.habits.firstIndex(where: { $0.id == habitId })
     else {
       return

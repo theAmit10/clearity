@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, LogBox, AppState } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, LogBox, AppState, Linking } from 'react-native';
 
 LogBox.ignoreLogs([/InteractionManager has been deprecated/]);
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -24,6 +24,11 @@ import {
   wasOpenedFromOfferPush,
 } from './src/services/offerReminder';
 import { openPushPaywall } from './src/navigation/RootNavigator';
+import { openWidgetPaywall } from './src/navigation/RootNavigator';
+import {
+  isWidgetPaywallUrl,
+  markWidgetPaywallTap,
+} from './src/services/widgetDeepLink';
 import { EventType } from '@notifee/react-native';
 import {
   initAnalytics,
@@ -100,6 +105,22 @@ function AppContent() {
     wasOpenedFromOfferPush().then(fromPush => {
       if (fromPush) markOfferPushTap();
     });
+    // Locked-widget tap (habita://paywall?source=widget): cold start parks
+    // it for onReady, warm url events route straight into the paywall.
+    Linking.getInitialURL()
+      .then(url => {
+        if (isWidgetPaywallUrl(url)) markWidgetPaywallTap();
+      })
+      .catch(() => {
+        // deep-link routing is non-critical
+      });
+    const widgetLinkSub = Linking.addEventListener('url', ({ url }) => {
+      try {
+        if (isWidgetPaywallUrl(url)) openWidgetPaywall();
+      } catch {
+        // tap routing is non-critical
+      }
+    });
     init();
     initGoals();
     loadOnboardingSeen()
@@ -113,6 +134,7 @@ function AppContent() {
       unsubVariant();
       unsubPro();
       if (typeof unsubOfferPush === 'function') unsubOfferPush();
+      widgetLinkSub.remove();
     };
   }, []);
 

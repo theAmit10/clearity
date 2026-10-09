@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
@@ -65,6 +66,14 @@ class HabitWidgetProvider : AppWidgetProvider() {
       } catch (_: Exception) {
         showEmptyState(views)
         setTapIntent(context, views)
+        return views
+      }
+
+      // Locked widgets render the Pro upsell; taps deep-link into the paywall.
+      if (payload.optBoolean("locked", false)) {
+        val expired = payload.optString("lockMode", "") == "expired"
+        showLockedState(views, expired)
+        setPaywallTapIntent(context, views)
         return views
       }
 
@@ -147,6 +156,18 @@ class HabitWidgetProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.habit_row_3, View.GONE)
     }
 
+    private fun showLockedState(views: RemoteViews, expired: Boolean) {
+      views.setTextViewText(R.id.title_text, "Widgets are Pro")
+      views.setTextViewText(
+        R.id.empty_text,
+        if (expired) "Pro expired — tap to renew" else "Upgrade to Pro to use widgets",
+      )
+      views.setViewVisibility(R.id.empty_state, View.VISIBLE)
+      views.setViewVisibility(R.id.habit_row_1, View.GONE)
+      views.setViewVisibility(R.id.habit_row_2, View.GONE)
+      views.setViewVisibility(R.id.habit_row_3, View.GONE)
+    }
+
     private fun parseColor(hex: String): Int {
       return try {
         Color.parseColor(hex)
@@ -180,6 +201,21 @@ class HabitWidgetProvider : AppWidgetProvider() {
       val pendingIntent = PendingIntent.getActivity(
         context,
         0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+      views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+    }
+
+    /** Locked-card tap: deep-link straight into the paywall (source `widget`). */
+    private fun setPaywallTapIntent(context: Context, views: RemoteViews) {
+      val intent = Intent(
+        Intent.ACTION_VIEW,
+        android.net.Uri.parse(WidgetModule.PAYWALL_DEEP_LINK),
+      ).setPackage(context.packageName)
+      val pendingIntent = PendingIntent.getActivity(
+        context,
+        2,
         intent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
       )

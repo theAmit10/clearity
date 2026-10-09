@@ -105,5 +105,7 @@ class WidgetModule(private val reactContext: ReactApplicationContext) :
     const val RINGS_TOGGLE_ACTION = "com.codethenic.habita.widget.RINGS_TOGGLE"
     const val EXTRA_HABIT_ID = "habit_id"
     const val MAX_RINGS = 10
+    /** Locked-widget tap target — JS routes it into the paywall (source `widget`). */
+    const val PAYWALL_DEEP_LINK = "habita://paywall?source=widget"
   }
 }

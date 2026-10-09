@@ -19,7 +19,18 @@ export interface WidgetDataPayload {
   habits: WidgetHabitData[];
   weekStart: string;
   weekEnd: string;
+  /**
+   * True when widgets must render the Pro upsell instead of habit data
+   * (free users and expired Pro). Native intentionally ignores `habits`
+   * and selection ids while locked; tapping deep-links into the paywall.
+   */
+  locked?: boolean;
+  /** Why the widget is locked — drives Upgrade vs Renew copy. */
+  lockMode?: WidgetLockMode | null;
 }
+
+/** Lock reason for the widget upsell card. */
+export type WidgetLockMode = 'free' | 'expired';
 
 /** Absolute-value op written natively when the user taps a widget ring. */
 export interface WidgetPendingToggle {
@@ -49,6 +60,68 @@ function getWeekRange(): { weekStart: string; weekEnd: string } {
 }
 
 export const MAX_RINGS_SELECTION = 10;
+
+export interface WidgetHabitInput {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  frequency: HabitFrequency;
+  frequencyValue?: number;
+  frequencyWindow?: number;
+  completions: Record<string, number>;
+}
+
+/**
+ * Payload honoring Pro state. Free / expired users get an empty, locked
+ * payload so OS widgets render the Pro upsell; Pro gets full data.
+ * Selection ids are preserved native-side so renew restores instantly.
+ */
+export function buildWidgetPayloadForState(
+  habits: WidgetHabitInput[],
+  pro: { isPro: boolean; proExpired: boolean },
+): WidgetDataPayload {
+  if (!pro.isPro) {
+    const { weekStart, weekEnd } = getWeekRange();
+    return {
+      habits: [],
+      weekStart,
+      weekEnd,
+      locked: true,
+      lockMode: pro.proExpired ? 'expired' : 'free',
+    };
+  }
+  return { ...buildWidgetPayloadData(habits), locked: false, lockMode: null };
+}
+
+/** Shared payload builder (habit rows + week range, no lock fields). */
+export function buildWidgetPayloadData(
+  habits: WidgetHabitInput[],
+): WidgetDataPayload {
+  const { weekStart, weekEnd } = getWeekRange();
+  const yearStart = `${new Date().getFullYear()}-01-01`;
+
+  const filtered = habits.map(h => {
+    const yearCompletions: Record<string, number> = {};
+    for (const dateKey of Object.keys(h.completions)) {
+      if (dateKey >= yearStart) {
+        yearCompletions[dateKey] = h.completions[dateKey];
+      }
+    }
+    return {
+      id: h.id,
+      name: h.name,
+      color: h.color,
+      icon: h.icon ?? 'fire',
+      frequency: h.frequency ?? 'daily',
+      frequencyValue: h.frequencyValue,
+      frequencyWindow: h.frequencyWindow,
+      completions: yearCompletions,
+    };
+  });
+
+  return { habits: filtered, weekStart, weekEnd };
+}
 
 export const WidgetModule = {
   setSelectedHabitIds: async (ids: string[]): Promise<void> => {
@@ -111,39 +184,6 @@ export const WidgetModule = {
   },
 
   buildPayload: (
-    habits: {
-      id: string;
-      name: string;
-      color: string;
-      icon: string;
-      frequency: HabitFrequency;
-      frequencyValue?: number;
-      frequencyWindow?: number;
-      completions: Record<string, number>;
-    }[],
-  ): WidgetDataPayload => {
-    const { weekStart, weekEnd } = getWeekRange();
-    const yearStart = `${new Date().getFullYear()}-01-01`;
-
-    const filtered = habits.map(h => {
-      const yearCompletions: Record<string, number> = {};
-      for (const dateKey of Object.keys(h.completions)) {
-        if (dateKey >= yearStart) {
-          yearCompletions[dateKey] = h.completions[dateKey];
-        }
-      }
-      return {
-        id: h.id,
-        name: h.name,
-        color: h.color,
-        icon: h.icon ?? 'fire',
-        frequency: h.frequency ?? 'daily',
-        frequencyValue: h.frequencyValue,
-        frequencyWindow: h.frequencyWindow,
-        completions: yearCompletions,
-      };
-    });
-
-    return { habits: filtered, weekStart, weekEnd };
-  },
+    habits: WidgetHabitInput[],
+  ): WidgetDataPayload => buildWidgetPayloadData(habits),
 };

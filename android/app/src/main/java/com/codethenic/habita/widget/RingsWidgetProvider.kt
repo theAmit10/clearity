@@ -40,8 +40,9 @@ class RingsWidgetProvider : AppWidgetProvider() {
     ) {
       try {
         val (rings, configured) = RingsWidgetStore.snapshot(context)
+        val lock = RingsWidgetStore.lockState(context)
         for (widgetId in appWidgetIds) {
-          val views = buildWidgetViews(context, rings, configured, widgetId)
+          val views = buildWidgetViews(context, rings, configured, lock, widgetId)
           appWidgetManager.updateAppWidget(widgetId, views)
         }
       } catch (_: Exception) {
@@ -52,9 +53,22 @@ class RingsWidgetProvider : AppWidgetProvider() {
       context: Context,
       rings: List<RingsWidgetStore.RingHabit>,
       configured: Boolean,
+      lock: RingsWidgetStore.WidgetLock,
       widgetId: Int,
     ): RemoteViews {
       val views = RemoteViews(context.packageName, R.layout.rings_widget)
+
+      if (lock.locked) {
+        views.setViewVisibility(R.id.rings_empty, View.VISIBLE)
+        views.setViewVisibility(R.id.rings_row_1, View.GONE)
+        views.setViewVisibility(R.id.rings_row_2, View.GONE)
+        views.setTextViewText(
+          R.id.rings_empty_text,
+          if (lock.expired) "Pro expired — tap to renew" else "Widgets are Pro — tap to upgrade",
+        )
+        setPaywallIntent(context, views)
+        return views
+      }
 
       if (rings.isEmpty()) {
         views.setViewVisibility(R.id.rings_empty, View.VISIBLE)
@@ -116,6 +130,21 @@ class RingsWidgetProvider : AppWidgetProvider() {
       val pendingIntent = PendingIntent.getActivity(
         context,
         1,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+      views.setOnClickPendingIntent(R.id.rings_container, pendingIntent)
+    }
+
+    /** Locked-card tap: deep-link straight into the paywall (source `widget`). */
+    private fun setPaywallIntent(context: Context, views: RemoteViews) {
+      val intent = Intent(
+        Intent.ACTION_VIEW,
+        android.net.Uri.parse(WidgetModule.PAYWALL_DEEP_LINK),
+      ).setPackage(context.packageName)
+      val pendingIntent = PendingIntent.getActivity(
+        context,
+        2,
         intent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
       )

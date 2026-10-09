@@ -17,7 +17,7 @@ import {
   settingsCardTransition,
 } from '../components/SettingsRevealItem';
 import { useHabitStore } from '../store/habitStore';
-import { WidgetModule, MAX_RINGS_SELECTION } from '../native/WidgetModule';
+import { WidgetModule, MAX_RINGS_SELECTION, buildWidgetPayloadForState } from '../native/WidgetModule';
 import { useTheme } from '../theme/ThemeProvider';
 import ProGate from '../components/ProGate';
 import { useTranslation } from '../i18n';
@@ -27,6 +27,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
   const { t } = useTranslation();
   const habits = useHabitStore(s => s.habits);
   const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [ringsIds, setRingsIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         }
         if (validIds.length !== ids.length || validRings.length !== ringIds.length) {
           const activeHabits = habits.filter(h => !h.archived);
-          await WidgetModule.updateWidgetData(WidgetModule.buildPayload(activeHabits));
+          await WidgetModule.updateWidgetData(
+            buildWidgetPayloadForState(activeHabits, { isPro, proExpired }),
+          );
         }
       } catch {
         // module not available
@@ -60,7 +63,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         setLoading(false);
       }
     })();
-  }, [habits]);
+  }, [habits, isPro, proExpired]);
 
   const toggleHabit = async (habitId: string) => {
     const next = selectedIds.includes(habitId)
@@ -82,7 +85,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
   const refreshWidgetData = async () => {
     const activeHabits = habits.filter(h => !h.archived);
-    const payload = WidgetModule.buildPayload(activeHabits);
+    const payload = buildWidgetPayloadForState(activeHabits, { isPro, proExpired });
     await WidgetModule.updateWidgetData(payload);
   };
 

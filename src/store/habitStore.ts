@@ -12,7 +12,7 @@ import { getStoredVariantSync } from './paywallVariantStore';
 import { APP_VERSION } from '../constants/appInfo';
 import { addDays, toDateKey, todayKey } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
-import { WidgetModule } from '../native/WidgetModule';
+import { WidgetModule, buildWidgetPayloadForState } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
 import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import type { CustomerInfo } from 'react-native-purchases';
@@ -78,9 +78,12 @@ function persist(habits: Habit[]) {
   saveHabits(habits).catch(err => logEvent('error', 'Failed to persist habits', err));
 }
 
-function updateWidget(habits: Habit[]) {
+function updateWidget(
+  habits: Habit[],
+  pro: { isPro: boolean; proExpired: boolean },
+) {
   const active = habits.filter(h => !h.archived);
-  const payload = WidgetModule.buildPayload(active);
+  const payload = buildWidgetPayloadForState(active, pro);
   WidgetModule.updateWidgetData(payload).catch(() => {});
   WidgetModule.reloadWidget().catch(() => {});
 }
@@ -116,9 +119,24 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         previous_state: prev.proExpired ? 'expired' : 'free',
       });
     }
+    // Push the matching widget payload on Pro transitions so expiry locks
+    // the OS widgets (Pro upsell card) and renew restores data instantly.
+    if (next.isPro !== prev.isPro || next.proExpired !== prev.proExpired) {
+      updateWidget(get().habits, {
+        isPro: next.isPro,
+        proExpired: next.proExpired,
+      });
+    }
   },
 
   syncWidgetToggles: async () => {
+    if (!get().isPro) {
+      // Locked widgets render the Pro upsell with no toggle targets — drain
+      // any stale queued ops so they can never write after expiry.
+      await WidgetModule.consumePendingToggles().catch(() => []);
+      logEvent('info', 'Widget toggles dropped (locked)');
+      return 0;
+    }
     const ops = await WidgetModule.consumePendingToggles();
     if (ops.length === 0) return 0;
     // Last-write-wins per habit+date so rapid double-taps converge.
@@ -159,7 +177,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     if (applied > 0) {
       set({ habits });
       persist(habits);
-      updateWidget(habits);
+      updateWidget(habits, get());
       logEvent('info', 'Widget toggles applied', { applied, unknown });
     } else if (unknown > 0) {
       logEvent('info', 'Widget toggles dropped (unknown habits)', { unknown });
@@ -248,7 +266,10 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       logEvent('info', 'Store initialized', { count: stored?.length ?? 0 });
       const h = stored ?? [];
       const active = h.filter((x: { archived: boolean }) => !x.archived);
-      const payload = WidgetModule.buildPayload(active);
+      const payload = buildWidgetPayloadForState(active, {
+        isPro: proState.isPro,
+        proExpired: proState.proExpired,
+      });
       WidgetModule.updateWidgetData(payload).catch(() => {});
       // Apply any widget taps that happened while the app was closed.
       // Fire-and-forget: failures are non-critical (queue stays native-side
@@ -278,7 +299,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = [...state.habits, habit];
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     trackEvent('habit_added', { icon: data.icon, frequency: data.frequency });
     logEvent('info', 'Habit added', { id: habit.id, name: habit.name });
   },
@@ -287,14 +308,14 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.map(h => (h.id === id ? { ...h, ...patch } : h));
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
   },
 
   deleteHabit: async id => {
     const habits = get().habits.filter(h => h.id !== id);
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     trackEvent('habit_deleted');
     logEvent('info', 'Habit deleted', { id });
   },
@@ -327,7 +348,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
   },
 
   decrementCompletion: async (id, dateKey) => {
@@ -348,7 +369,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
   },
 
   addMissedNote: async (id, dateKey, note) => {
@@ -362,7 +383,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     logEvent('info', 'Missed note added', { habitId: id, date: dateKey });
   },
 
@@ -377,13 +398,13 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     });
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
   },
 
   replaceAllHabits: async habits => {
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     logEvent('info', 'Habits replaced via import', { count: habits.length });
   },
 
@@ -406,7 +427,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = Array.from(byId.values());
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     logEvent('info', 'Habits merged via import', { count: habits.length });
   },
 
@@ -473,7 +494,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = reordered.filter(h => !!h && typeof h.id === 'string');
     set({ habits });
     persist(habits);
-    updateWidget(habits);
+    updateWidget(habits, get());
     logEvent('info', 'Habits reordered');
   },
 

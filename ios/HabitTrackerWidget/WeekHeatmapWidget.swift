@@ -26,6 +26,10 @@ struct WidgetDataPayload: Codable {
   let habits: [WidgetHabitData]
   let weekStart: String
   let weekEnd: String
+  /// True when widgets must render the Pro upsell instead of habit data.
+  let locked: Bool?
+  /// `expired` (Renew copy) vs anything else (Upgrade copy).
+  let lockMode: String?
 }
 
 // MARK: - Timeline Entry
@@ -36,6 +40,10 @@ struct WeekHeatmapEntry: TimelineEntry {
   let weekDates: [String]
   let todayKey: String
   let isEmpty: Bool
+  /// True when widgets are Pro-gated (render the upsell card).
+  let showProGate: Bool
+  /// True when the gate is Renew (expired) vs Upgrade (never Pro).
+  let proExpired: Bool
 }
 
 // MARK: - Timeline Provider
@@ -50,7 +58,9 @@ struct Provider: TimelineProvider {
       habits: [],
       weekDates: weekDateKeys(),
       todayKey: todayKeyString(),
-      isEmpty: true
+      isEmpty: true,
+      showProGate: false,
+      proExpired: false
     )
   }
 
@@ -80,6 +90,19 @@ struct Provider: TimelineProvider {
       return emptyEntry()
     }
 
+    // Locked widgets render the Pro upsell instead of habit data.
+    if payload.locked == true {
+      return WeekHeatmapEntry(
+        date: Date(),
+        habits: [],
+        weekDates: weekDateKeys(),
+        todayKey: todayKeyString(),
+        isEmpty: true,
+        showProGate: true,
+        proExpired: payload.lockMode == "expired"
+      )
+    }
+
     let selectedHabits = payload.habits.filter { h in
       selectedIds.contains(h.id)
     }
@@ -89,7 +112,9 @@ struct Provider: TimelineProvider {
       habits: selectedHabits,
       weekDates: weekDateKeys(),
       todayKey: todayKeyString(),
-      isEmpty: selectedHabits.isEmpty
+      isEmpty: selectedHabits.isEmpty,
+      showProGate: false,
+      proExpired: false
     )
   }
 
@@ -99,7 +124,9 @@ struct Provider: TimelineProvider {
       habits: [],
       weekDates: weekDateKeys(),
       todayKey: todayKeyString(),
-      isEmpty: true
+      isEmpty: true,
+      showProGate: false,
+      proExpired: false
     )
   }
 
@@ -142,6 +169,7 @@ struct WeekHeatmapWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: Provider()) { entry in
       WeekHeatmapEntryView(entry: entry)
+        .widgetURL(entry.showProGate ? WidgetPaywall.url : nil)
     }
     .configurationDisplayName("Week Heatmap")
     .description("Shows your weekly habit completion heatmap.")
@@ -156,7 +184,11 @@ struct WeekHeatmapEntryView: View {
   @Environment(\.widgetFamily) var family
 
   var body: some View {
-    if family == .systemSmall {
+    if entry.showProGate {
+      WidgetProLockView(expired: entry.proExpired)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .containerBackground(NeumorphicColors.background, for: .widget)
+    } else if family == .systemSmall {
       SmallWidgetView(entry: entry)
     } else {
       MediumWidgetView(entry: entry)

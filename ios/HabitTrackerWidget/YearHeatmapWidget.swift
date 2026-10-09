@@ -21,6 +21,10 @@ struct YearHeatmapEntry: TimelineEntry {
   let monthLabels: [(text: String, col: Int)]
   let todayKey: String
   let year: Int
+  /// True when widgets are Pro-gated (render the upsell card).
+  let showProGate: Bool
+  /// True when the gate is Renew (expired) vs Upgrade (never Pro).
+  let proExpired: Bool
 }
 
 // MARK: - Grid builder (mirrors the JS yearWeeks in YearHeatmap.tsx)
@@ -127,6 +131,20 @@ struct YearHeatmapProvider: TimelineProvider {
       return emptyEntry(weeks: weeks, labels: labels, year: year)
     }
 
+    // Locked widgets render the Pro upsell instead of habit data.
+    if payload.locked == true {
+      return YearHeatmapEntry(
+        date: Date(),
+        habit: nil,
+        weekDates: weeks,
+        monthLabels: labels,
+        todayKey: YearGridBuilder.todayKeyString(),
+        year: year,
+        showProGate: true,
+        proExpired: payload.lockMode == "expired"
+      )
+    }
+
     let habit = payload.habits.first { $0.id == selectedId }
 
     return YearHeatmapEntry(
@@ -135,7 +153,9 @@ struct YearHeatmapProvider: TimelineProvider {
       weekDates: weeks,
       monthLabels: labels,
       todayKey: YearGridBuilder.todayKeyString(),
-      year: year
+      year: year,
+      showProGate: false,
+      proExpired: false
     )
   }
 
@@ -152,7 +172,9 @@ struct YearHeatmapProvider: TimelineProvider {
       weekDates: wk,
       monthLabels: lb,
       todayKey: YearGridBuilder.todayKeyString(),
-      year: year
+      year: year,
+      showProGate: false,
+      proExpired: false
     )
   }
 
@@ -171,6 +193,7 @@ struct YearHeatmapWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: YearHeatmapProvider()) { entry in
       YearHeatmapEntryView(entry: entry)
+        .widgetURL(entry.showProGate ? WidgetPaywall.url : nil)
     }
     .configurationDisplayName("Year Heatmap")
     .description("Shows a full year of completions for one habit.")
@@ -188,7 +211,10 @@ struct YearHeatmapEntryView: View {
     GeometryReader { geo in
       VStack(spacing: 6) {
         header
-        if entry.habit != nil {
+        if entry.showProGate {
+          WidgetProLockView(expired: entry.proExpired)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if entry.habit != nil {
           grid(width: geo.size.width)
         } else {
           emptyState

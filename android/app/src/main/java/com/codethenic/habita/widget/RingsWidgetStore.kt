@@ -25,6 +25,23 @@ object RingsWidgetStore {
 
   data class PendingOp(val habitId: String, val dateKey: String, val value: Int)
 
+  /** Pro-gate state carried by the JS payload (`locked` / `lockMode`). */
+  data class WidgetLock(val locked: Boolean, val expired: Boolean)
+
+  fun lockState(context: Context): WidgetLock {
+    return try {
+      val json = prefs(context).getString(WidgetModule.HABIT_DATA_KEY, null)
+        ?: return WidgetLock(false, false)
+      val payload = JSONObject(json)
+      WidgetLock(
+        payload.optBoolean("locked", false),
+        payload.optString("lockMode", "") == "expired",
+      )
+    } catch (_: Exception) {
+      WidgetLock(false, false)
+    }
+  }
+
   fun prefs(context: Context): SharedPreferences =
     context.getSharedPreferences(WidgetModule.PREFS_NAME, 0)
 
@@ -167,6 +184,9 @@ object RingsWidgetStore {
     val today = todayKey()
     return try {
       val payload = JSONObject(json)
+      // Locked widgets render the Pro upsell with no toggle targets —
+      // never mutate or queue from a stale cached card.
+      if (payload.optBoolean("locked", false)) return null
       val arr = payload.optJSONArray("habits") ?: return null
       var found: JSONObject? = null
       for (i in 0 until arr.length()) {
