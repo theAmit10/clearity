@@ -37,6 +37,13 @@ interface HabitState {
   proExpired: boolean;
   init: () => Promise<void>;
   refreshProStatus: () => Promise<void>;
+  /**
+   * Central choke point for Pro flips from purchase / restore / dismiss
+   * flows: sets state and pushes the matching widget payload on
+   * transitions (bare setState skips the push and leaves OS widgets
+   * showing a stale locked card after renew).
+   */
+  applyProState: (next: { isPro: boolean; proExpired: boolean }) => void;
   /** Apply ops queued by native widget taps (absolute values). No-op when none. */
   syncWidgetToggles: () => Promise<number>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
@@ -139,6 +146,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     }
     // Push the matching widget payload on Pro transitions so expiry locks
     // the OS widgets (Pro upsell card) and renew restores data instantly.
+    if (next.isPro !== prev.isPro || next.proExpired !== prev.proExpired) {
+      updateWidget(get().habits, {
+        isPro: next.isPro,
+        proExpired: next.proExpired,
+      });
+    }
+  },
+
+  applyProState: next => {
+    const prev = get();
+    set(next);
     if (next.isPro !== prev.isPro || next.proExpired !== prev.proExpired) {
       updateWidget(get().habits, {
         isPro: next.isPro,

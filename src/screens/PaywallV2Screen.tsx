@@ -193,7 +193,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
         return;
       }
       const nowPro = isPro(result.customerInfo);
-      useHabitStore.setState({ isPro: nowPro, proExpired: false });
+      useHabitStore.getState().applyProState({ isPro: nowPro, proExpired: false });
       setRemoteIsPro(nowPro);
       setProExpiration(getProExpirationDate(result.customerInfo));
       if (nowPro) {
@@ -229,7 +229,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
       const info = await restorePurchases();
       if (info) {
         const nowPro = isPro(info);
-        useHabitStore.setState({ isPro: nowPro, proExpired: false });
+        useHabitStore.getState().applyProState({ isPro: nowPro, proExpired: false });
         setRemoteIsPro(nowPro);
         setProExpiration(getProExpirationDate(info));
         if (nowPro) {
@@ -267,7 +267,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
       const info = await getCustomerInfo();
       if (isPro(info)) {
         logEvent('info', 'User became pro via paywall v2');
-        useHabitStore.setState({ isPro: true, proExpired: false });
+        useHabitStore.getState().applyProState({ isPro: true, proExpired: false });
       }
     } catch (err) {
       logEvent('error', 'PaywallV2: dismiss status check failed', {
@@ -289,7 +289,7 @@ export default function PaywallV2Screen({ navigation, route }: any) {
     try {
       const info = await getCustomerInfo();
       const nowPro = isPro(info);
-      useHabitStore.setState({ isPro: nowPro, proExpired: false });
+      useHabitStore.getState().applyProState({ isPro: nowPro, proExpired: false });
       setRemoteIsPro(nowPro);
       setProExpiration(getProExpirationDate(info));
       if (!nowPro) navigation.goBack();

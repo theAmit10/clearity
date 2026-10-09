@@ -35,6 +35,7 @@ jest.mock('react-native-config', () => ({
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useHabitStore } from '../src/store/habitStore';
+import { WidgetModule } from '../src/native/WidgetModule';
 import { Habit } from '../src/types/habit';
 
 const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
@@ -153,5 +154,64 @@ describe('habitStore Pro locks', () => {
         '2026-07-13'
       ],
     ).toBe(1);
+  });
+});
+
+describe('habitStore applyProState', () => {
+  const seedExpiredWithFive = () => {
+    useHabitStore.setState({
+      habits: [1, 2, 3, 4, 5].map(n =>
+        makeHabit({
+          id: `h${n}`,
+          createdAt: `2026-0${n}-01T00:00:00.000Z`,
+        }),
+      ),
+      isPro: false,
+      proExpired: true,
+    });
+  };
+
+  it('pushes an unlocked widget payload on renew', () => {
+    seedExpiredWithFive();
+    const spy = jest.spyOn(WidgetModule, 'updateWidgetData');
+    try {
+      useHabitStore.getState().applyProState({ isPro: true, proExpired: false });
+      expect(useHabitStore.getState().isPro).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).toMatchObject({ locked: false });
+      expect(spy.mock.calls[0][0].habits).toHaveLength(5);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('pushes a locked widget payload on expiry', () => {
+    useHabitStore.setState({ habits: [], isPro: true, proExpired: false });
+    const spy = jest.spyOn(WidgetModule, 'updateWidgetData');
+    try {
+      useHabitStore
+        .getState()
+        .applyProState({ isPro: false, proExpired: true });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.mock.calls[0][0]).toMatchObject({
+        locked: true,
+        lockMode: 'expired',
+      });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('skips the widget push when state is unchanged', () => {
+    seedExpiredWithFive();
+    const spy = jest.spyOn(WidgetModule, 'updateWidgetData');
+    try {
+      useHabitStore
+        .getState()
+        .applyProState({ isPro: false, proExpired: true });
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
