@@ -29,6 +29,11 @@ import {
   isWidgetPaywallUrl,
   markWidgetPaywallTap,
 } from './src/services/widgetDeepLink';
+import {
+  rescheduleUnlockedReminders,
+  suspendLockedReminders,
+} from './src/services/proDowngrade';
+import { getLockedHabitIds } from './src/services/proAccess';
 import { EventType } from '@notifee/react-native';
 import {
   initAnalytics,
@@ -84,8 +89,20 @@ function AppContent() {
       if (s.isPro !== p?.isPro) {
         updateProProp(s.isPro);
         // Offer reminder is free-users-only: cancel on Pro, re-sync on free.
-        if (s.isPro) cancelOfferReminder();
-        else syncOfferReminder();
+        if (s.isPro) {
+          cancelOfferReminder();
+          // Renew: everything is unlocked again — reschedule suspended
+          // locked-habit/goal reminders (configs were kept, not deleted).
+          rescheduleUnlockedReminders().catch(() => {
+            // notification setup is non-critical
+          });
+        } else {
+          syncOfferReminder();
+          // Expiry: silence live schedules for newly Pro-locked items.
+          suspendLockedReminders().catch(() => {
+            // notification setup is non-critical
+          });
+        }
       }
     });
     // Foreground tap on the daily offer reminder → paywall (source offer_push).
@@ -207,7 +224,15 @@ function AppContent() {
         const habitConfigs = habitNotifications;
         // NOTE: rescheduleAll cancels every pending notification, so the
         // offer reminder must sync AFTER it.
-        await rescheduleAll(habitConfigs, adminNotifications);
+        // Skip Pro-locked habits while free/expired so suspension survives
+        // restarts (their configs are kept — renew reschedules them).
+        const hs = useHabitStore.getState();
+        const visibleHabits = hs.isPro
+          ? habitConfigs
+          : habitConfigs.filter(
+              n => !getLockedHabitIds(hs.habits).has(n.habitId),
+            );
+        await rescheduleAll(visibleHabits, adminNotifications);
         await useGoalStore.getState().rescheduleActive();
         await syncOfferReminder();
       } catch (err) {

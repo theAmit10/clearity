@@ -31,9 +31,12 @@ interface Props {
   onComplete?: (id: string) => void;
   onLongPress?: () => void;
   isDragging?: boolean;
+  /** Pro-locked (over the free limit after expiry): complete opens paywall. */
+  locked?: boolean;
+  onLockedPress?: () => void;
 }
 
-export default function GoalCard({ goal, onPress, onComplete, onLongPress, isDragging }: Props) {
+export default function GoalCard({ goal, onPress, onComplete, onLongPress, isDragging, locked, onLockedPress }: Props) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
@@ -62,7 +65,12 @@ export default function GoalCard({ goal, onPress, onComplete, onLongPress, isDra
   }));
 
   const handleComplete = () => {
-    if (completed || !onComplete) return;
+    if (completed) return;
+    if (locked) {
+      onLockedPress?.();
+      return;
+    }
+    if (!onComplete) return;
     scale.value = withSpring(1.15, { damping: 6 }, () => {
       scale.value = withSpring(1);
     });
@@ -85,12 +93,26 @@ export default function GoalCard({ goal, onPress, onComplete, onLongPress, isDra
             <Icon size={20} color={goal.color} />
           </Raised>
           <View style={styles.headerText}>
-            <Text
-              style={[styles.name, { color: theme.colors.textPrimary }]}
-              numberOfLines={1}
-            >
-              {goal.title}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text
+                style={[styles.name, { color: theme.colors.textPrimary }]}
+                numberOfLines={1}
+              >
+                {goal.title}
+              </Text>
+              {locked && (
+                <View
+                  style={[
+                    styles.lockBadge,
+                    { backgroundColor: theme.colors.accent },
+                  ]}
+                >
+                  <Text style={styles.lockBadgeText}>
+                    {t('proAccess.lockedBadge')}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text
               style={[
                 styles.sub,
@@ -191,6 +213,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.2,
+    flexShrink: 1,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  lockBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  lockBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   sub: {
     fontSize: 12,

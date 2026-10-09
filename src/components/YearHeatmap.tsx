@@ -17,6 +17,9 @@ import { useTranslation } from '../i18n';
 interface Props {
   habitId: string;
   color: string;
+  /** Pro-locked habit: cells open the paywall instead of toggling. */
+  locked?: boolean;
+  onLockedPress?: () => void;
 }
 
 const CELL = 10;
@@ -60,7 +63,7 @@ function weekMonthLabels(
   return labels;
 }
 
-export default function YearHeatmap({ habitId, color }: Props) {
+export default function YearHeatmap({ habitId, color, locked, onLockedPress }: Props) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { colors, radii } = theme;
@@ -182,7 +185,13 @@ export default function YearHeatmap({ habitId, color }: Props) {
                       <View key={key} style={[styles.cell, { top: di * SIDE }]}>
                         <Pressable
                           disabled={future || !daysInYear}
-                          onPress={() => toggleCompletion(habitId, key)}
+                          onPress={() => {
+                            if (locked) {
+                              onLockedPress?.();
+                            } else {
+                              toggleCompletion(habitId, key);
+                            }
+                          }}
                         >
                           <View
                             style={[

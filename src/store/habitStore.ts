@@ -15,6 +15,7 @@ import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotifi
 import { WidgetModule, buildWidgetPayloadForState } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
 import { FREE_HABIT_LIMIT, FREE_NOTIF_LIMIT } from '../constants/appInfo';
+import { getLockedHabitIds } from '../services/proAccess';
 import type { CustomerInfo } from 'react-native-purchases';
 import type { Goal } from '../types/goal';
 import { t } from '../i18n';
@@ -76,6 +77,23 @@ function computeProState(info: CustomerInfo | null, wasPro: boolean) {
 
 function persist(habits: Habit[]) {
   saveHabits(habits).catch(err => logEvent('error', 'Failed to persist habits', err));
+}
+
+/** Throw when a free/expired user touches a Pro-locked habit (over the
+ * free limit). Delete / reorder / archived items stay open so users can
+ * always recover without paying and nothing is ever force-deleted. */
+function assertHabitUnlocked(
+  habits: Habit[],
+  isPro: boolean,
+  id: string,
+): void {
+  if (isPro) return;
+  if (getLockedHabitIds(habits).has(id)) {
+    logEvent('info', 'Habit interaction blocked — Pro-locked habit');
+    throw new Error(
+      t('proAccess.habitLockedBody', { count: FREE_HABIT_LIMIT }),
+    );
+  }
 }
 
 function updateWidget(
@@ -305,6 +323,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   updateHabit: async (id, patch) => {
+    assertHabitUnlocked(get().habits, get().isPro, id);
     const habits = get().habits.map(h => (h.id === id ? { ...h, ...patch } : h));
     set({ habits });
     persist(habits);
@@ -321,6 +340,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   toggleCompletion: async (id, dateKey) => {
+    assertHabitUnlocked(get().habits, get().isPro, id);
     const key = dateKey ?? todayKey();
     const habits = get().habits.map(h => {
       if (h.id !== id) return h;
@@ -352,6 +372,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   decrementCompletion: async (id, dateKey) => {
+    assertHabitUnlocked(get().habits, get().isPro, id);
     const key = dateKey ?? todayKey();
     const habits = get().habits.map(h => {
       if (h.id !== id) return h;
@@ -373,6 +394,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   addMissedNote: async (id, dateKey, note) => {
+    assertHabitUnlocked(get().habits, get().isPro, id);
     const habits = get().habits.map(h => {
       if (h.id !== id) return h;
       return {
@@ -500,6 +522,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   addHabitNotification: async (habitId, data) => {
     const state = get();
+    assertHabitUnlocked(state.habits, state.isPro, habitId);
     const existingCount = state.habitNotifications.filter(n => n.habitId === habitId).length;
     if (!state.isPro && existingCount >= FREE_NOTIF_LIMIT) {
       logEvent('info', 'Notification creation blocked — free limit reached');
@@ -534,7 +557,15 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       adminNotifications: get().adminNotifications,
     });
     const updated = habitNotifications.find(n => n.id === id);
-    if (updated) await scheduleHabitNotification(updated);
+    if (updated) {
+      // A suspended (Pro-locked) habit must not come back to life via edit.
+      const st = get();
+      if (!st.isPro && getLockedHabitIds(st.habits).has(updated.habitId)) {
+        await cancelHabitNotification(updated.id);
+      } else {
+        await scheduleHabitNotification(updated);
+      }
+    }
     logEvent('info', 'Habit notification updated', { id });
   },
 

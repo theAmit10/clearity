@@ -28,6 +28,9 @@ interface Props {
    * neumorphic theme's fallback coral so this still looks right if a
    * caller doesn't pass the habit's own color. */
   color?: string;
+  /** Pro-locked habit: cells open the paywall instead of toggling. */
+  locked?: boolean;
+  onLockedPress?: () => void;
 }
 
 function getMonthDays(year: number, month: number): (number | null)[] {
@@ -64,6 +67,8 @@ function generateMonths(
 export default function MonthlyCalendar({
   habitId,
   color: colorProp,
+  locked,
+  onLockedPress,
 }: Props) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -163,9 +168,13 @@ export default function MonthlyCalendar({
   // Long-press steps one completion back (undo a mistaken tap).
   const handleLongPress = useCallback(
     (dateKey: string) => {
+      if (locked) {
+        onLockedPress?.();
+        return;
+      }
       decrementCompletion(habitId, dateKey);
     },
-    [decrementCompletion, habitId],
+    [decrementCompletion, habitId, locked, onLockedPress],
   );
 
   const renderMonth = useCallback(
@@ -215,7 +224,13 @@ export default function MonthlyCalendar({
               return (
                 <View key={dateKey} style={CS.wrapper}>
                   <NeumorphicButton
-                    onPress={() => toggleCompletion(habitId, dateKey)}
+                    onPress={() => {
+                      if (locked) {
+                        onLockedPress?.();
+                      } else {
+                        toggleCompletion(habitId, dateKey);
+                      }
+                    }}
                     onLongPress={() => handleLongPress(dateKey)}
                     delayLongPress={400}
                     forcePressed={isCompleted}

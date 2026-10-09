@@ -15,6 +15,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useGoalStore } from '../store/goalStore';
 import { useHabitStore } from '../store/habitStore';
 import { openPaywall } from '../services/paywallRouter';
+import { getLockedGoalIds } from '../services/proAccess';
 import { HABIT_ICONS } from '../constants/habitIcons';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -78,6 +79,8 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const addGoal = useGoalStore(s => s.addGoal);
   const updateGoal = useGoalStore(s => s.updateGoal);
   const proExpired = useHabitStore(s => s.proExpired);
+  const isPro = useHabitStore(s => s.isPro);
+  const goals = useGoalStore(s => s.goals);
 
   const [title, setTitle] = useState(existing?.title ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
@@ -164,6 +167,15 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
       endAt: endAt.toISOString(),
     };
     if (existing) {
+      // Pro-locked goal (over the free limit after expiry): edits route
+      // to the paywall instead of hitting the store guard unhandled.
+      if (!isPro && getLockedGoalIds(goals).has(existing.id)) {
+        openPaywall(navigation, {
+          ...(proExpired ? { mode: 'expired' as const } : null),
+          source: 'goal_limit',
+        });
+        return;
+      }
       await updateGoal(existing.id, payload);
       navigation.goBack();
     } else {

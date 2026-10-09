@@ -14,6 +14,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TrashIcon from 'react-native-heroicons/outline/TrashIcon';
 import { useGoalStore } from '../store/goalStore';
+import { useHabitStore } from '../store/habitStore';
+import { openPaywall } from '../services/paywallRouter';
+import { getLockedGoalIds } from '../services/proAccess';
+import { FREE_GOAL_LIMIT } from '../constants/appInfo';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -39,6 +43,23 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   const addGoalReminder = useGoalStore(s => s.addGoalReminder);
   const updateGoalReminder = useGoalStore(s => s.updateGoalReminder);
   const removeGoalReminder = useGoalStore(s => s.removeGoalReminder);
+  const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
+  const goals = useGoalStore(s => s.goals);
+  // Date-based lock, memoized from the raw array (never return a fresh
+  // collection from a zustand selector — see HomeScreen's warning).
+  const locked = React.useMemo(
+    () => !isPro && getLockedGoalIds(goals).has(id),
+    [isPro, goals, id],
+  );
+  const openExpiredPaywall = React.useCallback(
+    () =>
+      openPaywall(navigation, {
+        ...(proExpired ? { mode: 'expired' as const } : null),
+        source: 'goal_limit',
+      }),
+    [navigation, proExpired],
+  );
 
   const [now, setNow] = useState(Date.now());
   const [showExtend, setShowExtend] = useState(false);
@@ -91,6 +112,10 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   };
 
   const handleExtend = async (date?: Date) => {
+    if (locked) {
+      openExpiredPaywall();
+      return;
+    }
     const next = date ?? extendDate;
     if (next.getTime() <= new Date(goal.endAt).getTime()) return;
     await extendGoal(id, next.toISOString());
@@ -98,6 +123,10 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   };
 
   const openNewReminder = () => {
+    if (locked) {
+      openExpiredPaywall();
+      return;
+    }
     setEditingReminderId(null);
     setRTitle('');
     setRBody('');
@@ -106,6 +135,10 @@ export default function GoalDetailScreen({ route, navigation }: any) {
   };
 
   const openEditReminder = (r: (typeof customReminders)[number]) => {
+    if (locked) {
+      openExpiredPaywall();
+      return;
+    }
     setEditingReminderId(r.id);
     setRTitle(r.title);
     setRBody(r.body);
@@ -199,6 +232,25 @@ export default function GoalDetailScreen({ route, navigation }: any) {
             </NeumorphicButton>
           </View>
 
+          {locked && (
+            <Pressable
+              onPress={openExpiredPaywall}
+              style={[
+                styles.lockBanner,
+                { backgroundColor: theme.colors.accent + '1A' },
+              ]}
+            >
+              <Text style={[styles.lockTitle, { color: theme.colors.accent }]}>
+                {t('proAccess.goalLockedTitle')}
+              </Text>
+              <Text style={[styles.lockBody, { color: theme.colors.textMuted }]}>
+                {t('proAccess.goalLockBannerBody', {
+                  limit: FREE_GOAL_LIMIT,
+                })}
+              </Text>
+            </Pressable>
+          )}
+
           {/* Countdown */}
           <Inset radius={18} style={styles.countdownWrap}>
             {completed ? (
@@ -265,6 +317,10 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 backgroundColor={goal.color}
                 style={styles.primaryBtn}
                 onPress={async () => {
+                  if (locked) {
+                    openExpiredPaywall();
+                    return;
+                  }
                   await completeGoal(id);
                 }}
               >
@@ -276,7 +332,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 radius={14}
                 distance={5}
                 style={styles.secondaryBtn}
-                onPress={() => setShowExtend(true)}
+                onPress={() => (locked ? openExpiredPaywall() : setShowExtend(true))}
               >
                 <Text
                   style={[
@@ -296,7 +352,7 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 radius={14}
                 distance={5}
                 style={styles.secondaryBtn}
-                onPress={() => setShowExtend(true)}
+                onPress={() => (locked ? openExpiredPaywall() : setShowExtend(true))}
               >
                 <Text
                   style={[
@@ -600,7 +656,9 @@ export default function GoalDetailScreen({ route, navigation }: any) {
                 distance={5}
                 style={styles.saveBtn}
                 onPress={() =>
-                  navigation.navigate('AddEditGoal', { id: goal.id })
+                  locked
+                    ? openExpiredPaywall()
+                    : navigation.navigate('AddEditGoal', { id: goal.id })
                 }
               >
                 <Text
@@ -646,6 +704,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerText: { flex: 1 },
+  lockBanner: {
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 16,
+  },
+  lockTitle: { fontSize: 15, fontWeight: '800', marginBottom: 2 },
+  lockBody: { fontSize: 13, fontWeight: '600' },
   name: { fontSize: 26, fontWeight: '800' },
   description: { fontSize: 14, marginTop: 2, fontWeight: '500' },
   closeButton: {

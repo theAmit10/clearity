@@ -19,6 +19,7 @@ import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { OfferBanner } from '../components/OfferBanner';
 import { openPaywall } from '../services/paywallRouter';
+import { getLockedHabitIds } from '../services/proAccess';
 import { todayKey } from '../services/dateUtils';
 import { maybeRequestStreakReview, STREAK_REVIEW_DELAY_MS } from '../services/reviewPrompt';
 
@@ -38,6 +39,7 @@ export default function HomeScreen({ navigation }: any) {
   const showCategories = useHabitStore(s => s.showCategories);
   const customCategories = useHabitStore(s => s.customCategories);
   const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
   // Session-only dismissal — plain state, never persisted, so the banner
   // returns on next app launch (while the offer window is live).
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -76,6 +78,23 @@ export default function HomeScreen({ navigation }: any) {
     [activeHabits, selectedCategory],
   );
 
+  // Pro-locked habit ids (over the free limit once Pro lapses). Empty for
+  // Pro users; computed from createdAt so deletes auto-promote the next
+  // oldest and reorder can't game the lock.
+  const lockedIds = useMemo(
+    () => (isPro ? new Set<string>() : getLockedHabitIds(allHabits)),
+    [isPro, allHabits],
+  );
+
+  const openExpiredPaywall = useCallback(
+    () =>
+      openPaywall(navigation, {
+        ...(proExpired ? { mode: 'expired' as const } : null),
+        source: 'habit_limit',
+      }),
+    [navigation, proExpired],
+  );
+
   const handleToggleToday = useCallback(
     async (habit: Habit) => {
       // Capture pre-toggle state to distinguish check from uncheck.
@@ -105,6 +124,8 @@ export default function HomeScreen({ navigation }: any) {
         <ScaleDecorator>
           <HabitCard
             habit={item}
+            locked={lockedIds.has(item.id)}
+            onLockedPress={openExpiredPaywall}
             onToggleToday={() => handleToggleToday(item)}
             onPress={() => navigation.navigate('HabitDetail', { id: item.id })}
             onLongPress={drag}
@@ -113,7 +134,7 @@ export default function HomeScreen({ navigation }: any) {
         </ScaleDecorator>
       );
     },
-    [navigation, handleToggleToday],
+    [navigation, handleToggleToday, lockedIds, openExpiredPaywall],
   );
 
   return (

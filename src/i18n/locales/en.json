@@ -580,6 +580,16 @@
   "goalStore": {
     "goalLimitBody": "Free tier is limited to {{count}} goals. Upgrade to Pro for unlimited."
   },
+  "proAccess": {
+    "habitLockedBody": "This habit is Pro-locked after your plan expired. Renew Pro to keep using all {{count}}+ habits, or delete extras to stay free.",
+    "goalLockedBody": "This goal is Pro-locked after your plan expired. Renew Pro to keep using all {{count}}+ goals, or delete extras to stay free.",
+    "habitLockedTitle": "Habit locked — Pro expired",
+    "goalLockedTitle": "Goal locked — Pro expired",
+    "habitLockBannerBody": "Free plan includes up to {{limit}} habits. Renew Pro to unlock unlimited.",
+    "goalLockBannerBody": "Free plan includes up to {{limit}} goals. Renew Pro to unlock unlimited.",
+    "lockedBadge": "Pro",
+    "renewToUnlock": "Renew Pro to unlock"
+  },
   "goals": {
     "title": "Goals",
     "empty": "No goals yet.\nTap + to add your first one.",

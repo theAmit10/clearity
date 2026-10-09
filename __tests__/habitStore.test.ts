@@ -98,3 +98,60 @@ describe('habitStore', () => {
     expect(useHabitStore.getState().habits[0].completions['2026-07-13']).toBe(1);
   });
 });
+
+describe('habitStore Pro locks', () => {
+  const seedExpiredWithFive = () => {
+    useHabitStore.setState({
+      habits: [1, 2, 3, 4, 5].map(n =>
+        makeHabit({
+          id: `h${n}`,
+          createdAt: `2026-0${n}-01T00:00:00.000Z`,
+        }),
+      ),
+      isPro: false,
+      proExpired: true,
+    });
+  };
+
+  it('blocks toggle/update/decrement on locked habits', async () => {
+    seedExpiredWithFive();
+    const s = useHabitStore.getState();
+    await expect(s.toggleCompletion('h5', '2026-07-13')).rejects.toThrow();
+    await expect(s.updateHabit('h5', { name: 'Changed' })).rejects.toThrow();
+    await expect(
+      s.decrementCompletion('h5', '2026-07-13'),
+    ).rejects.toThrow();
+    expect(
+      useHabitStore.getState().habits.find(h => h.id === 'h5')?.name,
+    ).not.toBe('Changed');
+  });
+
+  it('allows free habits and deleting locked ones (auto-promote)', async () => {
+    seedExpiredWithFive();
+    await useHabitStore.getState().toggleCompletion('h1', '2026-07-13');
+    expect(
+      useHabitStore.getState().habits.find(h => h.id === 'h1')?.completions[
+        '2026-07-13'
+      ],
+    ).toBe(1);
+    await useHabitStore.getState().deleteHabit('h5');
+    // 4 remain → nothing locked; the previously-locked h4 works.
+    await useHabitStore.getState().toggleCompletion('h4', '2026-07-14');
+    expect(
+      useHabitStore.getState().habits.find(h => h.id === 'h4')?.completions[
+        '2026-07-14'
+      ],
+    ).toBe(1);
+  });
+
+  it('lets Pro users touch every habit', async () => {
+    seedExpiredWithFive();
+    useHabitStore.setState({ isPro: true, proExpired: false });
+    await useHabitStore.getState().toggleCompletion('h5', '2026-07-13');
+    expect(
+      useHabitStore.getState().habits.find(h => h.id === 'h5')?.completions[
+        '2026-07-13'
+      ],
+    ).toBe(1);
+  });
+});

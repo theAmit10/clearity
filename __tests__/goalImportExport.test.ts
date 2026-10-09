@@ -38,6 +38,7 @@ jest.mock('react-native-config', () => ({
 }));
 
 import { useGoalStore } from '../src/store/goalStore';
+import { useHabitStore } from '../src/store/habitStore';
 import { trackEvent } from '../src/services/analytics';
 import type { Goal } from '../src/types/goal';
 
@@ -96,8 +97,60 @@ describe('goalStore import (replace/merge)', () => {
   });
 
   it('replaceAllGoals with empty list clears goals', async () => {
+    useHabitStore.setState({ isPro: false });
     useGoalStore.setState({ goals: [futureGoal()], goalNotifications: [] });
     await useGoalStore.getState().replaceAllGoals([]);
     expect(useGoalStore.getState().goals).toEqual([]);
+  });
+});
+
+describe('goalStore Pro locks', () => {
+  const seedExpiredWithThree = () => {
+    useHabitStore.setState({ isPro: false });
+    useGoalStore.setState({
+      goals: [1, 2, 3].map(n =>
+        futureGoal({
+          id: `g${n}`,
+          createdAt: `2026-0${n}-01T00:00:00.000Z`,
+        }),
+      ),
+      goalNotifications: [],
+    });
+  };
+
+  it('blocks complete/update/extend on locked goals', async () => {
+    seedExpiredWithThree();
+    const s = useGoalStore.getState();
+    await expect(s.completeGoal('g3')).rejects.toThrow();
+    await expect(s.updateGoal('g3', { title: 'Changed' })).rejects.toThrow();
+    await expect(
+      s.extendGoal('g3', new Date(Date.now() + 60 * 86400000).toISOString()),
+    ).rejects.toThrow();
+    expect(
+      useGoalStore.getState().goals.find(g => g.id === 'g3')?.status,
+    ).toBe('active');
+  });
+
+  it('allows free goals and deleting locked ones (auto-promote)', async () => {
+    seedExpiredWithThree();
+    await useGoalStore.getState().completeGoal('g1');
+    expect(
+      useGoalStore.getState().goals.find(g => g.id === 'g1')?.status,
+    ).toBe('completed');
+    // Complete removes its notifications; deleting the locked goal frees all.
+    await useGoalStore.getState().deleteGoal('g3');
+    await useGoalStore.getState().updateGoal('g2', { title: 'Edited' });
+    expect(
+      useGoalStore.getState().goals.find(g => g.id === 'g2')?.title,
+    ).toBe('Edited');
+  });
+
+  it('lets Pro users touch every goal', async () => {
+    seedExpiredWithThree();
+    useHabitStore.setState({ isPro: true });
+    await useGoalStore.getState().completeGoal('g3');
+    expect(
+      useGoalStore.getState().goals.find(g => g.id === 'g3')?.status,
+    ).toBe('completed');
   });
 });

@@ -28,6 +28,9 @@ interface Props {
   onPress: () => void;
   onLongPress?: () => void;
   isDragging?: boolean;
+  /** Pro-locked (over the free limit after expiry): toggle opens paywall. */
+  locked?: boolean;
+  onLockedPress?: () => void;
 }
 
 export default function HabitCard({
@@ -36,6 +39,8 @@ export default function HabitCard({
   onPress,
   onLongPress,
   isDragging,
+  locked,
+  onLockedPress,
 }: Props) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -84,6 +89,10 @@ export default function HabitCard({
   const Icon = getHabitIcon(habit.icon);
 
   const handleToggle = () => {
+    if (locked) {
+      onLockedPress?.();
+      return;
+    }
     scale.value = withSpring(1.15, { damping: 6 }, () => {
       scale.value = withSpring(1);
     });
@@ -119,6 +128,18 @@ export default function HabitCard({
                 >
                   <Text style={[styles.catBadgeText, { color: habit.color }]}>
                     {categoryName}
+                  </Text>
+                </View>
+              )}
+              {locked && (
+                <View
+                  style={[
+                    styles.catBadge,
+                    { backgroundColor: theme.colors.accent },
+                  ]}
+                >
+                  <Text style={styles.lockBadgeText}>
+                    {t('proAccess.lockedBadge')}
                   </Text>
                 </View>
               )}
@@ -362,6 +383,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     textTransform: 'capitalize',
+  },
+  lockBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   streakRow: {
     flexDirection: 'row',

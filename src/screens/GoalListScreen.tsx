@@ -5,6 +5,9 @@ import DraggableFlatList, {
   RenderItemParams,
 } from 'react-native-draggable-flatlist';
 import { useGoalStore } from '../store/goalStore';
+import { useHabitStore } from '../store/habitStore';
+import { openPaywall } from '../services/paywallRouter';
+import { getLockedGoalIds } from '../services/proAccess';
 import type { Goal } from '../types/goal';
 import GoalCard from '../components/GoalCard';
 import { Raised } from '../components/neumorphic/NeumorphicView';
@@ -36,10 +39,32 @@ export default function GoalListScreen({ navigation }: any) {
   const { t } = useTranslation();
   const goals = useGoalStore(s => s.goals);
   const reorderGoals = useGoalStore(s => s.reorderGoals);
+  const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
   const [filter, setFilter] = useState<GoalFilter>('all');
+
+  // Pro-locked goal ids (over the free limit once Pro lapses). Empty for
+  // Pro users; date-based so deletes auto-promote and reorder can't game it.
+  const lockedIds = useMemo(
+    () => (isPro ? new Set<string>() : getLockedGoalIds(goals)),
+    [isPro, goals],
+  );
+
+  const openExpiredPaywall = useCallback(
+    () =>
+      openPaywall(navigation, {
+        ...(proExpired ? { mode: 'expired' as const } : null),
+        source: 'goal_limit',
+      }),
+    [navigation, proExpired],
+  );
 
   const confirmComplete = useCallback(
     (id: string) => {
+      if (lockedIds.has(id)) {
+        openExpiredPaywall();
+        return;
+      }
       const goal = useGoalStore.getState().goals.find(g => !!g && g.id === id);
       if (!goal || goal.status !== 'active') return;
       Alert.alert(t('goals.completeGoal'), goal.title, [
@@ -50,9 +75,9 @@ export default function GoalListScreen({ navigation }: any) {
             useGoalStore.getState().completeGoal(id);
           },
         },
-      ]);
+      ]      );
     },
-    [t],
+    [t, lockedIds, openExpiredPaywall],
   );
 
   // Manual (store) order — the list order IS the store order, like Home habits.
@@ -129,6 +154,8 @@ export default function GoalListScreen({ navigation }: any) {
         <ScaleDecorator>
           <GoalCard
             goal={item.goal}
+            locked={lockedIds.has(item.goal.id)}
+            onLockedPress={openExpiredPaywall}
             onPress={() => navigation.navigate('GoalDetail', { id: item.goal.id })}
             onComplete={confirmComplete}
             onLongPress={drag}
@@ -137,7 +164,7 @@ export default function GoalListScreen({ navigation }: any) {
         </ScaleDecorator>
       );
     },
-    [navigation, confirmComplete, theme, t],
+    [navigation, confirmComplete, theme, t, lockedIds, openExpiredPaywall],
   );
 
   const renderDragItem = useCallback(
@@ -147,6 +174,8 @@ export default function GoalListScreen({ navigation }: any) {
         <ScaleDecorator>
           <GoalCard
             goal={item}
+            locked={lockedIds.has(item.id)}
+            onLockedPress={openExpiredPaywall}
             onPress={() => navigation.navigate('GoalDetail', { id: item.id })}
             onComplete={confirmComplete}
             onLongPress={drag}
@@ -155,7 +184,7 @@ export default function GoalListScreen({ navigation }: any) {
         </ScaleDecorator>
       );
     },
-    [navigation, confirmComplete],
+    [navigation, confirmComplete, lockedIds, openExpiredPaywall],
   );
 
   const emptyText =

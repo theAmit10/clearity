@@ -6,6 +6,7 @@ import { logEvent } from '../services/logger';
 import { trackEvent } from '../services/analytics';
 import { t } from '../i18n';
 import { FREE_GOAL_LIMIT } from '../constants/appInfo';
+import { getLockedGoalIds } from '../services/proAccess';
 import { useHabitStore } from './habitStore';
 import {
   scheduleGoalNotification,
@@ -44,6 +45,23 @@ function persistNotifs(list: GoalNotificationConfig[]) {
 
 function makeId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** Throw when a free/expired user touches a Pro-locked goal (over the free
+ * limit). Delete / reminder-remove / reorder stay open so users can always
+ * recover without paying and nothing is ever force-deleted. */
+function assertGoalUnlocked(
+  goals: Goal[],
+  isPro: boolean,
+  id: string,
+): void {
+  if (isPro) return;
+  if (getLockedGoalIds(goals).has(id)) {
+    logEvent('info', 'Goal interaction blocked — Pro-locked goal');
+    throw new Error(
+      t('proAccess.goalLockedBody', { count: FREE_GOAL_LIMIT }),
+    );
+  }
 }
 
 /** Guard against corrupt entries (e.g. a drag-and-drop edge case handing
@@ -120,10 +138,21 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     }
   },
 
-  /** Re-schedule all pending reminders for active goals (app launch). */
+  /** Re-schedule all pending reminders for active goals (app launch).
+   * Skips Pro-locked goals while free/expired so suspension survives
+   * restarts (configs are kept — renew reschedules them). */
   rescheduleActive: async () => {
     const { goals, goalNotifications } = get();
-    const activeIds = new Set(goals.filter(g => g.status === 'active').map(g => g.id));
+    const isPro = useHabitStore.getState().isPro;
+    const locked = isPro ? null : getLockedGoalIds(goals);
+    const activeIds = new Set(
+      goals
+        .filter(
+          g =>
+            g.status === 'active' && (!locked || !locked.has(g.id)),
+        )
+        .map(g => g.id),
+    );
     const pending = goalNotifications.filter(
       n => n.enabled && activeIds.has(n.goalId) && n.timestamp > Date.now(),
     );
@@ -156,6 +185,7 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   updateGoal: async (id, patch) => {
+    assertGoalUnlocked(get().goals, useHabitStore.getState().isPro, id);
     const current = get().goals.find(g => g.id === id);
     if (!current) return;
     const updated = { ...current, ...patch };
@@ -192,6 +222,7 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   completeGoal: async id => {
+    assertGoalUnlocked(get().goals, useHabitStore.getState().isPro, id);
     const goal = get().goals.find(g => g.id === id);
     const removed = get().goalNotifications.filter(n => n.goalId === id);
     await Promise.all(removed.map(n => cancelGoalNotification(n.id)));
@@ -208,6 +239,7 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   extendGoal: async (id, newEndAt) => {
+    assertGoalUnlocked(get().goals, useHabitStore.getState().isPro, id);
     const current = get().goals.find(g => g.id === id);
     if (!current) return;
     const updated = { ...current, endAt: newEndAt };
@@ -230,6 +262,7 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   addGoalReminder: async (goalId, data) => {
+    assertGoalUnlocked(get().goals, useHabitStore.getState().isPro, goalId);
     const config: GoalNotificationConfig = {
       id: makeId(),
       goalId,
@@ -249,6 +282,10 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
 
   updateGoalReminder: async (id, patch) => {
+    const existing = get().goalNotifications.find(n => n.id === id);
+    if (existing) {
+      assertGoalUnlocked(get().goals, useHabitStore.getState().isPro, existing.goalId);
+    }
     const goalNotifications = get().goalNotifications.map(n =>
       n.id === id ? { ...n, ...patch } : n,
     );

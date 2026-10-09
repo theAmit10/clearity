@@ -20,6 +20,7 @@ import { FREE_NOTIF_LIMIT } from '../constants/appInfo';
 import { requestPermission } from '../services/notification';
 import { useTranslation } from '../i18n';
 import { openPaywall } from '../services/paywallRouter';
+import { getLockedHabitIds } from '../services/proAccess';
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
@@ -164,6 +165,14 @@ export default function HabitNotificationConfigScreen({ route, navigation }: any
     if (editingId) {
       await updateHabitNotification(editingId, { ...data, enabled });
     } else {
+      // Pro-locked habit: new reminders route to Renew, not the limit alert.
+      if (!isPro && getLockedHabitIds(habits).has(habitId)) {
+        openPaywall(navigation, {
+          mode: 'expired',
+          source: 'reminder_limit',
+        });
+        return;
+      }
       try {
         await requestPermission();
         await addHabitNotification(habitId, data);

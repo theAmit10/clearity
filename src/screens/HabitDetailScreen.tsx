@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
@@ -13,6 +13,9 @@ import YearHeatmap from '../components/YearHeatmap';
 import StatsRow from '../components/StatsRow';
 import ActionButtons from '../components/ActionButtons';
 import MonthlyCalendar from '../components/MonthlyCalendar';
+import { getLockedHabitIds } from '../services/proAccess';
+import { FREE_HABIT_LIMIT } from '../constants/appInfo';
+import { openPaywall } from '../services/paywallRouter';
 import { Raised } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -25,6 +28,23 @@ export default function HabitDetailScreen({ route, navigation }: any) {
   const { id } = route.params;
   const habit = useHabitStore(s => s.habits.find(h => h.id === id));
   const deleteHabit = useHabitStore(s => s.deleteHabit);
+  const isPro = useHabitStore(s => s.isPro);
+  const proExpired = useHabitStore(s => s.proExpired);
+  const habits = useHabitStore(s => s.habits);
+  // Date-based lock set, memoized from the raw array (never return a fresh
+  // collection from a zustand selector — see HomeScreen's warning).
+  const locked = React.useMemo(
+    () => !isPro && getLockedHabitIds(habits).has(id),
+    [isPro, habits, id],
+  );
+  const openExpiredPaywall = useCallback(
+    () =>
+      openPaywall(navigation, {
+        ...(proExpired ? { mode: 'expired' as const } : null),
+        source: 'habit_limit',
+      }),
+    [navigation, proExpired],
+  );
   const cardScale = useSharedValue(0.95);
   const cardOpacity = useSharedValue(0);
 
@@ -96,8 +116,39 @@ export default function HabitDetailScreen({ route, navigation }: any) {
               </NeumorphicButton>
             </View>
 
+            {locked && (
+              <Pressable
+                onPress={openExpiredPaywall}
+                style={[
+                  styles.lockBanner,
+                  { backgroundColor: theme.colors.accent + '1A' },
+                ]}
+              >
+                <Text
+                  style={[styles.lockTitle, { color: theme.colors.accent }]}
+                >
+                  {t('proAccess.habitLockedTitle')}
+                </Text>
+                <Text
+                  style={[
+                    styles.lockBody,
+                    { color: theme.colors.textMuted },
+                  ]}
+                >
+                  {t('proAccess.habitLockBannerBody', {
+                    limit: FREE_HABIT_LIMIT,
+                  })}
+                </Text>
+              </Pressable>
+            )}
+
             <View style={styles.section}>
-              <YearHeatmap habitId={habit.id} color={habit.color} />
+              <YearHeatmap
+                habitId={habit.id}
+                color={habit.color}
+                locked={locked}
+                onLockedPress={openExpiredPaywall}
+              />
             </View>
 
             <View style={styles.section}>
@@ -107,13 +158,20 @@ export default function HabitDetailScreen({ route, navigation }: any) {
             <View style={[styles.divider, { backgroundColor: theme.colors.shadowDark + '80' }]} />
 
             <View style={styles.section}>
-              <MonthlyCalendar habitId={habit.id} color={habit.color} />
+              <MonthlyCalendar
+                habitId={habit.id}
+                color={habit.color}
+                locked={locked}
+                onLockedPress={openExpiredPaywall}
+              />
             </View>
 
             <View style={styles.actionRow}>
               <ActionButtons
                 onEdit={() =>
-                  navigation.navigate('AddEditHabit', { id: habit.id })
+                  locked
+                    ? openExpiredPaywall()
+                    : navigation.navigate('AddEditHabit', { id: habit.id })
                 }
                 onDelete={confirmDelete}
               />
@@ -179,6 +237,20 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 16,
+  },
+  lockBanner: {
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  lockTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  lockBody: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   actionRow: {
     flexDirection: 'row',

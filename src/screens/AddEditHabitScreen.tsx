@@ -24,6 +24,7 @@ import { FREE_HABIT_LIMIT } from '../constants/appInfo';
 import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { openPaywall } from '../services/paywallRouter';
+import { getLockedHabitIds } from '../services/proAccess';
 
 const COLORS = [
   '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
@@ -112,6 +113,26 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
         : undefined,
     };
     if (existing) {
+      // Pro-locked habit (over the free limit after expiry): edits route
+      // to Renew instead of hitting the store guard as an unhandled throw.
+      if (!isPro && getLockedHabitIds(habits).has(existing.id)) {
+        Alert.alert(
+          t('proAccess.habitLockedTitle'),
+          t('proAccess.habitLockedBody', { count: FREE_HABIT_LIMIT }),
+          [
+            { text: t('common.notNow'), style: 'cancel' },
+            {
+              text: t('common.renewPro'),
+              onPress: () =>
+                openPaywall(navigation, {
+                  mode: 'expired',
+                  source: 'habit_limit',
+                }),
+            },
+          ],
+        );
+        return;
+      }
       await updateHabit(existing.id, payload);
       navigation.goBack();
     } else {
