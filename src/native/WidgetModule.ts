@@ -94,11 +94,25 @@ export function buildWidgetPayloadForState(
   return { ...buildWidgetPayloadData(habits), locked: false, lockMode: null };
 }
 
+/**
+ * Near-black habit colors are near-invisible on the widgets' black cards.
+ * The app already remaps legacy `#1C1C1E` for on-screen display
+ * (AddEditHabitScreen); mirror that remap here so widget rings/icons stay
+ * visible regardless of which habit color is stored.
+ */
+const INVISIBLE_WIDGET_COLORS = new Set(['#1c1c1e', '#000000', '#000', 'black']);
+export const WIDGET_FALLBACK_COLOR = '#48484A';
+
+export function visibleWidgetColor(color: string): string {
+  return INVISIBLE_WIDGET_COLORS.has(color.trim().toLowerCase())
+    ? WIDGET_FALLBACK_COLOR
+    : color;
+}
+
 /** Shared payload builder (habit rows + week range, no lock fields). */
 export function buildWidgetPayloadData(
   habits: WidgetHabitInput[],
-): WidgetDataPayload {
-  const { weekStart, weekEnd } = getWeekRange();
+): WidgetDataPayload {  const { weekStart, weekEnd } = getWeekRange();
   const yearStart = `${new Date().getFullYear()}-01-01`;
 
   const filtered = habits.map(h => {
@@ -111,7 +125,7 @@ export function buildWidgetPayloadData(
     return {
       id: h.id,
       name: h.name,
-      color: h.color,
+      color: visibleWidgetColor(h.color),
       icon: h.icon ?? 'fire',
       frequency: h.frequency ?? 'daily',
       frequencyValue: h.frequencyValue,

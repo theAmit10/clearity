@@ -249,7 +249,11 @@ object RingsWidgetStore {
 
   private val GLYPHS: Map<String, String> = mapOf(
     "fire" to "🔥",
-    "bolt" to "⚡",
+    // NOTE: U+26A1 defaults to *text* presentation — the trailing VS16
+    // (U+FE0F) forces color-emoji rendering. Without it canvas.drawText
+    // paints the glyph in the default black paint, invisible on the dark
+    // widget. Every other entry is either emoji-default or already has VS16.
+    "bolt" to "⚡️",
     "scale" to "⚖️",
     "walk" to "🚶",
     "heart" to "❤️",

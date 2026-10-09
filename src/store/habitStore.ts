@@ -44,6 +44,12 @@ interface HabitState {
    * showing a stale locked card after renew).
    */
   applyProState: (next: { isPro: boolean; proExpired: boolean }) => void;
+  /**
+   * Re-push the current payload and force a timeline reload. Called on app
+   * foreground so a desynced widget (throttled reloads, failed writes)
+   * repairs itself within seconds without waiting for the next mutation.
+   */
+  resyncWidget: () => void;
   /** Apply ops queued by native widget taps (absolute values). No-op when none. */
   syncWidgetToggles: () => Promise<number>;
   addHabit: (h: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'completions'>) => Promise<void>;
@@ -103,14 +109,36 @@ function assertHabitUnlocked(
   }
 }
 
+let lastWidgetReloadAt = 0;
+const WIDGET_RELOAD_THROTTLE_MS = 5000;
+
+/** Test-only: reset the reload throttle so specs stay deterministic. */
+export function __resetWidgetReloadThrottleForTests(): void {
+  lastWidgetReloadAt = 0;
+}
+
 function updateWidget(
   habits: Habit[],
   pro: { isPro: boolean; proExpired: boolean },
+  forceReload = false,
 ) {
   const active = habits.filter(h => !h.archived);
   const payload = buildWidgetPayloadForState(active, pro);
-  WidgetModule.updateWidgetData(payload).catch(() => {});
-  WidgetModule.reloadWidget().catch(() => {});
+  // Data writes always go through (cheap shared-defaults write); surface
+  // failures instead of stranding the widget on a stale payload silently.
+  WidgetModule.updateWidgetData(payload).catch(err =>
+    logEvent('error', 'Failed to push widget data', err),
+  );
+  // Timeline reloads are daily-budgeted by the OS — coalesce bursts (rapid
+  // toggles/edits) so heavy use can't freeze the widget on a stale timeline.
+  const now = Date.now();
+  if (!forceReload && now - lastWidgetReloadAt < WIDGET_RELOAD_THROTTLE_MS) {
+    return;
+  }
+  lastWidgetReloadAt = now;
+  WidgetModule.reloadWidget().catch(err =>
+    logEvent('error', 'Failed to reload widget', err),
+  );
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -163,6 +191,11 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         proExpired: next.proExpired,
       });
     }
+  },
+
+  resyncWidget: () => {
+    const s = get();
+    updateWidget(s.habits, { isPro: s.isPro, proExpired: s.proExpired }, true);
   },
 
   syncWidgetToggles: async () => {

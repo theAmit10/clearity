@@ -1,6 +1,8 @@
 import {
   WidgetModule,
   buildWidgetPayloadForState,
+  visibleWidgetColor,
+  WIDGET_FALLBACK_COLOR,
 } from '../src/native/WidgetModule';
 import {
   WIDGET_PAYWALL_URL,
@@ -55,6 +57,17 @@ describe('widget Pro gate', () => {
     const payload = WidgetModule.buildPayload(habits);
     expect(payload.habits).toHaveLength(1);
     expect(payload.locked).toBeUndefined();
+  });
+
+  it('remaps near-black colors so rings stay visible on black cards', () => {
+    expect(visibleWidgetColor('#1C1C1E')).toBe(WIDGET_FALLBACK_COLOR);
+    expect(visibleWidgetColor('#000000')).toBe(WIDGET_FALLBACK_COLOR);
+    expect(visibleWidgetColor('black')).toBe(WIDGET_FALLBACK_COLOR);
+    expect(visibleWidgetColor('#FF0000')).toBe('#FF0000');
+    const payload = WidgetModule.buildPayload([
+      { ...habits[0], color: '#1C1C1E' },
+    ]);
+    expect(payload.habits[0].color).toBe(WIDGET_FALLBACK_COLOR);
   });
 });
 

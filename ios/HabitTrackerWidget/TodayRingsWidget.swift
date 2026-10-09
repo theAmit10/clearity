@@ -1,5 +1,6 @@
 import AppIntents
 import SwiftUI
+import UIKit
 import WidgetKit
 
 // MARK: - Intent (iOS 17+ interactive widget)
@@ -174,13 +175,16 @@ struct RingCell: View {
               )
               .rotationEffect(.degrees(-90))
           }
-          // Icon
-          if let symbol = HabitIconMapper.symbol(for: ring.iconKey) {
+          // Icon — a mapped name unknown to this iOS version yields a nil
+          // UIImage (empty Image); fall back to the initial instead so the
+          // center can never render blank. Empty names fall back to "•".
+          if let symbol = HabitIconMapper.symbol(for: ring.iconKey),
+             UIImage(systemName: symbol) != nil {
             Image(systemName: symbol)
               .font(.system(size: 17, weight: .semibold))
               .foregroundColor(ring.done ? ringColor : ringColor.opacity(0.85))
           } else {
-            Text(String(ring.name.prefix(1)).uppercased())
+            Text(ring.name.first.map { String($0).uppercased() } ?? "•")
               .font(.system(size: 16, weight: .bold, design: .rounded))
               .foregroundColor(ringColor)
           }

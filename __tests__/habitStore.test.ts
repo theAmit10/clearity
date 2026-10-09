@@ -34,7 +34,10 @@ jest.mock('react-native-config', () => ({
 }));
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useHabitStore } from '../src/store/habitStore';
+import {
+  useHabitStore,
+  __resetWidgetReloadThrottleForTests,
+} from '../src/store/habitStore';
 import { WidgetModule } from '../src/native/WidgetModule';
 import { Habit } from '../src/types/habit';
 
@@ -212,6 +215,48 @@ describe('habitStore applyProState', () => {
       expect(spy).not.toHaveBeenCalled();
     } finally {
       spy.mockRestore();
+    }
+  });
+
+  it('always writes widget data but coalesces rapid reloads', () => {
+    seedExpiredWithFive();
+    __resetWidgetReloadThrottleForTests();
+    const dataSpy = jest.spyOn(WidgetModule, 'updateWidgetData');
+    const reloadSpy = jest.spyOn(WidgetModule, 'reloadWidget');
+    try {
+      // Renew transition: write + reload.
+      useHabitStore.getState().applyProState({ isPro: true, proExpired: false });
+      // Immediate expiry transition: data written, reload throttled.
+      useHabitStore
+        .getState()
+        .applyProState({ isPro: false, proExpired: true });
+      expect(dataSpy).toHaveBeenCalledTimes(2);
+      expect(reloadSpy).toHaveBeenCalledTimes(1);
+      expect(dataSpy.mock.calls[1][0]).toMatchObject({ locked: true });
+    } finally {
+      dataSpy.mockRestore();
+      reloadSpy.mockRestore();
+    }
+  });
+
+  it('resyncWidget forces a reload with current state', () => {
+    seedExpiredWithFive();
+    __resetWidgetReloadThrottleForTests();
+    const dataSpy = jest.spyOn(WidgetModule, 'updateWidgetData');
+    const reloadSpy = jest.spyOn(WidgetModule, 'reloadWidget');
+    try {
+      useHabitStore.getState().resyncWidget();
+      useHabitStore.getState().resyncWidget();
+      // Forced reloads bypass the throttle; payload reflects locked state.
+      expect(dataSpy).toHaveBeenCalledTimes(2);
+      expect(reloadSpy).toHaveBeenCalledTimes(2);
+      expect(dataSpy.mock.calls[0][0]).toMatchObject({
+        locked: true,
+        lockMode: 'expired',
+      });
+    } finally {
+      dataSpy.mockRestore();
+      reloadSpy.mockRestore();
     }
   });
 });

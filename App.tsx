@@ -205,11 +205,14 @@ function AppContent() {
   }, [crashlyticsEnabled, loaded]);
 
   // Widget taps queue natively while the app is backgrounded — drain the
-  // queue every time the app comes to the foreground.
+  // queue every time the app comes to the foreground. A fresh payload push
+  // goes first so a desynced widget (throttled reloads, failed writes)
+  // repairs itself within seconds of foregrounding.
   useEffect(() => {
     if (!loaded) return;
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
+        useHabitStore.getState().resyncWidget();
         useHabitStore.getState().syncWidgetToggles().catch(() => {});
       }
     });
