@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 // MARK: - Widget paywall deep link (source `widget`)
 //
@@ -261,200 +262,30 @@ enum RingsStore {
 }
 
 // MARK: - Heroicon key -> SF Symbol
-//
-// Keys must stay in parity with HABIT_ICONS in src/constants/habitIcons.tsx:
-// __tests__/widgetIconParity.test.ts fails if a catalog key is missing here,
-// or if two different keys resolve to the same SF Symbol.
-//
-// The widget extension targets iOS 17, so modern symbols are safe. A name the
-// OS doesn't know renders as an empty image, so TodayRingsWidget checks
-// `UIImage(systemName:)` and falls back to the habit's initial.
 
-enum HabitIconMapper {
-  private static let map: [String: String] = [
-    // Fitness & body
-    "fire": "flame.fill",
-    "bolt": "bolt.fill",
-    "scale": "scalemass.fill",
-    "walk": "figure.walk",
-    "heart": "heart.fill",
-    "grooming": "scissors",
-    "no-smoking": "nosign",
-    "progress": "arrow.up.right.circle.fill",
-    "caffeine-free": "cup.and.saucer",
-    "energy-full": "bolt.batteryblock.fill",
-    "energy-half": "battery.50",
-    "energy-low": "battery.0",
-    "fingerprint": "touchid",
-    "support": "lifepreserver.fill",
-    "safety": "exclamationmark.shield.fill",
-    "eye-care": "eye.fill",
-    "rest-eyes": "eye.slash.fill",
-    "balance": "slider.horizontal.3",
-    // Health & wellness
-    "moon": "moon.fill",
-    "sun": "sun.max.fill",
-    "beaker": "testtube.2",
-    "smile": "face.smiling.fill",
-    "sparkles": "sparkles",
-    "shield": "checkmark.shield.fill",
-    "low-mood": "face.dashed",
-    "reminder": "bell.badge.fill",
-    "snooze": "zzz",
-    "notification": "bell.fill",
-    "info": "info.circle.fill",
-    "question": "questionmark.circle.fill",
-    "recovery": "arrow.triangle.2.circlepath",
-    "rest": "pause.circle.fill",
-    // Learning & study
-    "book-open": "book.fill",
-    "study": "graduationcap.fill",
-    "pencil": "pencil",
-    "checklist": "checklist",
-    "check": "checkmark.circle.fill",
-    "clock": "clock.fill",
-    "calendar": "calendar",
-    "idea": "lightbulb.fill",
-    "language": "character.bubble.fill",
-    "news": "newspaper.fill",
-    "puzzle": "puzzlepiece.fill",
-    "rocket": "paperplane.fill",
-    "settings": "gearshape.fill",
-    "bookmark": "bookmark.fill",
-    "library": "building.columns.fill",
-    "notes": "doc.text.fill",
-    "research": "doc.text.magnifyingglass",
-    "math": "function",
-    "spreadsheet": "tablecells",
-    "tasks": "list.bullet.clipboard",
-    // Work & productivity
-    "computer": "desktopcomputer",
-    "briefcase": "briefcase.fill",
-    "office": "building.2.fill",
-    "presentation": "chart.bar.doc.horizontal",
-    "chart": "chart.bar.fill",
-    "report": "chart.pie.fill",
-    "calculator": "plus.forwardslash.minus",
-    "dashboard": "square.grid.2x2.fill",
-    "inbox": "tray.fill",
-    "approved": "checkmark.seal.fill",
-    "clipboard": "doc.on.clipboard",
-    "trend": "chart.line.uptrend.xyaxis",
-    "queue": "list.bullet.rectangle",
-    "filter": "line.3.horizontal.decrease",
-    // Creative & hobbies
-    "camera": "camera.fill",
-    "photo": "photo.fill",
-    "paint": "paintbrush.fill",
-    "swatch": "paintpalette.fill",
-    "ticket": "ticket.fill",
-    "film": "film.fill",
-    "craft": "cube.fill",
-    "grid": "square.grid.3x3.fill",
-    "apps": "plus.square.on.square",
-    "layout": "rectangle.3.group.fill",
-    "viewfinder": "viewfinder.circle.fill",
-    "color-picker": "eyedropper",
-    "gif": "photo.on.rectangle.angled",
-    "print": "printer.fill",
-    // Music & media
-    "music": "music.note",
-    "mic": "mic.fill",
-    "speaker": "speaker.wave.3.fill",
-    "mute": "speaker.slash.fill",
-    "radio": "dot.radiowaves.left.and.right",
-    "play": "play.fill",
-    "pause": "pause.fill",
-    "video": "video.fill",
-    "podcast": "wave.3.right",
-    "tv": "tv.fill",
-    // Money & shopping
-    "money": "dollarsign.circle.fill",
-    "shopping-bag": "bag.fill",
-    "cart": "cart.fill",
-    "cash": "banknote.fill",
-    "credit-card": "creditcard.fill",
-    "receipt": "receipt.fill",
-    "refund": "arrow.uturn.backward.circle.fill",
-    "wallet": "wallet.pass.fill",
-    "shop": "storefront.fill",
-    "euro": "eurosign.circle.fill",
-    "pound": "sterlingsign.circle.fill",
-    "rupee": "indianrupeesign.circle.fill",
-    "yen": "yensign.circle.fill",
-    // Social & people
-    "friends": "person.2.fill",
-    "community": "person.3.fill",
-    "volunteer": "hand.raised.fill",
-    "thumbs-up": "hand.thumbsup.fill",
-    "thumbs-down": "hand.thumbsdown.fill",
-    "speech": "megaphone.fill",
-    "call": "phone.fill",
-    "globe": "globe",
-    "chat": "bubble.left.fill",
-    "group-chat": "bubble.left.and.bubble.right.fill",
-    "email": "envelope.fill",
-    "email-open": "envelope.open.fill",
-    "mention": "at",
-    "hashtag": "number",
-    "person": "person.fill",
-    "add-friend": "person.badge.plus",
-    "remove-friend": "person.badge.minus",
-    "profile": "person.crop.circle.fill",
-    "share": "square.and.arrow.up",
-    "id-card": "person.text.rectangle.fill",
-    // Home & living
-    "home": "house.fill",
-    "house": "house.circle.fill",
-    "repair": "wrench.fill",
-    "tools": "wrench.and.screwdriver.fill",
-    "key": "key.fill",
-    "lock": "lock.fill",
-    "unlock": "lock.open.fill",
-    "window": "square.split.2x2",
-    "trash": "trash.fill",
-    "gift": "gift.fill",
-    "folder": "folder",
-    "folder-open": "folder.fill",
-    "storage": "archivebox.fill",
-    "baking": "birthday.cake.fill",
-    // Travel & outdoors
-    "truck": "box.truck.fill",
-    "map": "map.fill",
-    "travel": "airplane",
-    "location": "mappin.circle.fill",
-    "globe-americas": "globe.americas.fill",
-    "globe-asia": "globe.asia.australia.fill",
-    "globe-europe": "globe.europe.africa.fill",
-    "flag": "flag.fill",
-    // Tech & devices
-    "cloud": "cloud.fill",
-    "cpu": "cpu",
-    "code": "chevron.left.forwardslash.chevron.right",
-    "terminal": "terminal.fill",
-    "server": "server.rack",
-    "database": "cylinder.split.1x2.fill",
-    "wifi": "wifi",
-    "signal": "antenna.radiowaves.left.and.right",
-    "no-signal": "antenna.radiowaves.left.and.right.slash",
-    "mobile": "iphone",
-    "tablet": "ipad",
-    "qr-code": "qrcode",
-    "power": "power",
-    "bug": "ladybug.fill",
-    "layers": "square.3.layers.3d",
-    "data": "cylinder.fill",
-    "link": "link",
-    "upload": "icloud.and.arrow.up.fill",
-    "download": "icloud.and.arrow.down.fill",
-    // Achievement
-    "trophy": "trophy.fill",
-    "star": "star.fill",
-    "badge": "rosette",
-  ]
+// MARK: - Habit icon assets
+//
+// The app and both widgets draw the identical glyph: scripts/generate-icons.mjs
+// rasterizes every catalog key from the shared icon source into this target's
+// asset catalog as a white PNG (icon_<key>), and the widget tints it with the
+// habit color through .template rendering — the same shapes react-native-svg
+// renders in-app.
+//
+// __tests__/widgetIconParity.test.ts fails if any HABIT_ICONS key has no
+// imageset, so this lookup never goes stale.
 
-  /// SF Symbol name for a heroicon key, or nil to fall back to an initial.
-  static func symbol(for key: String) -> String? {
-    map[key]
+enum HabitIconAsset {
+  /// Asset name for a catalog key, falling back to the fire asset so the ring
+  /// center can never render blank (unknown or legacy keys, stale payloads).
+  /// Returns nil only if the asset catalog itself failed to load.
+  static func name(for key: String) -> String? {
+    let candidate = "icon_\(key)"
+    if UIImage(named: candidate) != nil {
+      return candidate
+    }
+    if UIImage(named: "icon_fire") != nil {
+      return "icon_fire"
+    }
+    return nil
   }
 }

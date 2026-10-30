@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "ios-s": "react-native run-ios --simulator='iPhone17Pro'"
   },
   "dependencies": {
@@ -55,6 +56,7 @@
     "@react-native/jest-preset": "^0.86.0",
     "@react-native/metro-config": "0.86.0",
     "@react-native/typescript-config": "0.86.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.2.0",
     "@types/react-test-renderer": "^19.1.0",

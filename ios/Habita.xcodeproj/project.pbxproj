@@ -25,6 +25,7 @@
 		E5A1B2C3D4E5F60718293A01 /* YearHeatmapWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */; };
 		F1A2B3C4D5E60718293A410 /* TodayRingsShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */; };
 		F1A2B3C4D5E60718293A420 /* TodayRingsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */; };
+		F1A2B3C4D5E60718293A431 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E60718293A430 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +76,7 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayRingsShared.swift; sourceTree = "<group>"; };
 		F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayRingsWidget.swift; sourceTree = "<group>"; };
+		F1A2B3C4D5E60718293A430 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F3E112B365D6D93D60F7F265 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WidgetKit.framework; sourceTree = SDKROOT; };
 		F8FF67C84EC8963ECC884586 /* HabitTrackerWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitTrackerWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCC56E32E6308AE208E53716 /* HabitTrackerWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HabitTrackerWidgetBundle.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				E5A1B2C3D4E5F60718293A00 /* YearHeatmapWidget.swift */,
 				F1A2B3C4D5E60718293A411 /* TodayRingsShared.swift */,
 				F1A2B3C4D5E60718293A421 /* TodayRingsWidget.swift */,
+				F1A2B3C4D5E60718293A430 /* Assets.xcassets */,
 				7A577561DDD909B3DE3C9D34 /* Info.plist */,
 			);
 			path = HabitTrackerWidget;
@@ -296,6 +299,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1A2B3C4D5E60718293A431 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

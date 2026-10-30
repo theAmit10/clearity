@@ -166,7 +166,7 @@ import {
   WindowIcon,
   WrenchIcon,
   WrenchScrewdriverIcon,
-} from 'react-native-heroicons/outline';
+} from './generatedIcons';
 
 export type IconComponent = React.ComponentType<{
   size?: number;
@@ -180,6 +180,10 @@ export type IconComponent = React.ComponentType<{
  * Keys are persisted on habits — never rename or remove an existing key.
  * `HABIT_ICON_QUICK_PICKS` controls the compact inline row on the add/edit
  * habit screen; everything here is reachable through the "See all" sheet.
+ *
+ * Components come from `./generatedIcons` (run `npm run icons:generate` after
+ * catalog changes): our icon set whose identical shape data also feeds the
+ * widget PNG export — app and widgets always draw the same glyph.
  */
 const iconCatalog = [
   // Fitness & body

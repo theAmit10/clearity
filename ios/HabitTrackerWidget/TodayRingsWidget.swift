@@ -175,13 +175,15 @@ struct RingCell: View {
               )
               .rotationEffect(.degrees(-90))
           }
-          // Icon — a mapped name unknown to this iOS version yields a nil
-          // UIImage (empty Image); fall back to the initial instead so the
-          // center can never render blank. Empty names fall back to "•".
-          if let symbol = HabitIconMapper.symbol(for: ring.iconKey),
-             UIImage(systemName: symbol) != nil {
-            Image(systemName: symbol)
-              .font(.system(size: 17, weight: .semibold))
+          // Icon — the same generated asset the app renders (white PNG tinted
+          // to the habit color). A missing asset falls back to the habit's
+          // initial so the center can never render blank.
+          if let assetName = HabitIconAsset.name(for: ring.iconKey) {
+            Image(assetName)
+              .renderingMode(.template)
+              .resizable()
+              .scaledToFit()
+              .frame(width: 18, height: 18)
               .foregroundColor(ring.done ? ringColor : ringColor.opacity(0.85))
           } else {
             Text(ring.name.first.map { String($0).uppercased() } ?? "•")

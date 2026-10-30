@@ -6,8 +6,11 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.RectF
 import android.view.View
 import android.widget.RemoteViews
@@ -92,7 +95,7 @@ class RingsWidgetProvider : AppWidgetProvider() {
         if (index < shown.size) {
           val ring = shown[index]
           views.setViewVisibility(viewId, View.VISIBLE)
-          views.setImageViewBitmap(viewId, ringBitmap(ring))
+          views.setImageViewBitmap(viewId, ringBitmap(context, ring))
           views.setContentDescription(viewId, ring.name)
           views.setOnClickPendingIntent(viewId, togglePendingIntent(context, widgetId, index, ring.id))
         } else {
@@ -152,7 +155,7 @@ class RingsWidgetProvider : AppWidgetProvider() {
     }
 
     /** Render the dark ring + progress arc + centered glyph, like the reference UI. */
-    private fun ringBitmap(ring: RingsWidgetStore.RingHabit): Bitmap {
+    private fun ringBitmap(context: Context, ring: RingsWidgetStore.RingHabit): Bitmap {
       val size = 144
       val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
       val canvas = Canvas(bmp)
@@ -178,18 +181,29 @@ class RingsWidgetProvider : AppWidgetProvider() {
         canvas.drawArc(oval, -90f, 360f * maxOf(ring.progress, 0.03f), false, arc)
       }
 
-      val glyph = RingsWidgetStore.glyphFor(ring.iconKey)
-      if (glyph.isNotEmpty()) {
-        val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-          textSize = size * 0.40f
-          textAlign = Paint.Align.CENTER
-          // Emoji ignore this; it keeps any future non-emoji glyph visible
-          // instead of painting it in the default (near-black) color.
-          color = ring.color
+      // Same generated asset the app renders (white PNG from the shared icon
+      // source), tinted to the habit color — pixel-identical to the iOS
+      // widget and the in-app SVG. Falls back to the habit's initial if the
+      // resource is somehow missing so the center can never render blank.
+      val iconRes = RingsWidgetStore.iconResId(context, ring.iconKey)
+      val icon = if (iconRes != 0) {
+        BitmapFactory.decodeResource(
+          context.resources,
+          iconRes,
+          BitmapFactory.Options().apply { inScaled = false },
+        )
+      } else {
+        null
+      }
+      if (icon != null) {
+        val iconSize = size * 0.40f
+        val half = iconSize / 2f
+        val dst = RectF(center - half, center - half, center + half, center + half)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+          colorFilter = PorterDuffColorFilter(ring.color, PorterDuff.Mode.SRC_IN)
         }
-        val fm = text.fontMetrics
-        val y = center - (fm.ascent + fm.descent) / 2f
-        canvas.drawText(glyph, center, y, text)
+        canvas.drawBitmap(icon, null, dst, paint)
+        icon.recycle()
       } else {
         val letter = ring.name.firstOrNull()?.uppercase() ?: "•"
         val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {

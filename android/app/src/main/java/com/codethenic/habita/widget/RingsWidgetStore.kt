@@ -243,198 +243,22 @@ object RingsWidgetStore {
   }
 
   /** Heroicon key -> glyph drawn inside the ring. */
-  fun glyphFor(iconKey: String): String {
-    return GLYPHS[iconKey] ?: ""
+  /**
+   * Drawable resource for the habit icon drawn inside the ring
+   * (`icon_<key>`, hyphens mapped to underscores — Android resource names
+   * disallow them). Falls back to the fire asset so the ring center can
+   * never render blank (unknown or legacy keys, stale payloads).
+   *
+   * The PNGs come from scripts/generate-icons.mjs — the same source as the
+   * app's SVGs — in res/drawable-nodpi: decoded raw and tinted with the habit
+   * color by the caller. __tests__/widgetIconParity.test.ts fails if any
+   * catalog key is missing one. Uses getIdentifier, so if resource shrinking
+   * is ever enabled, add a tools:keep="icon_*" keep.xml first.
+   */
+  fun iconResId(context: Context, iconKey: String): Int {
+    val name = "icon_" + iconKey.replace('-', '_')
+    val id = context.resources.getIdentifier(name, "drawable", context.packageName)
+    if (id != 0) return id
+    return context.resources.getIdentifier("icon_fire", "drawable", context.packageName)
   }
-
-  // Heroicon key -> glyph, ordered like HABIT_ICONS in
-  // src/constants/habitIcons.tsx. Keys must stay in parity with that catalog —
-  // __tests__/widgetIconParity.test.ts fails on a missing key or a duplicate
-  // glyph, so two different icons can never look identical in the widget.
-  //
-  // NOTE: U+26A1 defaults to *text* presentation — the trailing VS16 (U+FE0F)
-  // forces color-emoji rendering, otherwise canvas.drawText paints it in the
-  // default paint color. Every entry here is an emoji, so the ring color set
-  // on the glyph paint is ignored (and only matters if one is ever not).
-  private val GLYPHS: Map<String, String> = mapOf(
-    // Fitness & body
-    "fire" to "🔥",
-    "bolt" to "⚡️",
-    "scale" to "⚖️",
-    "walk" to "🚶",
-    "heart" to "❤️",
-    "grooming" to "✂️",
-    "no-smoking" to "🚭",
-    "progress" to "📈",
-    "caffeine-free" to "☕️",
-    "energy-full" to "💪",
-    "energy-half" to "🔋",
-    "energy-low" to "🔅",
-    "fingerprint" to "👆",
-    "support" to "🆘",
-    "safety" to "⚠️",
-    "eye-care" to "👁️",
-    "rest-eyes" to "😴",
-    "balance" to "🧘",
-    // Health & wellness
-    "moon" to "🌙",
-    "sun" to "☀️",
-    "beaker" to "🧪",
-    "smile" to "😊",
-    "sparkles" to "✨",
-    "shield" to "🛡️",
-    "low-mood" to "😔",
-    "reminder" to "🔔",
-    "snooze" to "💤",
-    "notification" to "📳",
-    "info" to "ℹ️",
-    "question" to "❓",
-    "recovery" to "🔄",
-    "rest" to "🛌",
-    // Learning & study
-    "book-open" to "📖",
-    "study" to "🎓",
-    "pencil" to "✏️",
-    "checklist" to "📋",
-    "check" to "✅",
-    "clock" to "🕐",
-    "calendar" to "📅",
-    "idea" to "💡",
-    "language" to "🔤",
-    "news" to "📰",
-    "puzzle" to "🧩",
-    "rocket" to "🚀",
-    "settings" to "⚙️",
-    "bookmark" to "🔖",
-    "library" to "🏛️",
-    "notes" to "📝",
-    "research" to "🔍",
-    "math" to "➗",
-    "spreadsheet" to "📑",
-    "tasks" to "📌",
-    // Work & productivity
-    "computer" to "💻",
-    "briefcase" to "💼",
-    "office" to "🏢",
-    "presentation" to "📽️",
-    "chart" to "📊",
-    "report" to "📉",
-    "calculator" to "🧮",
-    "dashboard" to "🗂️",
-    "inbox" to "📥",
-    "approved" to "☑️",
-    "clipboard" to "📎",
-    "trend" to "↗️",
-    "queue" to "🗒️",
-    "filter" to "🔽",
-    // Creative & hobbies
-    "camera" to "📷",
-    "photo" to "🖼️",
-    "paint" to "🎨",
-    "swatch" to "🌈",
-    "ticket" to "🎟️",
-    "film" to "🎬",
-    "craft" to "🧶",
-    "grid" to "🔲",
-    "apps" to "🎛️",
-    "layout" to "📐",
-    "viewfinder" to "🎯",
-    "color-picker" to "🖌️",
-    "gif" to "🎞️",
-    "print" to "🖨️",
-    // Music & media
-    "music" to "🎵",
-    "mic" to "🎤",
-    "speaker" to "🔊",
-    "mute" to "🔇",
-    "radio" to "📻",
-    "play" to "▶️",
-    "pause" to "⏸️",
-    "video" to "🎥",
-    "podcast" to "🎙️",
-    "tv" to "📺",
-    // Money & shopping
-    "money" to "💰",
-    "shopping-bag" to "🛍️",
-    "cart" to "🛒",
-    "cash" to "💵",
-    "credit-card" to "💳",
-    "receipt" to "🧾",
-    "refund" to "↩️",
-    "wallet" to "👛",
-    "shop" to "🏪",
-    "euro" to "💶",
-    "pound" to "💷",
-    "rupee" to "💱",
-    "yen" to "💴",
-    // Social & people
-    "friends" to "👫",
-    "community" to "👪",
-    "volunteer" to "🙌",
-    "thumbs-up" to "👍",
-    "thumbs-down" to "👎",
-    "speech" to "📣",
-    "call" to "📞",
-    "globe" to "🌐",
-    "chat" to "💬",
-    "group-chat" to "👥",
-    "email" to "✉️",
-    "email-open" to "📨",
-    "mention" to "🙋",
-    "hashtag" to "#️⃣",
-    "person" to "👤",
-    "add-friend" to "🤝",
-    "remove-friend" to "❌",
-    "profile" to "🧑‍💼",
-    "share" to "📤",
-    "id-card" to "🆔",
-    // Home & living
-    "home" to "🏠",
-    "house" to "🏡",
-    "repair" to "🔧",
-    "tools" to "🛠️",
-    "key" to "🔑",
-    "lock" to "🔒",
-    "unlock" to "🔓",
-    "window" to "🚪",
-    "trash" to "🗑️",
-    "gift" to "🎁",
-    "folder" to "📁",
-    "folder-open" to "📂",
-    "storage" to "📦",
-    "baking" to "🎂",
-    // Travel & outdoors
-    "truck" to "🚚",
-    "map" to "🗺️",
-    "travel" to "✈️",
-    "location" to "📍",
-    "globe-americas" to "🌎",
-    "globe-asia" to "🌏",
-    "globe-europe" to "🌍",
-    "flag" to "🚩",
-    // Tech & devices
-    "cloud" to "☁️",
-    "cpu" to "🧠",
-    "code" to "⌨️",
-    "terminal" to "🖥️",
-    "server" to "🗄️",
-    "database" to "💾",
-    "wifi" to "📶",
-    "signal" to "📡",
-    "no-signal" to "📵",
-    "mobile" to "📱",
-    "tablet" to "📲",
-    "qr-code" to "🔳",
-    "power" to "🔌",
-    "bug" to "🐛",
-    "layers" to "📚",
-    "data" to "🗃️",
-    "link" to "🔗",
-    "upload" to "⬆️",
-    "download" to "⬇️",
-    // Achievement
-    "trophy" to "🏆",
-    "star" to "⭐",
-    "badge" to "🏅",
-  )
 }
