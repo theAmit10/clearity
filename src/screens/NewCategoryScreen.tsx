@@ -21,7 +21,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useHabitStore } from '../store/habitStore';
 import { HABIT_ICONS, getQuickPickIcons } from '../constants/habitIcons';
-import { IconPickerSheet } from '../components/IconPickerSheet';
 import type { HabitCategory } from '../types/habit';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -37,7 +36,6 @@ export default function NewCategoryScreen({ navigation }: any) {
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(HABIT_ICONS[0].key);
-  const [iconSheetVisible, setIconSheetVisible] = useState(false);
 
   React.useEffect(() => {
     cardScale.value = withSpring(1, { damping: 15, stiffness: 120 });
@@ -144,7 +142,13 @@ export default function NewCategoryScreen({ navigation }: any) {
                     {t('addHabit.icon')}
                   </Text>
                   <Pressable
-                    onPress={() => setIconSheetVisible(true)}
+                    onPress={() =>
+                      navigation.navigate('IconPicker', {
+                        selectedKey: icon,
+                        accentColor: theme.colors.accent,
+                        onSelect: setIcon,
+                      })
+                    }
                     hitSlop={10}
                     accessibilityRole="button"
                   >
@@ -216,17 +220,6 @@ export default function NewCategoryScreen({ navigation }: any) {
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <IconPickerSheet
-        visible={iconSheetVisible}
-        selectedKey={icon}
-        accentColor={theme.colors.accent}
-        onSelect={key => {
-          setIcon(key);
-          setIconSheetVisible(false);
-        }}
-        onClose={() => setIconSheetVisible(false)}
-      />
     </SafeAreaView>
   );
 }

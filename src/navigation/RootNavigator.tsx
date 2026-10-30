@@ -13,6 +13,7 @@ import GoalListScreen from '../screens/GoalListScreen';
 import GoalDetailScreen from '../screens/GoalDetailScreen';
 import AddEditGoalScreen from '../screens/AddEditGoalScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
+import IconPickerScreen from '../screens/IconPickerScreen';
 import OnboardingScreen, {
   type OnboardingResult,
 } from '../screens/OnboardingScreen';
@@ -80,6 +81,11 @@ function HomeStack() {
         options={{ ...headerOpts, presentation: 'modal' }}
       />
       <Stack.Screen
+        name="IconPicker"
+        component={IconPickerScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
         name="AddEditHabit"
         component={AddEditHabitScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
@@ -119,6 +125,11 @@ function GoalStack() {
         name="GoalDetail"
         component={GoalDetailScreen}
         options={{ ...headerOpts, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="IconPicker"
+        component={IconPickerScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
       />
       <Stack.Screen
         name="AddEditGoal"

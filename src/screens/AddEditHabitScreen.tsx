@@ -15,7 +15,6 @@ import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import { logEvent } from '../services/logger';
 import { HABIT_ICONS, getQuickPickIcons, getHabitIcon } from '../constants/habitIcons';
-import { IconPickerSheet } from '../components/IconPickerSheet';
 import { BUILT_IN_CATEGORIES } from '../constants/habitCategories';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -81,7 +80,6 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [frequencyValue, setFrequencyValue] = useState(existing?.frequencyValue?.toString() ?? '');
   const [frequencyWindow, setFrequencyWindow] = useState(existing?.frequencyWindow?.toString() ?? '');
   const [category, setCategory] = useState(existing?.category || 'none');
-  const [iconSheetVisible, setIconSheetVisible] = useState(false);
 
   useEffect(() => {
     if (route.params?.newCategoryKey) {
@@ -241,7 +239,13 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
               {t('addHabit.icon')}
             </Text>
             <Pressable
-              onPress={() => setIconSheetVisible(true)}
+              onPress={() =>
+                navigation.navigate('IconPicker', {
+                  selectedKey: icon,
+                  accentColor: displayColor,
+                  onSelect: setIcon,
+                })
+              }
               hitSlop={10}
               accessibilityRole="button"
             >
@@ -482,16 +486,6 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <IconPickerSheet
-        visible={iconSheetVisible}
-        selectedKey={icon}
-        accentColor={displayColor}
-        onSelect={key => {
-          setIcon(key);
-          setIconSheetVisible(false);
-        }}
-        onClose={() => setIconSheetVisible(false)}
-      />
     </SafeAreaView>
   );
 }

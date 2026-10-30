@@ -17,7 +17,6 @@ import { useHabitStore } from '../store/habitStore';
 import { openPaywall } from '../services/paywallRouter';
 import { getLockedGoalIds } from '../services/proAccess';
 import { HABIT_ICONS, getQuickPickIcons } from '../constants/habitIcons';
-import { IconPickerSheet } from '../components/IconPickerSheet';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -86,7 +85,6 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const [title, setTitle] = useState(existing?.title ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
-  const [iconSheetVisible, setIconSheetVisible] = useState(false);
   const [color, setColor] = useState(
     existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? COLORS[0]),
   );
@@ -250,7 +248,13 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
               {t('goals.icon')}
             </Text>
             <Pressable
-              onPress={() => setIconSheetVisible(true)}
+              onPress={() =>
+                navigation.navigate('IconPicker', {
+                  selectedKey: icon,
+                  accentColor: displayColor,
+                  onSelect: setIcon,
+                })
+              }
               hitSlop={10}
               accessibilityRole="button"
             >
@@ -495,17 +499,6 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <IconPickerSheet
-        visible={iconSheetVisible}
-        selectedKey={icon}
-        accentColor={displayColor}
-        onSelect={key => {
-          setIcon(key);
-          setIconSheetVisible(false);
-        }}
-        onClose={() => setIconSheetVisible(false)}
-      />
     </SafeAreaView>
   );
 }
