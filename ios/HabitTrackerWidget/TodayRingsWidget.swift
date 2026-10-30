@@ -183,7 +183,7 @@ struct RingCell: View {
               .renderingMode(.template)
               .resizable()
               .scaledToFit()
-              .frame(width: 18, height: 18)
+              .frame(width: 21, height: 21)
               .foregroundColor(ring.done ? ringColor : ringColor.opacity(0.85))
           } else {
             Text(ring.name.first.map { String($0).uppercased() } ?? "•")
