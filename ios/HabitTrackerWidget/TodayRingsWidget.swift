@@ -94,7 +94,7 @@ struct RingsEntryView: View {
   @Environment(\.widgetFamily) var family
 
   private var columns: [GridItem] {
-    Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+    Array(repeating: GridItem(.flexible(), spacing: 12), count: 5)
   }
 
   /// Floating black card: rounded on top, square on the bottom.
@@ -136,12 +136,12 @@ struct RingsEntryView: View {
             .foregroundColor(Color(hex: "#9E9E9E"))
         }
       } else {
-        LazyVGrid(columns: columns, spacing: family == .systemLarge ? 14 : 10) {
+        LazyVGrid(columns: columns, spacing: 16) {
           ForEach(entry.rings.prefix(10), id: \.id) { ring in
             RingCell(ring: ring, showName: family == .systemLarge)
           }
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 10)
         .padding(.vertical, 12)
       }
     }
@@ -183,7 +183,7 @@ struct RingCell: View {
               .renderingMode(.template)
               .resizable()
               .scaledToFit()
-              .frame(width: 21, height: 21)
+              .frame(width: 30, height: 30)
               .foregroundColor(ring.done ? ringColor : ringColor.opacity(0.85))
           } else {
             Text(ring.name.first.map { String($0).uppercased() } ?? "•")

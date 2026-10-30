@@ -196,7 +196,7 @@ class RingsWidgetProvider : AppWidgetProvider() {
         null
       }
       if (icon != null) {
-        val iconSize = size * 0.46f
+        val iconSize = size * 0.65f
         val half = iconSize / 2f
         val dst = RectF(center - half, center - half, center + half, center + half)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
