@@ -10,7 +10,7 @@ import {
 } from '../services/analytics';
 import { getStoredVariantSync } from './paywallVariantStore';
 import { APP_VERSION } from '../constants/appInfo';
-import { addDays, toDateKey, todayKey } from '../services/dateUtils';
+import { addDays, toDateKey, todayKey, startOfWeek, type WeekStartDay } from '../services/dateUtils';
 import { scheduleHabitNotification, cancelHabitNotification, scheduleAdminNotification, cancelAdminNotification, DEFAULT_ADMIN_NOTIFICATIONS } from '../services/notification';
 import { WidgetModule, buildWidgetPayloadForState } from '../native/WidgetModule';
 import { getCustomerInfo, isPro as checkIsPro, hadProButExpired, setOnCustomerInfoUpdate } from '../services/revenueCat';
@@ -33,6 +33,8 @@ interface HabitState {
   showCategoryBadges: boolean;
   showFrequency: boolean;
   crashlyticsEnabled: boolean;
+  /** First day of the week (Settings → Week Starts On). */
+  weekStartsOn: WeekStartDay;
   isPro: boolean;
   proExpired: boolean;
   init: () => Promise<void>;
@@ -78,6 +80,7 @@ interface HabitState {
   setShowCategoryBadges: (val: boolean) => Promise<void>;
   setShowFrequency: (val: boolean) => Promise<void>;
   setCrashlyticsEnabled: (val: boolean) => Promise<void>;
+  setWeekStartsOn: (val: WeekStartDay) => Promise<void>;
 }
 
 function computeProState(info: CustomerInfo | null, wasPro: boolean) {
@@ -123,7 +126,11 @@ function updateWidget(
   forceReload = false,
 ) {
   const active = habits.filter(h => !h.archived);
-  const payload = buildWidgetPayloadForState(active, pro);
+  const payload = buildWidgetPayloadForState(
+    active,
+    pro,
+    useHabitStore.getState().weekStartsOn ?? 'monday',
+  );
   // Data writes always go through (cheap shared-defaults write); surface
   // failures instead of stranding the widget on a stale payload silently.
   WidgetModule.updateWidgetData(payload).catch(err =>
@@ -154,6 +161,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   showCategoryBadges: true,
   showFrequency: true,
   crashlyticsEnabled: true,
+  weekStartsOn: 'monday' as WeekStartDay,
   isPro: false,
   proExpired: false,
 
@@ -319,6 +327,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         showCategoryBadges: generalSettings?.showCategoryBadges ?? true,
         showFrequency: generalSettings?.showFrequency ?? true,
         crashlyticsEnabled: generalSettings?.crashlyticsEnabled ?? true,
+        weekStartsOn: generalSettings?.weekStartsOn === 'sunday' ? 'sunday' : 'monday',
       });
 
       if (!Array.isArray(raw)) {
@@ -338,7 +347,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       const payload = buildWidgetPayloadForState(active, {
         isPro: proState.isPro,
         proExpired: proState.proExpired,
-      });
+      }, get().weekStartsOn);
       WidgetModule.updateWidgetData(payload).catch(() => {});
       // Apply any widget taps that happened while the app was closed.
       // Fire-and-forget: failures are non-critical (queue stays native-side
@@ -700,32 +709,49 @@ export const useHabitStore = create<HabitState>((set, get) => ({
 
   setShowCategories: async val => {
     set({ showCategories: val });
-    await saveGeneralSettings({ showCategories: val, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
+    await saveGeneralSettings({ showCategories: val, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled, weekStartsOn: get().weekStartsOn });
     logEvent('info', 'Show categories toggled', { val });
   },
 
   setShowStreaks: async val => {
     set({ showStreaks: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: val, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: val, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled, weekStartsOn: get().weekStartsOn });
     logEvent('info', 'Show streaks toggled', { val });
   },
 
   setShowCategoryBadges: async val => {
     set({ showCategoryBadges: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: val, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: val, showFrequency: get().showFrequency, crashlyticsEnabled: get().crashlyticsEnabled, weekStartsOn: get().weekStartsOn });
     logEvent('info', 'Show category badges toggled', { val });
   },
 
   setShowFrequency: async val => {
     set({ showFrequency: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: val, crashlyticsEnabled: get().crashlyticsEnabled });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: val, crashlyticsEnabled: get().crashlyticsEnabled, weekStartsOn: get().weekStartsOn });
     logEvent('info', 'Show frequency toggled', { val });
   },
 
   setCrashlyticsEnabled: async val => {
     set({ crashlyticsEnabled: val });
-    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: val });
+    await saveGeneralSettings({ showCategories: get().showCategories, showStreaks: get().showStreaks, showCategoryBadges: get().showCategoryBadges, showFrequency: get().showFrequency, crashlyticsEnabled: val, weekStartsOn: get().weekStartsOn });
     logEvent('info', 'Crashlytics toggled', { val });
+  },
+
+  setWeekStartsOn: async val => {
+    if (get().weekStartsOn === val) return;
+    set({ weekStartsOn: val });
+    await saveGeneralSettings({
+      showCategories: get().showCategories,
+      showStreaks: get().showStreaks,
+      showCategoryBadges: get().showCategoryBadges,
+      showFrequency: get().showFrequency,
+      crashlyticsEnabled: get().crashlyticsEnabled,
+      weekStartsOn: val,
+    });
+    // Widgets compute their own week boundaries from the payload — push the
+    // new preference immediately so rings/heatmaps re-render on the new week.
+    updateWidget(get().habits, get(), true);
+    logEvent('info', 'Week start changed', { val });
   },
 }));
 
@@ -739,9 +765,22 @@ function countCompletionsInRange(habit: Habit, start: Date, end: Date): number {
   return count;
 }
 
-const effectiveSetCache = new WeakMap<Habit, Set<string>>();
+/** Effective-date cache — keyed by habit object, but the computed set also
+ * depends on the week-start preference, so a preference change drops it. */
+let effectiveSetCache = new WeakMap<Habit, Set<string>>();
+let effectiveSetCacheWeekStart: WeekStartDay = 'monday';
+
+/** Current week-start preference (module-level reads must not crash pre-store). */
+function currentWeekStart(): WeekStartDay {
+  return useHabitStore.getState().weekStartsOn ?? 'monday';
+}
 
 export function computeEffectiveDateSet(habit: Habit): Set<string> {
+  const weekStartsOn = currentWeekStart();
+  if (effectiveSetCacheWeekStart !== weekStartsOn) {
+    effectiveSetCache = new WeakMap();
+    effectiveSetCacheWeekStart = weekStartsOn;
+  }
   const cached = effectiveSetCache.get(habit);
   if (cached) return cached;
 
@@ -780,7 +819,7 @@ export function computeEffectiveDateSet(habit: Habit): Set<string> {
     const seen = new Set<string>();
     for (const k of dates) {
       const d = new Date(k + 'T00:00:00');
-      const ws = getWeekStart(d);
+      const ws = startOfWeek(d, weekStartsOn);
       const key = toDateKey(ws);
       if (seen.has(key)) continue;
       seen.add(key);
@@ -816,15 +855,6 @@ export function computeEffectiveDateSet(habit: Habit): Set<string> {
 
 export function isDayCompleted(habit: Habit, dateKey: string): boolean {
   return computeEffectiveDateSet(habit).has(dateKey);
-}
-
-function getWeekStart(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
 }
 
 export function computeStats(habit: Habit): HabitStats {

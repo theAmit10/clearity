@@ -1,4 +1,9 @@
 import { NativeModules } from 'react-native';
+import {
+  startOfWeek,
+  weekStartsOnCode,
+  type WeekStartDay,
+} from '../services/dateUtils';
 
 const { WidgetModule: NativeWidgetModule } = NativeModules;
 
@@ -19,6 +24,11 @@ export interface WidgetDataPayload {
   habits: WidgetHabitData[];
   weekStart: string;
   weekEnd: string;
+  /**
+   * First day of the week for widgets: 0 = Sunday, 1 = Monday.
+   * Optional so stale cached payloads stay decodable natively.
+   */
+  weekStartsOn?: 0 | 1;
   /**
    * True when widgets must render the Pro upsell instead of habit data
    * (free users and expired Pro). Native intentionally ignores `habits`
@@ -41,11 +51,8 @@ export interface WidgetPendingToggle {
   timestamp: number;
 }
 
-function getWeekRange(): { weekStart: string; weekEnd: string } {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const start = new Date(today);
-  start.setDate(today.getDate() - dayOfWeek);
+function getWeekRange(startDay: WeekStartDay): { weekStart: string; weekEnd: string } {
+  const start = startOfWeek(new Date(), startDay);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
 
@@ -80,18 +87,24 @@ export interface WidgetHabitInput {
 export function buildWidgetPayloadForState(
   habits: WidgetHabitInput[],
   pro: { isPro: boolean; proExpired: boolean },
+  weekStartsOn: WeekStartDay = 'monday',
 ): WidgetDataPayload {
   if (!pro.isPro) {
-    const { weekStart, weekEnd } = getWeekRange();
+    const { weekStart, weekEnd } = getWeekRange(weekStartsOn);
     return {
       habits: [],
       weekStart,
       weekEnd,
+      weekStartsOn: weekStartsOnCode(weekStartsOn),
       locked: true,
       lockMode: pro.proExpired ? 'expired' : 'free',
     };
   }
-  return { ...buildWidgetPayloadData(habits), locked: false, lockMode: null };
+  return {
+    ...buildWidgetPayloadData(habits, weekStartsOn),
+    locked: false,
+    lockMode: null,
+  };
 }
 
 /**
@@ -112,7 +125,8 @@ export function visibleWidgetColor(color: string): string {
 /** Shared payload builder (habit rows + week range, no lock fields). */
 export function buildWidgetPayloadData(
   habits: WidgetHabitInput[],
-): WidgetDataPayload {  const { weekStart, weekEnd } = getWeekRange();
+  weekStartsOn: WeekStartDay = 'monday',
+): WidgetDataPayload {  const { weekStart, weekEnd } = getWeekRange(weekStartsOn);
   const yearStart = `${new Date().getFullYear()}-01-01`;
 
   const filtered = habits.map(h => {
@@ -134,7 +148,7 @@ export function buildWidgetPayloadData(
     };
   });
 
-  return { habits: filtered, weekStart, weekEnd };
+  return { habits: filtered, weekStart, weekEnd, weekStartsOn: weekStartsOnCode(weekStartsOn) };
 }
 
 export const WidgetModule = {
@@ -199,5 +213,6 @@ export const WidgetModule = {
 
   buildPayload: (
     habits: WidgetHabitInput[],
-  ): WidgetDataPayload => buildWidgetPayloadData(habits),
+    weekStartsOn: WeekStartDay = 'monday',
+  ): WidgetDataPayload => buildWidgetPayloadData(habits, weekStartsOn),
 };

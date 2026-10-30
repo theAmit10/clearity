@@ -22,6 +22,12 @@
     "section": "Idioma",
     "description": "Escolha seu idioma preferido. O aplicativo usará o idioma do seu dispositivo por padrão."
   },
+  "weekStart": {
+    "title": "Início da semana",
+    "monday": "Segunda-feira",
+    "sunday": "Domingo",
+    "description": "Escolha em qual dia a semana começa nos calendários, contadores semanais e widgets."
+  },
   "common": {
     "settings": "Configurações",
     "notifications": "Notificações",
@@ -304,6 +310,7 @@
     "generalSection": "Geral",
     "generalDescription": "Personalize o layout da tela inicial e o comportamento padrão.",
     "generalSettings": "Configurações gerais",
+    "weekStart": "A semana começa",
     "habitsSection": "Hábitos",
     "habitsDescription": "Reordene seus hábitos pressionando e segurando na tela inicial, ou use a tela de reordenação dedicada abaixo.",
     "reorderHabits": "Reordenar hábitos",

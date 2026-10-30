@@ -26,6 +26,7 @@ export const SETTINGS_SHARED_TAGS = {
   analytics: 'settings-analytics-card',
   notifications: 'settings-notifications-card',
   language: 'settings-language-card',
+  weekStart: 'settings-week-start-card',
 } as const;
 
 /** Shared fade + resize morph used by every settings card transition. */

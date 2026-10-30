@@ -22,6 +22,12 @@
     "section": "Language",
     "description": "Choose your preferred language. The app will use your device language by default."
   },
+  "weekStart": {
+    "title": "Week Starts On",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "description": "Choose which day the week starts on in calendars, weekly counts, and widgets."
+  },
   "common": {
     "settings": "Settings",
     "notifications": "Notifications",
@@ -304,6 +310,7 @@
     "generalSection": "General",
     "generalDescription": "Customize the home screen layout and default behavior.",
     "generalSettings": "General settings",
+    "weekStart": "Week starts on",
     "habitsSection": "Habits",
     "habitsDescription": "Reorder your habits by long-pressing them on the home screen, or use the dedicated reorder screen below.",
     "reorderHabits": "Reorder habits",

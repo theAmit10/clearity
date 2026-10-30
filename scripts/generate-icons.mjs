@@ -51,6 +51,7 @@ const ANDROID_IMAGE_SIZE = 192; // drawn at ~58px inside the 144px ring canvas
 const CATALOG_PATH = path.join(root, 'src/constants/habitIcons.tsx');
 const SHAPES_JSON_PATH = path.join(root, 'src/constants/iconShapes.json');
 const GENERATED_TSX_PATH = path.join(root, 'src/constants/generatedIcons.tsx');
+const CUSTOM_ICONS_PATH = path.join(scriptsDir, 'custom-icons.json');
 const IOS_ASSETS_DIR = path.join(root, 'ios/HabitTrackerWidget/Assets.xcassets');
 const ANDROID_DRAWABLE_DIR = path.join(
   root,
@@ -176,10 +177,44 @@ function normalizeChildren(raw, name) {
     .map(child => toNode(child, name));
 }
 
+// Hand-drawn custom icons (scripts/custom-icons.json) — glyphs heroicons
+// doesn't ship (dumbbell, footprints, droplet, pill…). Loaded once and
+// validated so bad authoring fails loudly at generate time, not at runtime.
+function loadCustomIcons() {
+  if (!fs.existsSync(CUSTOM_ICONS_PATH)) return {};
+  const parsed = JSON.parse(fs.readFileSync(CUSTOM_ICONS_PATH, 'utf8'));
+  const icons = parsed?.icons ?? {};
+  for (const [name, nodes] of Object.entries(icons)) {
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+      throw new Error(`custom-icons.json: ${name} has no shape nodes`);
+    }
+    for (const node of nodes) {
+      if (!SVG_TAGS.has(node?.t)) {
+        throw new Error(
+          `custom-icons.json: ${name} has unknown shape tag "${node?.t}" (allowed: ${[...SVG_TAGS].join(', ')})`,
+        );
+      }
+      if (node.t === 'Path' && typeof node.d !== 'string') {
+        throw new Error(`custom-icons.json: ${name} Path node is missing "d"`);
+      }
+    }
+  }
+  return icons;
+}
+
+const CUSTOM_ICONS = loadCustomIcons();
+
 const extractCache = new Map();
 
 function extractIcon(name) {
   if (extractCache.has(name)) return extractCache.get(name);
+
+  // Hand-drawn icons win over heroicons (and reserve names freely).
+  if (CUSTOM_ICONS[name]) {
+    const shapes = CUSTOM_ICONS[name];
+    extractCache.set(name, shapes);
+    return shapes;
+  }
 
   const file = require.resolve(`react-native-heroicons/outline/${name}`);
   const mod = require(file);
@@ -234,7 +269,7 @@ function writeShapesJson(entries) {
 // 4. Emit src/constants/generatedIcons.tsx (self-contained SVG components)
 // ---------------------------------------------------------------------------
 function jsxAttrString(value) {
-  if (typeof value === 'number') return `{${value}}`;
+  if (typeof value === 'number') return `={${value}}`;
   if (typeof value === 'boolean') return value ? '' : `={${value}}`;
   return `={${JSON.stringify(String(value))}}`;
 }

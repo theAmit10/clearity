@@ -54,6 +54,8 @@ struct RingsPayload: Codable {
   var habits: [RingsHabit]
   var weekStart: String?
   var weekEnd: String?
+  /// First day of the week: 0 = Sunday, 1 = Monday (default when absent).
+  var weekStartsOn: Int?
   /// True when widgets must render the Pro upsell instead of habit data.
   var locked: Bool?
   /// `expired` (Renew copy) vs anything else (Upgrade copy).
@@ -87,7 +89,7 @@ enum RingsStore {
     UserDefaults(suiteName: appGroup)
   }
 
-  // MARK: - Date helpers (device-local, Monday-start weeks like the app)
+  // MARK: - Date helpers (device-local; week start follows the payload)
 
   static func todayKey(_ date: Date = Date()) -> String {
     let f = DateFormatter()
@@ -102,18 +104,19 @@ enum RingsStore {
     return todayKey(d)
   }
 
-  /// Monday-start week containing `date` (mirrors getWeekStart in habitStore.ts).
-  static func mondayStart(of date: Date) -> Date {
+  /// Week containing `date` starting on `startDay` (0 = Sunday, 1 = Monday;
+  /// mirrors startOfWeek in dateUtils.ts). Defaults to Monday.
+  static func weekStart(of date: Date, startDay: Int = 1) -> Date {
     let cal = Calendar.current
     let weekday = cal.component(.weekday, from: date) // 1 = Sunday
-    let daysBack = (weekday + 5) % 7
+    let daysBack = startDay == 0 ? weekday - 1 : (weekday + 5) % 7
     let start = cal.date(byAdding: .day, value: -daysBack, to: date) ?? date
     return cal.startOfDay(for: start)
   }
 
   // MARK: - Progress (mirrors HabitCard ring logic)
 
-  static func progress(for habit: RingsHabit, today: String) -> (Double, Bool) {
+  static func progress(for habit: RingsHabit, today: String, weekStartsOn: Int = 1) -> (Double, Bool) {
     let freq = habit.frequency ?? "daily"
     switch freq {
     case "n_times_in_m_days":
@@ -131,7 +134,7 @@ enum RingsStore {
       return (min(1, Double(current) / Double(target)), current >= target)
     case "n_times_per_week":
       let target = max(1, habit.frequencyValue ?? 3)
-      let start = mondayStart(of: Date())
+      let start = weekStart(of: Date(), startDay: weekStartsOn)
       var sum = 0
       for i in 0..<7 {
         let key: String
@@ -188,7 +191,7 @@ enum RingsStore {
     }
 
     let rings = ordered.map { habit -> RingsSnapshotHabit in
-      let (p, done) = progress(for: habit, today: today)
+      let (p, done) = progress(for: habit, today: today, weekStartsOn: payload.weekStartsOn ?? 1)
       return RingsSnapshotHabit(
         id: habit.id,
         name: habit.name,

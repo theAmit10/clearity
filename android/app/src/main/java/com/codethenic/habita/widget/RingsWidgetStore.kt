@@ -9,7 +9,7 @@ import java.util.Calendar
 
 /**
  * Shared Today Rings logic: payload parsing, ring progress (mirrors the app's
- * HabitCard ring + Monday-start weeks from habitStore.ts), toggling, and the
+ * HabitCard ring + week start from dateUtils.ts), toggling, and the
  * pending-op queue the JS side reconciles on launch/foreground.
  */
 object RingsWidgetStore {
@@ -63,12 +63,16 @@ object RingsWidgetStore {
     return keyOf(cal)
   }
 
-  /** Monday-start week containing today (mirrors getWeekStart in habitStore.ts). */
-  private fun mondayStartKeys(): List<String> {
+  /**
+   * Week containing today starting on [startDay] (0 = Sunday, 1 = Monday;
+   * mirrors startOfWeek in dateUtils.ts). Defaults to Monday.
+   */
+  private fun weekStartKeys(startDay: Int = 1): List<String> {
     val cal = Calendar.getInstance()
-    // Calendar.SUNDAY = 1 ... SATURDAY = 7; daysBack maps Mon->0 ... Sun->6.
+    // Calendar.SUNDAY = 1 ... SATURDAY = 7; daysBack maps the chosen
+    // start day to 0 and the remaining days to 1..6.
     val weekday = cal.get(Calendar.DAY_OF_WEEK)
-    val daysBack = (weekday + 5) % 7
+    val daysBack = if (startDay == 0) weekday - 1 else (weekday + 5) % 7
     cal.add(Calendar.DAY_OF_MONTH, -daysBack)
     return (0..6).map {
       val key = keyOf(cal)
@@ -91,6 +95,7 @@ object RingsWidgetStore {
     targetRaw: Int,
     windowRaw: Int,
     today: String,
+    weekStartsOn: Int = 1,
   ): Pair<Float, Boolean> {
     return when (frequency) {
       "n_times_in_m_days" -> {
@@ -108,7 +113,7 @@ object RingsWidgetStore {
       "n_times_per_week" -> {
         val target = maxOf(1, if (targetRaw > 0) targetRaw else 3)
         var sum = 0
-        for (key in mondayStartKeys()) sum += completions.optInt(key, 0)
+        for (key in weekStartKeys(weekStartsOn)) sum += completions.optInt(key, 0)
         Pair((sum.toFloat() / target).coerceAtMost(1f), sum >= target)
       }
       "n_times_per_month" -> {
@@ -141,6 +146,7 @@ object RingsWidgetStore {
     val today = todayKey()
     return try {
       val payload = JSONObject(json)
+      val weekStartsOn = payload.optInt("weekStartsOn", 1)
       val arr = payload.optJSONArray("habits") ?: return Pair(emptyList(), hasSelection)
       val all = mutableListOf<Triple<JSONObject, JSONObject, Int>>()
       for (i in 0 until arr.length()) {
@@ -158,6 +164,7 @@ object RingsWidgetStore {
         val (p, done) = progressOf(
           completions, freq,
           h.optInt("frequencyValue", 0), h.optInt("frequencyWindow", 0), today,
+          weekStartsOn,
         )
         RingHabit(
           id = h.optString("id", ""),

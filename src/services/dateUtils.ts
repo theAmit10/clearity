@@ -17,12 +17,32 @@ export function addDays(d: Date, days: number): Date {
   return copy;
 }
 
-export function startOfWeek(d: Date): Date {
+/** User-selectable first day of the week (Settings → Week Starts On). */
+export type WeekStartDay = 'monday' | 'sunday';
+
+/** Days since the week's start weekday for `d` (0 = week's first day). */
+export function weekdayOffset(d: Date, startDay: WeekStartDay): number {
+  const day = d.getDay(); // 0 = Sunday
+  if (startDay === 'monday') return day === 0 ? 6 : day - 1;
+  return day;
+}
+
+/** First day (local midnight) of the week containing `d`. */
+export function startOfWeek(d: Date, startDay: WeekStartDay = 'sunday'): Date {
   const copy = new Date(d);
-  const day = copy.getDay(); // 0 = Sunday
-  copy.setDate(copy.getDate() - day);
+  copy.setDate(copy.getDate() - weekdayOffset(copy, startDay));
   copy.setHours(0, 0, 0, 0);
   return copy;
+}
+
+/** Wire encoding for the widget payload: 0 = Sunday, 1 = Monday. */
+export function weekStartsOnCode(startDay: WeekStartDay): 0 | 1 {
+  return startDay === 'monday' ? 1 : 0;
+}
+
+/** Inverse of weekStartsOnCode; anything unknown falls back to Monday. */
+export function weekStartsOnFromCode(code: number | null | undefined): WeekStartDay {
+  return code === 0 ? 'sunday' : 'monday';
 }
 
 // Returns an array of Date objects, oldest first, ending today,

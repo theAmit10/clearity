@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { WeekStartDay } from './dateUtils';
 
 const HABITS_KEY = '@habit_tracker/habits';
 const LOGS_KEY = '@habit_tracker/logs';
@@ -127,6 +128,8 @@ export interface GeneralSettings {
   showCategoryBadges: boolean;
   showFrequency: boolean;
   crashlyticsEnabled: boolean;
+  /** First day of the week — 'monday' (default) or 'sunday'. */
+  weekStartsOn: WeekStartDay;
 }
 
 export async function loadGeneralSettings(): Promise<GeneralSettings | null> {

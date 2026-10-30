@@ -7,7 +7,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { toDateKey, isFuture, addDays } from '../services/dateUtils';
+import { toDateKey, isFuture, addDays, weekdayOffset, type WeekStartDay } from '../services/dateUtils';
 import { useHabitStore } from '../store/habitStore';
 import { computeEffectiveDateSet } from '../store/habitStore';
 import { Inset } from './neumorphic/NeumorphicView';
@@ -26,12 +26,12 @@ const CELL = 10;
 const GAP = 2;
 const SIDE = CELL + GAP;
 
-function yearWeeks(year: number): Date[][] {
+function yearWeeks(year: number, startDay: WeekStartDay): Date[][] {
   const start = new Date(year, 0, 1);
   const end = new Date(year, 11, 31);
   const weeks: Date[][] = [];
   let cursor = new Date(start);
-  cursor.setDate(cursor.getDate() - cursor.getDay());
+  cursor.setDate(cursor.getDate() - weekdayOffset(cursor, startDay));
   while (cursor <= end) {
     const week: Date[] = [];
     for (let d = 0; d < 7; d++) {
@@ -69,18 +69,26 @@ export default function YearHeatmap({ habitId, color, locked, onLockedPress }: P
   const { colors, radii } = theme;
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
+  const weekStartsOn = useHabitStore(s => s.weekStartsOn);
   const completions = habit?.completions ?? {};
 
   const effectiveSet = useMemo(() => {
     if (!habit || !habit.frequency || habit.frequency === 'daily') return null;
     return computeEffectiveDateSet(habit);
-  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow]);
+  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow, weekStartsOn]);
 
   const year = new Date().getFullYear();
-  const weeks = useMemo(() => yearWeeks(year), [year]);
-  const weekdayLabels = (t('calendar.weekdaysShort') as unknown as string[]).map(
-    (d, i) => (i % 2 === 1 ? d : ''),
-  );
+  const weeks = useMemo(() => yearWeeks(year, weekStartsOn), [year, weekStartsOn]);
+  // weekdaysShort is Mon-first; rotate it to the chosen week start so labels
+  // line up with the grid rows, then keep every other row (Mon/Wed/Fri or
+  // Tue/Thu/Sat depending on the start day).
+  const weekdayLabels = useMemo(() => {
+    const days = t('calendar.weekdaysShort') as unknown as string[];
+    const ordered = weekStartsOn === 'monday'
+      ? days
+      : [days[6], ...days.slice(0, 6)];
+    return ordered.map((d, i) => (i % 2 === 1 ? d : ''));
+  }, [t, weekStartsOn]);
   const monthNames = t('calendar.monthsShort') as unknown as string[];
   const monthLabels = useMemo(() => weekMonthLabels(weeks, monthNames), [weeks, monthNames]);
   const scrollRef = useRef<ScrollView>(null);

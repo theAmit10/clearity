@@ -60,6 +60,7 @@ export default function SettingsScreen({ navigation }: any) {
   const mergeGoals = useGoalStore(s => s.mergeGoals);
   const isPro = useHabitStore(s => s.isPro);
   const proExpired = useHabitStore(s => s.proExpired);
+  const weekStartsOn = useHabitStore(s => s.weekStartsOn);
   const [busy, setBusy] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const scrollY = useSharedValue(0);
@@ -413,6 +414,22 @@ export default function SettingsScreen({ navigation }: any) {
           <Row
             label={t('settings.generalSettings')}
             onPress={() => navigation.navigate('General')}
+          />
+          <Row
+            label={t('settings.weekStart')}
+            rightContent={
+              <Text
+                style={{
+                  color: theme.colors.iosSecondaryLabel,
+                  fontSize: 16,
+                }}
+              >
+                {weekStartsOn === 'sunday'
+                  ? t('weekStart.sunday')
+                  : t('weekStart.monday')}
+              </Text>
+            }
+            onPress={() => navigation.navigate('WeekStart')}
           />
         </Section>
 

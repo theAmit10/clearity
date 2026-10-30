@@ -54,7 +54,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         if (validIds.length !== ids.length || validRings.length !== ringIds.length) {
           const activeHabits = habits.filter(h => !h.archived);
           await WidgetModule.updateWidgetData(
-            buildWidgetPayloadForState(activeHabits, { isPro, proExpired }),
+            buildWidgetPayloadForState(activeHabits, { isPro, proExpired }, useHabitStore.getState().weekStartsOn),
           );
         }
       } catch {
@@ -85,7 +85,11 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
   const refreshWidgetData = async () => {
     const activeHabits = habits.filter(h => !h.archived);
-    const payload = buildWidgetPayloadForState(activeHabits, { isPro, proExpired });
+    const payload = buildWidgetPayloadForState(
+      activeHabits,
+      { isPro, proExpired },
+      useHabitStore.getState().weekStartsOn,
+    );
     await WidgetModule.updateWidgetData(payload);
   };
 

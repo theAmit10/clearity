@@ -13,7 +13,7 @@ import {
   FlatList,
   LayoutChangeEvent,
 } from 'react-native';
-import { toDateKey, isFuture } from '../services/dateUtils';
+import { toDateKey, isFuture, weekdayOffset, type WeekStartDay } from '../services/dateUtils';
 import { useHabitStore, computeEffectiveDateSet } from '../store/habitStore';
 import { Raised } from './neumorphic/NeumorphicView';
 import CalendarIcon from './CalendarIcon';
@@ -33,11 +33,12 @@ interface Props {
   onLockedPress?: () => void;
 }
 
-function getMonthDays(year: number, month: number): (number | null)[] {
-  const firstDay = new Date(year, month, 1).getDay();
+function getMonthDays(year: number, month: number, startDay: WeekStartDay): (number | null)[] {
+  const firstDay = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
+  const pad = weekdayOffset(firstDay, startDay);
+  for (let i = 0; i < pad; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
   return cells;
 }
@@ -74,12 +75,19 @@ export default function MonthlyCalendar({
   const { t } = useTranslation();
   const { colors, radii } = theme;
   const color = colorProp ?? colors.accent;
-  const [weekdays, monthNames] = [
+  const [weekdaysNarrow, monthNames] = [
     t('calendar.weekdaysNarrow'),
     t('calendar.monthsLong'),
   ] as unknown as [string[], string[]];
   const toggleCompletion = useHabitStore(s => s.toggleCompletion);
   const decrementCompletion = useHabitStore(s => s.decrementCompletion);
+  const weekStartsOn = useHabitStore(s => s.weekStartsOn);
+  // weekdaysNarrow is Sun-first; rotate to the chosen week start so the
+  // header matches the padded grid columns.
+  const weekdays =
+    weekStartsOn === 'monday'
+      ? [...weekdaysNarrow.slice(1), weekdaysNarrow[0]]
+      : weekdaysNarrow;
   const habit = useHabitStore(s => s.habits.find(h => h.id === habitId));
   const completions = habit?.completions ?? {};
   const missedNotes = habit?.missedNotes ?? {};
@@ -87,7 +95,7 @@ export default function MonthlyCalendar({
   const effectiveSet = useMemo(() => {
     if (!habit || !habit.frequency || habit.frequency === 'daily') return null;
     return computeEffectiveDateSet(habit);
-  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow]);
+  }, [completions, habit?.frequency, habit?.frequencyValue, habit?.frequencyWindow, weekStartsOn]);
 
   const today = new Date();
   const todayStr = toDateKey(today);
@@ -179,7 +187,7 @@ export default function MonthlyCalendar({
 
   const renderMonth = useCallback(
     ({ item }: { item: MonthPage }) => {
-      const days = getMonthDays(item.year, item.month);
+      const days = getMonthDays(item.year, item.month, weekStartsOn);
       return (
         <View style={{ width: containerWidth }}>
           <View style={styles.weekdayRow}>
@@ -331,6 +339,7 @@ export default function MonthlyCalendar({
       color,
       circleSize,
       weekdays,
+      weekStartsOn,
     ],
   );
 

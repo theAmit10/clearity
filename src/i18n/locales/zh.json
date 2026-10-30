@@ -22,6 +22,12 @@
     "section": "语言",
     "description": "选择你偏好的语言。应用默认使用设备语言。"
   },
+  "weekStart": {
+    "title": "周起始日",
+    "monday": "星期一",
+    "sunday": "星期日",
+    "description": "选择日历、每周统计和小组件中一周开始的星期。"
+  },
   "common": {
     "settings": "设置",
     "notifications": "通知",
@@ -304,6 +310,7 @@
     "generalSection": "通用",
     "generalDescription": "自定义主屏幕布局和默认行为。",
     "generalSettings": "通用设置",
+    "weekStart": "每周开始于",
     "habitsSection": "习惯",
     "habitsDescription": "在主屏幕上长按习惯即可重新排序，或使用下方专门的排序界面。",
     "reorderHabits": "重新排序习惯",

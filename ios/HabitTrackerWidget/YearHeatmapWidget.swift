@@ -21,6 +21,8 @@ struct YearHeatmapEntry: TimelineEntry {
   let monthLabels: [(text: String, col: Int)]
   let todayKey: String
   let year: Int
+  /// First day of the week: 0 = Sunday, 1 = Monday (drives row labels).
+  let weekStartsOn: Int
   /// True when widgets are Pro-gated (render the upsell card).
   let showProGate: Bool
   /// True when the gate is Renew (expired) vs Upgrade (never Pro).
@@ -31,11 +33,12 @@ struct YearHeatmapEntry: TimelineEntry {
 
 enum YearGridBuilder {
 
-  static func weekDateKeys(year: Int) -> [[String]] {
+  static func weekDateKeys(year: Int, startDay: Int = 1) -> [[String]] {
     let cal = Calendar.current
     var cursor = cal.date(from: DateComponents(year: year, month: 1, day: 1)) ?? Date()
     let weekday = cal.component(.weekday, from: cursor) // 1 = Sunday
-    if let back = cal.date(byAdding: .day, value: -(weekday - 1), to: cursor) {
+    let daysBack = startDay == 0 ? weekday - 1 : (weekday + 5) % 7
+    if let back = cal.date(byAdding: .day, value: -daysBack, to: cursor) {
       cursor = back
     }
     let end = cal.date(from: DateComponents(year: year, month: 12, day: 31)) ?? Date()
@@ -113,22 +116,22 @@ struct YearHeatmapProvider: TimelineProvider {
 
   private func loadEntry() -> YearHeatmapEntry {
     let year = Calendar.current.component(.year, from: Date())
-    let weeks = YearGridBuilder.weekDateKeys(year: year)
-    let labels = YearGridBuilder.monthLabels(weeks: weeks)
-
-    guard let defaults = UserDefaults(suiteName: appGroup) else {
-      return emptyEntry(weeks: weeks, labels: labels, year: year)
+    let defaults = UserDefaults(suiteName: appGroup)
+    let selectedId = defaults?.string(forKey: selectedYearHabitIdKey) ?? ""
+    let habitDataJson = defaults?.string(forKey: habitDataKey)
+    let payload = habitDataJson.flatMap { json -> WidgetDataPayload? in
+      guard let data = json.data(using: .utf8) else { return nil }
+      return try? JSONDecoder().decode(WidgetDataPayload.self, from: data)
     }
 
-    let selectedId = defaults.string(forKey: selectedYearHabitIdKey) ?? ""
-    let habitDataJson = defaults.string(forKey: habitDataKey)
+    // Week columns and row labels follow the user's week-start preference
+    // (0 = Sunday, 1 = Monday; default matches the app's Monday default).
+    let startDay = payload?.weekStartsOn ?? 1
+    let weeks = YearGridBuilder.weekDateKeys(year: year, startDay: startDay)
+    let labels = YearGridBuilder.monthLabels(weeks: weeks)
 
-    guard !selectedId.isEmpty,
-          let json = habitDataJson,
-          let data = json.data(using: .utf8),
-          let payload = try? JSONDecoder().decode(WidgetDataPayload.self, from: data)
-    else {
-      return emptyEntry(weeks: weeks, labels: labels, year: year)
+    guard defaults != nil, !selectedId.isEmpty, let payload = payload else {
+      return emptyEntry(weeks: weeks, labels: labels, year: year, startDay: startDay)
     }
 
     // Locked widgets render the Pro upsell instead of habit data.
@@ -140,6 +143,7 @@ struct YearHeatmapProvider: TimelineProvider {
         monthLabels: labels,
         todayKey: YearGridBuilder.todayKeyString(),
         year: year,
+        weekStartsOn: startDay,
         showProGate: true,
         proExpired: payload.lockMode == "expired"
       )
@@ -154,6 +158,7 @@ struct YearHeatmapProvider: TimelineProvider {
       monthLabels: labels,
       todayKey: YearGridBuilder.todayKeyString(),
       year: year,
+      weekStartsOn: startDay,
       showProGate: false,
       proExpired: false
     )
@@ -162,9 +167,10 @@ struct YearHeatmapProvider: TimelineProvider {
   private func emptyEntry(
     weeks: [[String]] = [],
     labels: [(text: String, col: Int)] = [],
-    year: Int = Calendar.current.component(.year, from: Date())
+    year: Int = Calendar.current.component(.year, from: Date()),
+    startDay: Int = 1
   ) -> YearHeatmapEntry {
-    let wk = weeks.isEmpty ? YearGridBuilder.weekDateKeys(year: year) : weeks
+    let wk = weeks.isEmpty ? YearGridBuilder.weekDateKeys(year: year, startDay: startDay) : weeks
     let lb = labels.isEmpty ? YearGridBuilder.monthLabels(weeks: wk) : labels
     return YearHeatmapEntry(
       date: Date(),
@@ -173,6 +179,7 @@ struct YearHeatmapProvider: TimelineProvider {
       monthLabels: lb,
       todayKey: YearGridBuilder.todayKeyString(),
       year: year,
+      weekStartsOn: startDay,
       showProGate: false,
       proExpired: false
     )
@@ -270,7 +277,11 @@ struct YearHeatmapEntryView: View {
     return HStack(alignment: .top, spacing: 4) {
       VStack(spacing: 0) {
         ForEach(0..<7, id: \.self) { di in
-          let label = ["", "Mon", "", "Wed", "", "Fri", ""][di]
+          // Rows follow the week start: Sunday rows label Mon/Wed/Fri at
+          // 1/3/5, Monday rows label Mon/Wed/Fri at 0/2/4.
+          let label = entry.weekStartsOn == 0
+            ? ["", "Mon", "", "Wed", "", "Fri", ""][di]
+            : ["Mon", "", "Wed", "", "Fri", "", ""][di]
           Group {
             if label.isEmpty {
               Color.clear

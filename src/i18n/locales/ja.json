@@ -22,6 +22,12 @@
     "section": "言語",
     "description": "使用する言語を選択してください。デフォルトではデバイスの言語が使用されます。"
   },
+  "weekStart": {
+    "title": "週の開始",
+    "monday": "月曜日",
+    "sunday": "日曜日",
+    "description": "カレンダー・週の集計・ウィジェットで週が始まる曜日を選択してください。"
+  },
   "common": {
     "settings": "設定",
     "notifications": "通知",
@@ -304,6 +310,7 @@
     "generalSection": "一般",
     "generalDescription": "ホーム画面のレイアウトとデフォルトの動作をカスタマイズします。",
     "generalSettings": "一般設定",
+    "weekStart": "週の開始曜日",
     "habitsSection": "習慣",
     "habitsDescription": "ホーム画面で長押しして並べ替えるか、下の専用の並べ替え画面をご利用ください。",
     "reorderHabits": "習慣を並べ替え",

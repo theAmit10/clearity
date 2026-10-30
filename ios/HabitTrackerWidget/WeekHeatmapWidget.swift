@@ -26,6 +26,8 @@ struct WidgetDataPayload: Codable {
   let habits: [WidgetHabitData]
   let weekStart: String
   let weekEnd: String
+  /// First day of the week: 0 = Sunday, 1 = Monday (default when absent).
+  let weekStartsOn: Int?
   /// True when widgets must render the Pro upsell instead of habit data.
   let locked: Bool?
   /// `expired` (Renew copy) vs anything else (Upgrade copy).
@@ -95,7 +97,7 @@ struct Provider: TimelineProvider {
       return WeekHeatmapEntry(
         date: Date(),
         habits: [],
-        weekDates: weekDateKeys(),
+        weekDates: weekDateKeys(startDay: payload.weekStartsOn ?? 1),
         todayKey: todayKeyString(),
         isEmpty: true,
         showProGate: true,
@@ -110,7 +112,7 @@ struct Provider: TimelineProvider {
     return WeekHeatmapEntry(
       date: Date(),
       habits: selectedHabits,
-      weekDates: weekDateKeys(),
+      weekDates: weekDateKeys(startDay: payload.weekStartsOn ?? 1),
       todayKey: todayKeyString(),
       isEmpty: selectedHabits.isEmpty,
       showProGate: false,
@@ -137,10 +139,16 @@ struct Provider: TimelineProvider {
     return formatter.string(from: Date())
   }
 
-  private func weekDateKeys() -> [String] {
+  private func weekDateKeys(startDay: Int = 1) -> [String] {
     let cal = Calendar.current
     let today = Date()
-    guard let weekStart = cal.dateInterval(of: .weekOfMonth, for: today)?.start else {
+    // Explicit start day instead of Calendar.current's locale firstWeekday so
+    // the widget always matches the in-app preference (0 = Sunday, 1 = Monday).
+    let weekday = cal.component(.weekday, from: cal.startOfDay(for: today)) // 1 = Sunday
+    let daysBack = startDay == 0 ? weekday - 1 : (weekday + 5) % 7
+    guard let weekStart = cal.date(
+      byAdding: .day, value: -daysBack, to: cal.startOfDay(for: today)
+    ) else {
       return []
     }
     let formatter = DateFormatter()

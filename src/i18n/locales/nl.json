@@ -22,6 +22,12 @@
     "section": "Taal",
     "description": "Kies je voorkeurstaal. De app gebruikt standaard de taal van je apparaat."
   },
+  "weekStart": {
+    "title": "Weekstart",
+    "monday": "Maandag",
+    "sunday": "Zondag",
+    "description": "Kies op welke dag de week begint in kalenders, weektellingen en widgets."
+  },
   "common": {
     "settings": "Instellingen",
     "notifications": "Meldingen",
@@ -304,6 +310,7 @@
     "generalSection": "Algemeen",
     "generalDescription": "Pas de indeling van het startscherm en het standaardgedrag aan.",
     "generalSettings": "Algemene instellingen",
+    "weekStart": "Week begint op",
     "habitsSection": "Gewoontes",
     "habitsDescription": "Herschik je gewoontes door ze op het startscherm ingedrukt te houden, of gebruik het speciale herschikkingsscherm hieronder.",
     "reorderHabits": "Gewoontes herschikken",

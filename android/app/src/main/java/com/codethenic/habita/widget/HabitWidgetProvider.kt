@@ -84,6 +84,9 @@ class HabitWidgetProvider : AppWidgetProvider() {
         return views
       }
 
+      // 0 = Sunday, 1 = Monday (default) — mirrors the in-app preference.
+      val weekStartsOn = payload.optInt("weekStartsOn", 1)
+
       val rowIds = listOf(R.id.habit_row_1, R.id.habit_row_2, R.id.habit_row_3)
       val dotIds = listOf(R.id.dot_1, R.id.dot_2, R.id.dot_3)
       val nameIds = listOf(R.id.name_1, R.id.name_2, R.id.name_3)
@@ -114,8 +117,11 @@ class HabitWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(nameIds[habitIndex], name)
 
         for (day in 0..6) {
-          val dateKey = dateKeyForOffset(day)
-          val completed = completionsObj.optBoolean(dateKey, false)
+          val dateKey = dateKeyForOffset(day, weekStartsOn)
+          // Completions are numeric (0/1+) in the payload; optBoolean on a
+          // number always returns the fallback, so read it as an int.
+          val completed = completionsObj.optInt(dateKey, 0) > 0 ||
+            completionsObj.optBoolean(dateKey, false)
           val isToday = dateKey == todayKey
           val cellId = dayIds[habitIndex][day]
 
@@ -184,11 +190,16 @@ class HabitWidgetProvider : AppWidgetProvider() {
       return "$y-$m-$d"
     }
 
-    private fun dateKeyForOffset(dayOffset: Int): String {
+    /** Column `dayOffset` (0-based) of the week starting on `startDay`
+     *  (0 = Sunday, 1 = Monday — mirrors startOfWeek in dateUtils.ts). */
+    private fun dateKeyForOffset(dayOffset: Int, startDay: Int = 1): String {
       val cal = Calendar.getInstance()
       val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
-      val daysSinceSunday = (dayOfWeek - Calendar.SUNDAY + 7) % 7
-      cal.add(Calendar.DAY_OF_MONTH, -daysSinceSunday + dayOffset)
+      // Calendar.SUNDAY = 1 ... SATURDAY = 7.
+      val daysSinceStart =
+        if (startDay == 0) (dayOfWeek - Calendar.SUNDAY + 7) % 7
+        else (dayOfWeek + 5) % 7
+      cal.add(Calendar.DAY_OF_MONTH, -daysSinceStart + dayOffset)
       val y = cal.get(Calendar.YEAR)
       val m = String.format("%02d", cal.get(Calendar.MONTH) + 1)
       val d = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH))

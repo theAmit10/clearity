@@ -1,4 +1,7 @@
 import React from 'react';
+// Components from './generatedIcons'; the AppleIcon..YogaIcon names at the end
+// of the import list are hand-drawn custom icons (scripts/custom-icons.json) —
+// habit glyphs heroicons doesn't ship.
 import {
   AcademicCapIcon,
   AdjustmentsHorizontalIcon,
@@ -166,6 +169,23 @@ import {
   WindowIcon,
   WrenchIcon,
   WrenchScrewdriverIcon,
+  AppleIcon,
+  BikeIcon,
+  CoffeeIcon,
+  DropletIcon,
+  DumbbellIcon,
+  FlameIcon,
+  FootprintsIcon,
+  HourglassIcon,
+  MedalIcon,
+  MeditationIcon,
+  PillIcon,
+  PiggyBankIcon,
+  RunIcon,
+  StopwatchIcon,
+  ToothbrushIcon,
+  UtensilsIcon,
+  YogaIcon,
 } from './generatedIcons';
 
 export type IconComponent = React.ComponentType<{
@@ -205,6 +225,11 @@ const iconCatalog = [
   { key: 'eye-care', name: 'Eye Care', category: 'fitness', Icon: EyeIcon },
   { key: 'rest-eyes', name: 'Rest Eyes', category: 'fitness', Icon: EyeSlashIcon },
   { key: 'balance', name: 'Balance', category: 'fitness', Icon: AdjustmentsHorizontalIcon },
+  { key: 'workout', name: 'Workout', category: 'fitness', Icon: DumbbellIcon },
+  { key: 'run', name: 'Running', category: 'fitness', Icon: RunIcon },
+  { key: 'steps', name: 'Steps', category: 'fitness', Icon: FootprintsIcon },
+  { key: 'bike', name: 'Cycling', category: 'fitness', Icon: BikeIcon },
+  { key: 'yoga', name: 'Yoga', category: 'fitness', Icon: YogaIcon },
 
   // Health & wellness
   { key: 'moon', name: 'Sleep', category: 'health', Icon: MoonIcon },
@@ -221,6 +246,14 @@ const iconCatalog = [
   { key: 'question', name: 'Question', category: 'health', Icon: QuestionMarkCircleIcon },
   { key: 'recovery', name: 'Recovery', category: 'health', Icon: ArrowPathIcon },
   { key: 'rest', name: 'Rest', category: 'health', Icon: PauseCircleIcon },
+  { key: 'hydration', name: 'Hydration', category: 'health', Icon: DropletIcon },
+  { key: 'medication', name: 'Medication', category: 'health', Icon: PillIcon },
+  { key: 'mindful', name: 'Meditation', category: 'health', Icon: MeditationIcon },
+  { key: 'nutrition', name: 'Nutrition', category: 'health', Icon: AppleIcon },
+  { key: 'meals', name: 'Meals', category: 'health', Icon: UtensilsIcon },
+  { key: 'fasting', name: 'Fasting', category: 'health', Icon: HourglassIcon },
+  { key: 'coffee', name: 'Coffee', category: 'health', Icon: CoffeeIcon },
+  { key: 'teeth', name: 'Teeth', category: 'health', Icon: ToothbrushIcon },
 
   // Learning & study
   { key: 'book-open', name: 'Reading', category: 'learning', Icon: BookOpenIcon },
@@ -259,6 +292,7 @@ const iconCatalog = [
   { key: 'trend', name: 'Trend Report', category: 'work', Icon: PresentationChartLineIcon },
   { key: 'queue', name: 'Queue', category: 'work', Icon: QueueListIcon },
   { key: 'filter', name: 'Filter', category: 'work', Icon: FunnelIcon },
+  { key: 'focus', name: 'Focus', category: 'work', Icon: StopwatchIcon },
 
   // Creative & hobbies
   { key: 'camera', name: 'Camera', category: 'creative', Icon: CameraIcon },
@@ -302,6 +336,7 @@ const iconCatalog = [
   { key: 'pound', name: 'Pound', category: 'money', Icon: CurrencyPoundIcon },
   { key: 'rupee', name: 'Rupee', category: 'money', Icon: CurrencyRupeeIcon },
   { key: 'yen', name: 'Yen', category: 'money', Icon: CurrencyYenIcon },
+  { key: 'savings', name: 'Savings', category: 'money', Icon: PiggyBankIcon },
 
   // Social & people
   { key: 'friends', name: 'Friends', category: 'social', Icon: UserGroupIcon },
@@ -376,6 +411,8 @@ const iconCatalog = [
   { key: 'trophy', name: 'Trophy', category: 'achievement', Icon: TrophyIcon },
   { key: 'star', name: 'Star', category: 'achievement', Icon: StarIcon },
   { key: 'badge', name: 'Badge', category: 'achievement', Icon: CheckBadgeIcon },
+  { key: 'streak', name: 'Streak', category: 'achievement', Icon: FlameIcon },
+  { key: 'medal', name: 'Medal', category: 'achievement', Icon: MedalIcon },
 ] as const satisfies readonly {
   key: string;
   name: string;

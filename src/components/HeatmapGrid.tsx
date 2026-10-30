@@ -1,9 +1,9 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { toDateKey, isFuture, addDays } from '../services/dateUtils';
+import { toDateKey, isFuture, addDays, weekdayOffset, type WeekStartDay } from '../services/dateUtils';
 import { Inset } from './neumorphic/NeumorphicView';
 import { useTheme } from '../theme/ThemeProvider';
-import { computeEffectiveDateSet } from '../store/habitStore';
+import { computeEffectiveDateSet, useHabitStore } from '../store/habitStore';
 
 interface Props {
   completions: Record<string, number>;
@@ -16,12 +16,12 @@ interface Props {
   weeks?: number;
 }
 
-function yearWeeks(year: number): Date[][] {
+function yearWeeks(year: number, startDay: WeekStartDay): Date[][] {
   const start = new Date(year, 0, 1);
   const end = new Date(year, 11, 31);
   const weeks: Date[][] = [];
   let cursor = new Date(start);
-  cursor.setDate(cursor.getDate() - cursor.getDay());
+  cursor.setDate(cursor.getDate() - weekdayOffset(cursor, startDay));
   while (cursor <= end) {
     const week: Date[] = [];
     for (let d = 0; d < 7; d++) {
@@ -46,7 +46,8 @@ export default function HeatmapGrid({
   const { colors, radii } = theme;
   const side = cellSize + gap;
   const year = new Date().getFullYear();
-  const weeksData = useMemo(() => yearWeeks(year), [year]);
+  const weekStartsOn = useHabitStore(s => s.weekStartsOn);
+  const weeksData = useMemo(() => yearWeeks(year, weekStartsOn), [year, weekStartsOn]);
   const scrollRef = useRef<ScrollView>(null);
 
   const effectiveSet = useMemo(() => {
@@ -57,7 +58,12 @@ export default function HeatmapGrid({
       frequencyValue,
       frequencyWindow,
     } as any);
-  }, [completions, frequency, frequencyValue, frequencyWindow]);
+  // weekStartsOn isn't referenced directly, but computeEffectiveDateSet
+  // groups weekly habits by the stored preference (its cache is invalidated
+  // on change) — keep it in deps so the set recomputes when the user
+  // switches the week start.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completions, frequency, frequencyValue, frequencyWindow, weekStartsOn]);
 
   const todayWeekIndex = useMemo(() => {
     const today = new Date();

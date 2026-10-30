@@ -26,6 +26,11 @@
     "eye-care": "EyeIcon",
     "rest-eyes": "EyeSlashIcon",
     "balance": "AdjustmentsHorizontalIcon",
+    "workout": "DumbbellIcon",
+    "run": "RunIcon",
+    "steps": "FootprintsIcon",
+    "bike": "BikeIcon",
+    "yoga": "YogaIcon",
     "moon": "MoonIcon",
     "sun": "SunIcon",
     "beaker": "BeakerIcon",
@@ -40,6 +45,14 @@
     "question": "QuestionMarkCircleIcon",
     "recovery": "ArrowPathIcon",
     "rest": "PauseCircleIcon",
+    "hydration": "DropletIcon",
+    "medication": "PillIcon",
+    "mindful": "MeditationIcon",
+    "nutrition": "AppleIcon",
+    "meals": "UtensilsIcon",
+    "fasting": "HourglassIcon",
+    "coffee": "CoffeeIcon",
+    "teeth": "ToothbrushIcon",
     "book-open": "BookOpenIcon",
     "study": "AcademicCapIcon",
     "pencil": "PencilSquareIcon",
@@ -74,6 +87,7 @@
     "trend": "PresentationChartLineIcon",
     "queue": "QueueListIcon",
     "filter": "FunnelIcon",
+    "focus": "StopwatchIcon",
     "camera": "CameraIcon",
     "photo": "PhotoIcon",
     "paint": "PaintBrushIcon",
@@ -111,6 +125,7 @@
     "pound": "CurrencyPoundIcon",
     "rupee": "CurrencyRupeeIcon",
     "yen": "CurrencyYenIcon",
+    "savings": "PiggyBankIcon",
     "friends": "UserGroupIcon",
     "community": "UsersIcon",
     "volunteer": "HandRaisedIcon",
@@ -174,7 +189,9 @@
     "download": "CloudArrowDownIcon",
     "trophy": "TrophyIcon",
     "star": "StarIcon",
-    "badge": "CheckBadgeIcon"
+    "badge": "CheckBadgeIcon",
+    "streak": "FlameIcon",
+    "medal": "MedalIcon"
   },
   "icons": {
     "fire": [
@@ -339,6 +356,220 @@
         "d": "M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
       }
     ],
+    "workout": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M3 7.5v9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.5 9.5v5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.5 12h11"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.5 9.5v5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M21 7.5v9"
+      }
+    ],
+    "run": [
+      {
+        "t": "Circle",
+        "cx": 15.5,
+        "cy": 5,
+        "r": 2.2
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M14.2 9 11 13.2l1.6 2-.6 5.3"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M11 13.2 7.8 16.2 5.2 13.8"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M14 9.8l2.9 1.7-1 2.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M13.4 10.6 10.6 12.2 9 10.6"
+      }
+    ],
+    "steps": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M7.9 11.4c1.5 0 2.7 1.2 2.7 2.9 0 1.5-1 2.4-1.3 3.6-.3 1.2-.6 2.3-1.4 2.3s-1.1-1.1-1.4-2.3c-.3-1.2-1.3-2.1-1.3-3.6 0-1.7 1.2-2.9 2.7-2.9z"
+      },
+      {
+        "t": "Circle",
+        "cx": 5.9,
+        "cy": 10.7,
+        "r": 0.7
+      },
+      {
+        "t": "Circle",
+        "cx": 7.9,
+        "cy": 10,
+        "r": 0.75
+      },
+      {
+        "t": "Circle",
+        "cx": 9.8,
+        "cy": 10.8,
+        "r": 0.65
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M14.7 5c1.5 0 2.7 1.2 2.7 2.9 0 1.5-1 2.4-1.3 3.6-.3 1.2-.6 2.3-1.4 2.3s-1.1-1.1-1.4-2.3c-.3-1.2-1.3-2.1-1.3-3.6 0-1.7 1.2-2.9 2.7-2.9z"
+      },
+      {
+        "t": "Circle",
+        "cx": 12.7,
+        "cy": 4.3,
+        "r": 0.7
+      },
+      {
+        "t": "Circle",
+        "cx": 14.7,
+        "cy": 3.6,
+        "r": 0.75
+      },
+      {
+        "t": "Circle",
+        "cx": 16.6,
+        "cy": 4.4,
+        "r": 0.65
+      }
+    ],
+    "bike": [
+      {
+        "t": "Circle",
+        "cx": 5.5,
+        "cy": 17.5,
+        "r": 3.8
+      },
+      {
+        "t": "Circle",
+        "cx": 18.5,
+        "cy": 17.5,
+        "r": 3.8
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M5.5 17.5H11.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M5.5 17.5 9 9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M11.5 17.5 9 9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9 9h6.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M11.5 17.5 15.5 9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M15.5 9 18.5 17.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M7.8 9h2.4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M14.4 7.7h2.6"
+      }
+    ],
+    "yoga": [
+      {
+        "t": "Circle",
+        "cx": 12,
+        "cy": 5.4,
+        "r": 2
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 7.4V13.6"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 9.4 8.6 6.1"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 9.4 15.4 6.1"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M5.8 18.8c1.7-3.5 3.9-5.2 6.2-5.2s4.5 1.7 6.2 5.2"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M5.8 18.8h12.4"
+      }
+    ],
     "moon": [
       {
         "t": "Path",
@@ -449,6 +680,228 @@
         "strokeLinecap": "round",
         "strokeLinejoin": "round",
         "d": "M14.25 9v6m-4.5 0V9M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      }
+    ],
+    "hydration": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 3.2c1.5 2.6 6.8 7 6.8 11.2a6.8 6.8 0 0 1-13.6 0C5.2 10.2 10.5 5.8 12 3.2Z"
+      }
+    ],
+    "medication": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M5.4 14.4 14.4 5.4a3 3 0 0 1 4.2 4.2L9.6 18.6a3 3 0 0 1-4.2-4.2Z"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9.9 9.9 14.1 14.1"
+      }
+    ],
+    "mindful": [
+      {
+        "t": "Circle",
+        "cx": 12,
+        "cy": 4.8,
+        "r": 2
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 6.8v5.4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 8.8c-1.5 1.2-3 3.2-4.2 6.4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 8.8c1.5 1.2 3 3.2 4.2 6.4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.5 18.5c1.5-2.5 3.5-3.8 5.5-3.8s4 1.3 5.5 3.8"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.5 18.5h11"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M10 18.5c.8-.7 3.2-.7 4 0"
+      }
+    ],
+    "nutrition": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 8.2c-1-1.5-2.8-2.3-4.6-2C5.1 6.4 3.5 8.7 3.6 11.5c.1 3 1.9 6 3.7 6.9.9.4 1.9.3 2.7-.2.5-.3 1.1-.5 2-.5s1.5.2 2 .5c.8.5 1.8.6 2.7.2 1.8-.9 3.6-3.9 3.7-6.9.1-2.8-1.5-5.1-3.8-5.5-1.8-.3-3.6.5-4.6 2z"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 8c0-1.5.4-2.7 1.2-3.7"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M13.2 4.3c1.4-1.6 3.2-2.2 5.2-1.8-.4 2-2 3.4-4 3.6"
+      }
+    ],
+    "meals": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.5 3v4.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5V3"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9 3v7"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9 10v11"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.5 3.5c-1.3 1.9-2 4.1-2 6.6 0 1.9.5 3.5 1.4 4.7"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.5 3.5c1.7 1.7 2.6 3.9 2.6 6.4 0 2-.8 3.7-2.2 4.9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.4 14.8V21"
+      }
+    ],
+    "fasting": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6 3h12"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6 21h12"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6 3c0 5 2.6 7.9 6 9-3.4 1.1-6 4-6 9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M18 3c0 5-2.6 7.9-6 9 3.4 1.1 6 4 6 9"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9.5 6h5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9.6 18.6c.7-.9 1.5-1.3 2.4-1.3s1.7.4 2.4 1.3"
+      }
+    ],
+    "coffee": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M4.5 9.5h12V14a6 6 0 0 1-12 0V9.5z"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M16.5 11.2h1.6a2.9 2.9 0 0 1 0 5.8h-1.4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9 6.8C8 5.7 10 5.1 9 4"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M13 6.8c-1-1.1 1-1.7 0-2.8"
+      }
+    ],
+    "teeth": [
+      {
+        "t": "Rect",
+        "x": 3.2,
+        "y": 11.4,
+        "width": 6.4,
+        "height": 4,
+        "rx": 1.3
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M4.6 11.4V9.1"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M6.4 11.4V8.7"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M8.2 11.4V9.1"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9.6 13.4h10.6"
       }
     ],
     "book-open": [
@@ -733,6 +1186,44 @@
         "strokeLinecap": "round",
         "strokeLinejoin": "round",
         "d": "M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"
+      }
+    ],
+    "focus": [
+      {
+        "t": "Circle",
+        "cx": 12,
+        "cy": 14,
+        "r": 7
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 7V4.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9.5 2.5h5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.4 8.9 19 7.3"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 14V9.8"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 14l2.8 1.7"
       }
     ],
     "camera": [
@@ -1035,6 +1526,56 @@
         "strokeLinecap": "round",
         "strokeLinejoin": "round",
         "d": "m9 7.5 3 4.5m0 0 3-4.5M12 12v5.25M15 12H9m6 3H9m12-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      }
+    ],
+    "savings": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M20 14.5c0 3.6-3.6 6.5-8 6.5s-8-2.9-8-6.5 3.6-6.5 8-6.5 8 2.9 8 6.5z"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M19.4 13.2H21c.8 0 1.4.6 1.4 1.3s-.6 1.3-1.4 1.3h-1.6"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M9 8.6c-.4-1.5-.2-2.8.6-3.8 1.2.6 2 1.7 2.4 3.2"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M10.5 9.8h3.5"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M8.5 20.4v1.6"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M15.5 20.4v1.6"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M17.3 12.7h.01"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M4.3 12.2c-1.2-.3-2.2.4-2.4 1.4-.2 1.1.8 2 1.9 1.8"
       }
     ],
     "friends": [
@@ -1565,6 +2106,46 @@
         "strokeLinecap": "round",
         "strokeLinejoin": "round",
         "d": "M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
+      }
+    ],
+    "streak": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 2.4c2.8 3.2 5.3 6 5.3 9.6a5.3 5.3 0 0 1-10.6 0c0-2.3 1.2-4.1 2.6-5.6.1 1.6.9 2.8 2.2 3.5-.7-3.4-.3-5.9.5-7.5z"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12.3 13.6c1.4 1.4 2.3 2.7 2.3 4a2.7 2.7 0 0 1-5.4 0c0-1.1.6-2 1.4-2.9.1.8.5 1.3 1 1.6-.2-1.1-.1-2 .7-2.7z"
+      }
+    ],
+    "medal": [
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M8.2 2.5 11.5 9.1"
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M15.8 2.5 12.5 9.1"
+      },
+      {
+        "t": "Circle",
+        "cx": 12,
+        "cy": 15.5,
+        "r": 5.5
+      },
+      {
+        "t": "Path",
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "d": "M12 12.5l.7 2.03 2.15.04-1.71 1.3.62 2.06-1.76-1.23-1.76 1.23.62-2.06-1.71-1.3 2.15-.04z"
       }
     ]
   }
