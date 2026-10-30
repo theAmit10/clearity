@@ -378,7 +378,9 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     const habits = get().habits.map(h => (h.id === id ? { ...h, ...patch } : h));
     set({ habits });
     persist(habits);
-    updateWidget(habits, get());
+    // An icon change repaints the widget's rings, so bypass the reload
+    // throttle — otherwise a quick edit keeps showing the previous icon.
+    updateWidget(habits, get(), 'icon' in patch);
   },
 
   deleteHabit: async id => {

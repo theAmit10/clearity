@@ -14,7 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import { logEvent } from '../services/logger';
-import { HABIT_ICONS, getHabitIcon } from '../constants/habitIcons';
+import { HABIT_ICONS, getQuickPickIcons, getHabitIcon } from '../constants/habitIcons';
+import { IconPickerSheet } from '../components/IconPickerSheet';
 import { BUILT_IN_CATEGORIES } from '../constants/habitCategories';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -80,6 +81,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [frequencyValue, setFrequencyValue] = useState(existing?.frequencyValue?.toString() ?? '');
   const [frequencyWindow, setFrequencyWindow] = useState(existing?.frequencyWindow?.toString() ?? '');
   const [category, setCategory] = useState(existing?.category || 'none');
+  const [iconSheetVisible, setIconSheetVisible] = useState(false);
 
   useEffect(() => {
     if (route.params?.newCategoryKey) {
@@ -234,11 +236,22 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             />
           </Inset> */}
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            {t('addHabit.icon')}
-          </Text>
+          <View style={styles.labelRow}>
+            <Text style={[styles.labelInline, { color: theme.colors.textMuted }]}>
+              {t('addHabit.icon')}
+            </Text>
+            <Pressable
+              onPress={() => setIconSheetVisible(true)}
+              hitSlop={10}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.seeAll, { color: displayColor }]}>
+                {t('addHabit.seeAll')}
+              </Text>
+            </Pressable>
+          </View>
           <View style={styles.row}>
-            {HABIT_ICONS.map(({ key, Icon }) => {
+            {getQuickPickIcons(icon).map(({ key, Icon }) => {
               const selected = icon === key;
               return (
                 <NeumorphicButton
@@ -468,6 +481,17 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
           </NeumorphicButton>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <IconPickerSheet
+        visible={iconSheetVisible}
+        selectedKey={icon}
+        accentColor={displayColor}
+        onSelect={key => {
+          setIcon(key);
+          setIconSheetVisible(false);
+        }}
+        onClose={() => setIconSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -488,6 +512,25 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     marginBottom: 10,
     marginTop: 22,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 22,
+    marginBottom: 10,
+  },
+  labelInline: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  seeAll: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    paddingVertical: 5,
   },
   inputWrap: {
     paddingHorizontal: 4,

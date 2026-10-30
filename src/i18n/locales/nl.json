@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "Fitness",
+    "health": "Gezondheid",
+    "learning": "Leren",
+    "work": "Werk",
+    "creative": "Creativiteit",
+    "music": "Muziek & media",
+    "money": "Geld",
+    "social": "Sociaal",
+    "home": "Thuis",
+    "travel": "Reizen",
+    "tech": "Technologie",
+    "achievement": "Prestaties"
+  },
   "addHabit": {
     "titleEdit": "Gewoonte bewerken",
     "titleNew": "Nieuwe gewoonte",
@@ -202,7 +216,11 @@
     "createCategory": "+ Aanmaken",
     "createCategoryPro": "+ Aanmaken — Pro",
     "saveChanges": "Wijzigingen opslaan",
-    "createHabit": "Gewoonte aanmaken"
+    "createHabit": "Gewoonte aanmaken",
+    "seeAll": "Alles bekijken",
+    "allIcons": "Alle pictogrammen",
+    "searchIcons": "Pictogrammen zoeken",
+    "noIconsFound": "Geen pictogrammen gevonden"
   },
   "newCategory": {
     "title": "Nieuwe categorie",

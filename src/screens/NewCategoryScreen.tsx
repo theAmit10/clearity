@@ -20,7 +20,8 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useHabitStore } from '../store/habitStore';
-import { HABIT_ICONS } from '../constants/habitIcons';
+import { HABIT_ICONS, getQuickPickIcons } from '../constants/habitIcons';
+import { IconPickerSheet } from '../components/IconPickerSheet';
 import type { HabitCategory } from '../types/habit';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -36,6 +37,7 @@ export default function NewCategoryScreen({ navigation }: any) {
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(HABIT_ICONS[0].key);
+  const [iconSheetVisible, setIconSheetVisible] = useState(false);
 
   React.useEffect(() => {
     cardScale.value = withSpring(1, { damping: 15, stiffness: 120 });
@@ -137,11 +139,22 @@ export default function NewCategoryScreen({ navigation }: any) {
                   />
                 </Inset>
 
-                <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-                  {t('addHabit.icon')}
-                </Text>
+                <View style={styles.labelRow}>
+                  <Text style={[styles.labelInline, { color: theme.colors.textMuted }]}>
+                    {t('addHabit.icon')}
+                  </Text>
+                  <Pressable
+                    onPress={() => setIconSheetVisible(true)}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.seeAll, { color: theme.colors.accent }]}>
+                      {t('addHabit.seeAll')}
+                    </Text>
+                  </Pressable>
+                </View>
                 <View style={styles.row}>
-                  {HABIT_ICONS.map(({ key, Icon }) => {
+                  {getQuickPickIcons(icon).map(({ key, Icon }) => {
                     const selected = icon === key;
                     return (
                       <NeumorphicButton
@@ -203,6 +216,17 @@ export default function NewCategoryScreen({ navigation }: any) {
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <IconPickerSheet
+        visible={iconSheetVisible}
+        selectedKey={icon}
+        accentColor={theme.colors.accent}
+        onSelect={key => {
+          setIcon(key);
+          setIconSheetVisible(false);
+        }}
+        onClose={() => setIconSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -248,6 +272,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 22,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 22,
+    marginBottom: 10,
+  },
+  labelInline: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  seeAll: { fontSize: 13, fontWeight: '700', letterSpacing: 0.2, paddingVertical: 5 },
   inputWrap: {
     paddingHorizontal: 4,
   },

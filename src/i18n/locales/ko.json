@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "피트니스",
+    "health": "건강",
+    "learning": "학습",
+    "work": "업무",
+    "creative": "창의력",
+    "music": "음악 및 미디어",
+    "money": "금융",
+    "social": "소셜",
+    "home": "집",
+    "travel": "여행",
+    "tech": "기술",
+    "achievement": "성취"
+  },
   "addHabit": {
     "titleEdit": "습관 편집",
     "titleNew": "새 습관",
@@ -202,7 +216,11 @@
     "createCategory": "＋ 만들기",
     "createCategoryPro": "＋ 만들기 — Pro",
     "saveChanges": "변경 사항 저장",
-    "createHabit": "습관 만들기"
+    "createHabit": "습관 만들기",
+    "seeAll": "전체 보기",
+    "allIcons": "모든 아이콘",
+    "searchIcons": "아이콘 검색",
+    "noIconsFound": "아이콘을 찾을 수 없습니다"
   },
   "newCategory": {
     "title": "새 카테고리",

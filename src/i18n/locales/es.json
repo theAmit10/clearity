@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "Fitness",
+    "health": "Salud",
+    "learning": "Aprendizaje",
+    "work": "Trabajo",
+    "creative": "Creatividad",
+    "music": "Música y medios",
+    "money": "Dinero",
+    "social": "Social",
+    "home": "Hogar",
+    "travel": "Viajes",
+    "tech": "Tecnología",
+    "achievement": "Logros"
+  },
   "addHabit": {
     "titleEdit": "Editar hábito",
     "titleNew": "Nuevo hábito",
@@ -202,7 +216,11 @@
     "createCategory": "+ Crear",
     "createCategoryPro": "+ Crear — Pro",
     "saveChanges": "Guardar cambios",
-    "createHabit": "Crear hábito"
+    "createHabit": "Crear hábito",
+    "seeAll": "Ver todo",
+    "allIcons": "Todos los iconos",
+    "searchIcons": "Buscar iconos",
+    "noIconsFound": "No se encontraron iconos"
   },
   "newCategory": {
     "title": "Nueva categoría",

@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "फ़िटनेस",
+    "health": "स्वास्थ्य",
+    "learning": "पढ़ाई",
+    "work": "काम",
+    "creative": "रचनात्मकता",
+    "music": "संगीत और मीडिया",
+    "money": "पैसा",
+    "social": "सामाजिक",
+    "home": "घर",
+    "travel": "यात्रा",
+    "tech": "तकनीक",
+    "achievement": "उपलब्धियाँ"
+  },
   "addHabit": {
     "titleEdit": "आदत संपादित करें",
     "titleNew": "नई आदत",
@@ -202,7 +216,11 @@
     "createCategory": "+ बनाएं",
     "createCategoryPro": "+ बनाएं — Pro",
     "saveChanges": "बदलाव सेव करें",
-    "createHabit": "आदत बनाएं"
+    "createHabit": "आदत बनाएं",
+    "seeAll": "सभी देखें",
+    "allIcons": "सभी आइकन",
+    "searchIcons": "आइकन खोजें",
+    "noIconsFound": "कोई आइकन नहीं मिला"
   },
   "newCategory": {
     "title": "नई श्रेणी",

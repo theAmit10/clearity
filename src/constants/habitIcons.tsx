@@ -1,252 +1,482 @@
 import React from 'react';
 import {
-  FireIcon,
-  BookOpenIcon,
-  BeakerIcon,
-  HeartIcon,
-  MoonIcon,
-  PencilSquareIcon,
-  BoltIcon,
-  SparklesIcon,
-  MusicalNoteIcon,
-  CurrencyDollarIcon,
-  NoSymbolIcon,
-  SunIcon,
-  TrophyIcon,
   AcademicCapIcon,
-  HomeModernIcon,
-  CameraIcon,
-  ClockIcon,
+  AdjustmentsHorizontalIcon,
+  ArchiveBoxIcon,
+  ArrowPathIcon,
+  ArrowTrendingUpIcon,
+  AtSymbolIcon,
+  BanknotesIcon,
+  Battery0Icon,
+  Battery100Icon,
+  Battery50Icon,
+  BeakerIcon,
+  BellIcon,
+  BellAlertIcon,
+  BellSnoozeIcon,
+  BoltIcon,
+  BoltSlashIcon,
+  BookmarkIcon,
+  BookOpenIcon,
+  BriefcaseIcon,
+  BugAntIcon,
+  BuildingLibraryIcon,
+  BuildingOfficeIcon,
+  BuildingStorefrontIcon,
+  CakeIcon,
+  CalculatorIcon,
   CalendarDaysIcon,
+  CameraIcon,
+  ChartBarIcon,
+  ChartBarSquareIcon,
+  ChartPieIcon,
+  ChatBubbleLeftIcon,
+  ChatBubbleLeftRightIcon,
+  CheckBadgeIcon,
   CheckCircleIcon,
   ClipboardDocumentCheckIcon,
+  ClipboardDocumentListIcon,
+  ClipboardIcon,
+  ClockIcon,
   CloudIcon,
+  CloudArrowDownIcon,
+  CloudArrowUpIcon,
+  CodeBracketIcon,
   Cog6ToothIcon,
+  CommandLineIcon,
   ComputerDesktopIcon,
   CpuChipIcon,
+  CreditCardIcon,
+  CubeIcon,
+  CurrencyDollarIcon,
+  CurrencyEuroIcon,
+  CurrencyPoundIcon,
+  CurrencyRupeeIcon,
+  CurrencyYenIcon,
+  DevicePhoneMobileIcon,
+  DeviceTabletIcon,
+  DocumentCheckIcon,
+  DocumentMagnifyingGlassIcon,
+  DocumentTextIcon,
+  CircleStackIcon,
+  EnvelopeIcon,
+  EnvelopeOpenIcon,
+  EyeIcon,
+  EyeDropperIcon,
+  EyeSlashIcon,
+  FaceFrownIcon,
   FaceSmileIcon,
+  FilmIcon,
+  FingerPrintIcon,
+  FireIcon,
+  FlagIcon,
+  FolderIcon,
+  FolderOpenIcon,
+  FunnelIcon,
+  GiftIcon,
+  GifIcon,
   GlobeAltIcon,
+  GlobeAmericasIcon,
+  GlobeAsiaAustraliaIcon,
+  GlobeEuropeAfricaIcon,
   HandRaisedIcon,
+  HandThumbDownIcon,
   HandThumbUpIcon,
+  HashtagIcon,
+  HeartIcon,
   HomeIcon,
+  HomeModernIcon,
+  IdentificationIcon,
+  InboxIcon,
+  InformationCircleIcon,
+  KeyIcon,
   LanguageIcon,
+  LifebuoyIcon,
   LightBulbIcon,
+  LinkIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  MapIcon,
   MapPinIcon,
   MegaphoneIcon,
   MicrophoneIcon,
+  MoonIcon,
+  MusicalNoteIcon,
   NewspaperIcon,
+  NoSymbolIcon,
   PaintBrushIcon,
+  PaperAirplaneIcon,
+  PauseCircleIcon,
+  PauseIcon,
+  PencilSquareIcon,
   PhoneIcon,
   PhotoIcon,
+  PlayIcon,
+  PowerIcon,
+  PresentationChartBarIcon,
+  PresentationChartLineIcon,
+  PrinterIcon,
   PuzzlePieceIcon,
+  QrCodeIcon,
+  QuestionMarkCircleIcon,
+  QueueListIcon,
+  RadioIcon,
+  ReceiptPercentIcon,
+  ReceiptRefundIcon,
+  RectangleGroupIcon,
   RocketLaunchIcon,
+  RssIcon,
   ScaleIcon,
   ScissorsIcon,
+  ServerIcon,
+  ServerStackIcon,
+  ShareIcon,
   ShieldCheckIcon,
+  ShieldExclamationIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,
+  SignalIcon,
+  SignalSlashIcon,
+  SparklesIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
+  Square3Stack3DIcon,
+  Squares2X2Icon,
+  SquaresPlusIcon,
+  StarIcon,
+  SunIcon,
   SwatchIcon,
+  TableCellsIcon,
   TicketIcon,
+  TrashIcon,
+  TrophyIcon,
   TruckIcon,
+  TvIcon,
+  UserCircleIcon,
   UserGroupIcon,
+  UserIcon,
+  UserMinusIcon,
+  UserPlusIcon,
   UsersIcon,
+  VariableIcon,
+  VideoCameraIcon,
+  ViewfinderCircleIcon,
+  WalletIcon,
+  WifiIcon,
+  WindowIcon,
+  WrenchIcon,
+  WrenchScrewdriverIcon,
 } from 'react-native-heroicons/outline';
 
-export type HabitIconKey =
-  | 'fire'
-  | 'book-open'
-  | 'beaker'
-  | 'heart'
-  | 'moon'
-  | 'pencil'
-  | 'bolt'
-  | 'sparkles'
-  | 'music'
-  | 'money'
-  | 'no-smoking'
-  | 'sun'
-  | 'trophy'
-  | 'study'
-  | 'home'
-  | 'camera'
-  | 'clock'
-  | 'calendar'
-  | 'check'
-  | 'checklist'
-  | 'cloud'
-  | 'settings'
-  | 'computer'
-  | 'cpu'
-  | 'smile'
-  | 'globe'
-  | 'volunteer'
-  | 'thumbs-up'
-  | 'house'
-  | 'language'
-  | 'idea'
-  | 'walk'
-  | 'speech'
-  | 'mic'
-  | 'news'
-  | 'paint'
-  | 'call'
-  | 'photo'
-  | 'puzzle'
-  | 'rocket'
-  | 'scale'
-  | 'grooming'
-  | 'shield'
-  | 'shopping-bag'
-  | 'cart'
-  | 'swatch'
-  | 'ticket'
-  | 'truck'
-  | 'friends'
-  | 'community';
+export type IconComponent = React.ComponentType<{
+  size?: number;
+  color?: string;
+}>;
 
-export interface HabitIconOption {
-  key: HabitIconKey;
-  Icon: React.ComponentType<{ size?: number; color?: string }>;
-}
+/**
+ * Full habit icon catalog. Each entry carries a display `name` (also used as
+ * the search term in the icon picker) and a `category` used for grouping.
+ *
+ * Keys are persisted on habits — never rename or remove an existing key.
+ * `HABIT_ICON_QUICK_PICKS` controls the compact inline row on the add/edit
+ * habit screen; everything here is reachable through the "See all" sheet.
+ */
+const iconCatalog = [
+  // Fitness & body
+  { key: 'fire', name: 'Fire', category: 'fitness', Icon: FireIcon },
+  { key: 'bolt', name: 'Energy', category: 'fitness', Icon: BoltIcon },
+  { key: 'scale', name: 'Weight', category: 'fitness', Icon: ScaleIcon },
+  { key: 'walk', name: 'Walk', category: 'fitness', Icon: MapPinIcon },
+  { key: 'heart', name: 'Heart', category: 'fitness', Icon: HeartIcon },
+  { key: 'grooming', name: 'Grooming', category: 'fitness', Icon: ScissorsIcon },
+  { key: 'no-smoking', name: 'No Smoking', category: 'fitness', Icon: NoSymbolIcon },
+  { key: 'progress', name: 'Progress', category: 'fitness', Icon: ArrowTrendingUpIcon },
+  { key: 'caffeine-free', name: 'Caffeine Free', category: 'fitness', Icon: BoltSlashIcon },
+  { key: 'energy-full', name: 'Energy Full', category: 'fitness', Icon: Battery100Icon },
+  { key: 'energy-half', name: 'Energy Half', category: 'fitness', Icon: Battery50Icon },
+  { key: 'energy-low', name: 'Energy Low', category: 'fitness', Icon: Battery0Icon },
+  { key: 'fingerprint', name: 'Fingerprint', category: 'fitness', Icon: FingerPrintIcon },
+  { key: 'support', name: 'Support', category: 'fitness', Icon: LifebuoyIcon },
+  { key: 'safety', name: 'Safety', category: 'fitness', Icon: ShieldExclamationIcon },
+  { key: 'eye-care', name: 'Eye Care', category: 'fitness', Icon: EyeIcon },
+  { key: 'rest-eyes', name: 'Rest Eyes', category: 'fitness', Icon: EyeSlashIcon },
+  { key: 'balance', name: 'Balance', category: 'fitness', Icon: AdjustmentsHorizontalIcon },
 
-export const HABIT_ICONS: HabitIconOption[] = [
-  // Fitness / body
-  { key: 'fire', Icon: FireIcon },
-  { key: 'bolt', Icon: BoltIcon },
-  { key: 'scale', Icon: ScaleIcon },
-  { key: 'walk', Icon: MapPinIcon },
-  { key: 'heart', Icon: HeartIcon },
-  { key: 'grooming', Icon: ScissorsIcon },
-  { key: 'no-smoking', Icon: NoSymbolIcon },
+  // Health & wellness
+  { key: 'moon', name: 'Sleep', category: 'health', Icon: MoonIcon },
+  { key: 'sun', name: 'Sunlight', category: 'health', Icon: SunIcon },
+  { key: 'beaker', name: 'Water', category: 'health', Icon: BeakerIcon },
+  { key: 'smile', name: 'Mood', category: 'health', Icon: FaceSmileIcon },
+  { key: 'sparkles', name: 'Self Care', category: 'health', Icon: SparklesIcon },
+  { key: 'shield', name: 'Immunity', category: 'health', Icon: ShieldCheckIcon },
+  { key: 'low-mood', name: 'Low Mood', category: 'health', Icon: FaceFrownIcon },
+  { key: 'reminder', name: 'Reminder', category: 'health', Icon: BellAlertIcon },
+  { key: 'snooze', name: 'Snooze', category: 'health', Icon: BellSnoozeIcon },
+  { key: 'notification', name: 'Notification', category: 'health', Icon: BellIcon },
+  { key: 'info', name: 'Info', category: 'health', Icon: InformationCircleIcon },
+  { key: 'question', name: 'Question', category: 'health', Icon: QuestionMarkCircleIcon },
+  { key: 'recovery', name: 'Recovery', category: 'health', Icon: ArrowPathIcon },
+  { key: 'rest', name: 'Rest', category: 'health', Icon: PauseCircleIcon },
 
-  // Health / mind
-  { key: 'moon', Icon: MoonIcon },
-  { key: 'sun', Icon: SunIcon },
-  { key: 'beaker', Icon: BeakerIcon },
-  { key: 'smile', Icon: FaceSmileIcon },
-  { key: 'sparkles', Icon: SparklesIcon },
-  { key: 'shield', Icon: ShieldCheckIcon },
+  // Learning & study
+  { key: 'book-open', name: 'Reading', category: 'learning', Icon: BookOpenIcon },
+  { key: 'study', name: 'Study', category: 'learning', Icon: AcademicCapIcon },
+  { key: 'pencil', name: 'Write', category: 'learning', Icon: PencilSquareIcon },
+  { key: 'checklist', name: 'Checklist', category: 'learning', Icon: ClipboardDocumentCheckIcon },
+  { key: 'check', name: 'Done', category: 'learning', Icon: CheckCircleIcon },
+  { key: 'clock', name: 'Time', category: 'learning', Icon: ClockIcon },
+  { key: 'calendar', name: 'Calendar', category: 'learning', Icon: CalendarDaysIcon },
+  { key: 'idea', name: 'Idea', category: 'learning', Icon: LightBulbIcon },
+  { key: 'language', name: 'Language', category: 'learning', Icon: LanguageIcon },
+  { key: 'news', name: 'News', category: 'learning', Icon: NewspaperIcon },
+  { key: 'puzzle', name: 'Puzzle', category: 'learning', Icon: PuzzlePieceIcon },
+  { key: 'rocket', name: 'Project', category: 'learning', Icon: RocketLaunchIcon },
+  { key: 'settings', name: 'Settings', category: 'learning', Icon: Cog6ToothIcon },
+  { key: 'bookmark', name: 'Bookmark', category: 'learning', Icon: BookmarkIcon },
+  { key: 'library', name: 'Library', category: 'learning', Icon: BuildingLibraryIcon },
+  { key: 'notes', name: 'Notes', category: 'learning', Icon: DocumentTextIcon },
+  { key: 'research', name: 'Research', category: 'learning', Icon: DocumentMagnifyingGlassIcon },
+  { key: 'math', name: 'Math', category: 'learning', Icon: VariableIcon },
+  { key: 'spreadsheet', name: 'Spreadsheet', category: 'learning', Icon: TableCellsIcon },
+  { key: 'tasks', name: 'Tasks', category: 'learning', Icon: ClipboardDocumentListIcon },
 
-  // Learning / productivity
-  { key: 'book-open', Icon: BookOpenIcon },
-  { key: 'study', Icon: AcademicCapIcon },
-  { key: 'pencil', Icon: PencilSquareIcon },
-  { key: 'checklist', Icon: ClipboardDocumentCheckIcon },
-  { key: 'check', Icon: CheckCircleIcon },
-  { key: 'clock', Icon: ClockIcon },
-  { key: 'calendar', Icon: CalendarDaysIcon },
-  { key: 'idea', Icon: LightBulbIcon },
-  { key: 'language', Icon: LanguageIcon },
-  { key: 'news', Icon: NewspaperIcon },
-  { key: 'puzzle', Icon: PuzzlePieceIcon },
-  { key: 'rocket', Icon: RocketLaunchIcon },
-  { key: 'settings', Icon: Cog6ToothIcon },
+  // Work & productivity
+  { key: 'computer', name: 'Computer', category: 'work', Icon: ComputerDesktopIcon },
+  { key: 'briefcase', name: 'Work', category: 'work', Icon: BriefcaseIcon },
+  { key: 'office', name: 'Office', category: 'work', Icon: BuildingOfficeIcon },
+  { key: 'presentation', name: 'Presentation', category: 'work', Icon: PresentationChartBarIcon },
+  { key: 'chart', name: 'Chart', category: 'work', Icon: ChartBarIcon },
+  { key: 'report', name: 'Report', category: 'work', Icon: ChartPieIcon },
+  { key: 'calculator', name: 'Calculator', category: 'work', Icon: CalculatorIcon },
+  { key: 'dashboard', name: 'Dashboard', category: 'work', Icon: ChartBarSquareIcon },
+  { key: 'inbox', name: 'Inbox', category: 'work', Icon: InboxIcon },
+  { key: 'approved', name: 'Approved', category: 'work', Icon: DocumentCheckIcon },
+  { key: 'clipboard', name: 'Clipboard', category: 'work', Icon: ClipboardIcon },
+  { key: 'trend', name: 'Trend Report', category: 'work', Icon: PresentationChartLineIcon },
+  { key: 'queue', name: 'Queue', category: 'work', Icon: QueueListIcon },
+  { key: 'filter', name: 'Filter', category: 'work', Icon: FunnelIcon },
 
-  // Creative / hobby
-  { key: 'music', Icon: MusicalNoteIcon },
-  { key: 'mic', Icon: MicrophoneIcon },
-  { key: 'camera', Icon: CameraIcon },
-  { key: 'photo', Icon: PhotoIcon },
-  { key: 'paint', Icon: PaintBrushIcon },
-  { key: 'swatch', Icon: SwatchIcon },
-  { key: 'ticket', Icon: TicketIcon },
+  // Creative & hobbies
+  { key: 'camera', name: 'Camera', category: 'creative', Icon: CameraIcon },
+  { key: 'photo', name: 'Photo', category: 'creative', Icon: PhotoIcon },
+  { key: 'paint', name: 'Paint', category: 'creative', Icon: PaintBrushIcon },
+  { key: 'swatch', name: 'Colors', category: 'creative', Icon: SwatchIcon },
+  { key: 'ticket', name: 'Ticket', category: 'creative', Icon: TicketIcon },
+  { key: 'film', name: 'Film', category: 'creative', Icon: FilmIcon },
+  { key: 'craft', name: 'Craft', category: 'creative', Icon: CubeIcon },
+  { key: 'grid', name: 'Grid', category: 'creative', Icon: Squares2X2Icon },
+  { key: 'apps', name: 'Apps', category: 'creative', Icon: SquaresPlusIcon },
+  { key: 'layout', name: 'Layout', category: 'creative', Icon: RectangleGroupIcon },
+  { key: 'viewfinder', name: 'Viewfinder', category: 'creative', Icon: ViewfinderCircleIcon },
+  { key: 'color-picker', name: 'Color Picker', category: 'creative', Icon: EyeDropperIcon },
+  { key: 'gif', name: 'GIF', category: 'creative', Icon: GifIcon },
+  { key: 'print', name: 'Print', category: 'creative', Icon: PrinterIcon },
 
-  // Money / finance
-  { key: 'money', Icon: CurrencyDollarIcon },
-  { key: 'shopping-bag', Icon: ShoppingBagIcon },
-  { key: 'cart', Icon: ShoppingCartIcon },
+  // Music & media
+  { key: 'music', name: 'Music', category: 'music', Icon: MusicalNoteIcon },
+  { key: 'mic', name: 'Microphone', category: 'music', Icon: MicrophoneIcon },
+  { key: 'speaker', name: 'Speaker', category: 'music', Icon: SpeakerWaveIcon },
+  { key: 'mute', name: 'Mute', category: 'music', Icon: SpeakerXMarkIcon },
+  { key: 'radio', name: 'Radio', category: 'music', Icon: RadioIcon },
+  { key: 'play', name: 'Play', category: 'music', Icon: PlayIcon },
+  { key: 'pause', name: 'Pause', category: 'music', Icon: PauseIcon },
+  { key: 'video', name: 'Video', category: 'music', Icon: VideoCameraIcon },
+  { key: 'podcast', name: 'Podcast', category: 'music', Icon: RssIcon },
+  { key: 'tv', name: 'TV', category: 'music', Icon: TvIcon },
 
-  // Social / lifestyle
-  { key: 'friends', Icon: UserGroupIcon },
-  { key: 'community', Icon: UsersIcon },
-  { key: 'volunteer', Icon: HandRaisedIcon },
-  { key: 'thumbs-up', Icon: HandThumbUpIcon },
-  { key: 'speech', Icon: MegaphoneIcon },
-  { key: 'call', Icon: PhoneIcon },
-  { key: 'globe', Icon: GlobeAltIcon },
-  { key: 'truck', Icon: TruckIcon },
+  // Money & shopping
+  { key: 'money', name: 'Money', category: 'money', Icon: CurrencyDollarIcon },
+  { key: 'shopping-bag', name: 'Shopping', category: 'money', Icon: ShoppingBagIcon },
+  { key: 'cart', name: 'Cart', category: 'money', Icon: ShoppingCartIcon },
+  { key: 'cash', name: 'Cash', category: 'money', Icon: BanknotesIcon },
+  { key: 'credit-card', name: 'Credit Card', category: 'money', Icon: CreditCardIcon },
+  { key: 'receipt', name: 'Receipt', category: 'money', Icon: ReceiptPercentIcon },
+  { key: 'refund', name: 'Refund', category: 'money', Icon: ReceiptRefundIcon },
+  { key: 'wallet', name: 'Wallet', category: 'money', Icon: WalletIcon },
+  { key: 'shop', name: 'Shop', category: 'money', Icon: BuildingStorefrontIcon },
+  { key: 'euro', name: 'Euro', category: 'money', Icon: CurrencyEuroIcon },
+  { key: 'pound', name: 'Pound', category: 'money', Icon: CurrencyPoundIcon },
+  { key: 'rupee', name: 'Rupee', category: 'money', Icon: CurrencyRupeeIcon },
+  { key: 'yen', name: 'Yen', category: 'money', Icon: CurrencyYenIcon },
 
-  // Home / tech
-  { key: 'home', Icon: HomeModernIcon },
-  { key: 'house', Icon: HomeIcon },
-  { key: 'cloud', Icon: CloudIcon },
-  { key: 'computer', Icon: ComputerDesktopIcon },
-  { key: 'cpu', Icon: CpuChipIcon },
+  // Social & people
+  { key: 'friends', name: 'Friends', category: 'social', Icon: UserGroupIcon },
+  { key: 'community', name: 'Community', category: 'social', Icon: UsersIcon },
+  { key: 'volunteer', name: 'Volunteer', category: 'social', Icon: HandRaisedIcon },
+  { key: 'thumbs-up', name: 'Thumbs Up', category: 'social', Icon: HandThumbUpIcon },
+  { key: 'thumbs-down', name: 'Thumbs Down', category: 'social', Icon: HandThumbDownIcon },
+  { key: 'speech', name: 'Announce', category: 'social', Icon: MegaphoneIcon },
+  { key: 'call', name: 'Call', category: 'social', Icon: PhoneIcon },
+  { key: 'globe', name: 'Globe', category: 'social', Icon: GlobeAltIcon },
+  { key: 'chat', name: 'Chat', category: 'social', Icon: ChatBubbleLeftIcon },
+  { key: 'group-chat', name: 'Group Chat', category: 'social', Icon: ChatBubbleLeftRightIcon },
+  { key: 'email', name: 'Email', category: 'social', Icon: EnvelopeIcon },
+  { key: 'email-open', name: 'Read Email', category: 'social', Icon: EnvelopeOpenIcon },
+  { key: 'mention', name: 'Mention', category: 'social', Icon: AtSymbolIcon },
+  { key: 'hashtag', name: 'Hashtag', category: 'social', Icon: HashtagIcon },
+  { key: 'person', name: 'Person', category: 'social', Icon: UserIcon },
+  { key: 'add-friend', name: 'Add Friend', category: 'social', Icon: UserPlusIcon },
+  { key: 'remove-friend', name: 'Remove Friend', category: 'social', Icon: UserMinusIcon },
+  { key: 'profile', name: 'Profile', category: 'social', Icon: UserCircleIcon },
+  { key: 'share', name: 'Share', category: 'social', Icon: ShareIcon },
+  { key: 'id-card', name: 'ID Card', category: 'social', Icon: IdentificationIcon },
+
+  // Home & living
+  { key: 'home', name: 'Home', category: 'home', Icon: HomeModernIcon },
+  { key: 'house', name: 'House', category: 'home', Icon: HomeIcon },
+  { key: 'repair', name: 'Repair', category: 'home', Icon: WrenchIcon },
+  { key: 'tools', name: 'Tools', category: 'home', Icon: WrenchScrewdriverIcon },
+  { key: 'key', name: 'Key', category: 'home', Icon: KeyIcon },
+  { key: 'lock', name: 'Lock', category: 'home', Icon: LockClosedIcon },
+  { key: 'unlock', name: 'Unlock', category: 'home', Icon: LockOpenIcon },
+  { key: 'window', name: 'Window', category: 'home', Icon: WindowIcon },
+  { key: 'trash', name: 'Trash', category: 'home', Icon: TrashIcon },
+  { key: 'gift', name: 'Gift', category: 'home', Icon: GiftIcon },
+  { key: 'folder', name: 'Folder', category: 'home', Icon: FolderIcon },
+  { key: 'folder-open', name: 'Open Folder', category: 'home', Icon: FolderOpenIcon },
+  { key: 'storage', name: 'Storage', category: 'home', Icon: ArchiveBoxIcon },
+  { key: 'baking', name: 'Baking', category: 'home', Icon: CakeIcon },
+
+  // Travel & outdoors
+  { key: 'truck', name: 'Delivery', category: 'travel', Icon: TruckIcon },
+  { key: 'map', name: 'Map', category: 'travel', Icon: MapIcon },
+  { key: 'travel', name: 'Travel', category: 'travel', Icon: PaperAirplaneIcon },
+  { key: 'location', name: 'Location', category: 'travel', Icon: MapPinIcon },
+  { key: 'globe-americas', name: 'Americas', category: 'travel', Icon: GlobeAmericasIcon },
+  { key: 'globe-asia', name: 'Asia Pacific', category: 'travel', Icon: GlobeAsiaAustraliaIcon },
+  { key: 'globe-europe', name: 'Europe Africa', category: 'travel', Icon: GlobeEuropeAfricaIcon },
+  { key: 'flag', name: 'Flag', category: 'travel', Icon: FlagIcon },
+
+  // Tech & devices
+  { key: 'cloud', name: 'Cloud', category: 'tech', Icon: CloudIcon },
+  { key: 'cpu', name: 'Chip', category: 'tech', Icon: CpuChipIcon },
+  { key: 'code', name: 'Code', category: 'tech', Icon: CodeBracketIcon },
+  { key: 'terminal', name: 'Terminal', category: 'tech', Icon: CommandLineIcon },
+  { key: 'server', name: 'Server', category: 'tech', Icon: ServerIcon },
+  { key: 'database', name: 'Database', category: 'tech', Icon: ServerStackIcon },
+  { key: 'wifi', name: 'WiFi', category: 'tech', Icon: WifiIcon },
+  { key: 'signal', name: 'Signal', category: 'tech', Icon: SignalIcon },
+  { key: 'no-signal', name: 'No Signal', category: 'tech', Icon: SignalSlashIcon },
+  { key: 'mobile', name: 'Mobile', category: 'tech', Icon: DevicePhoneMobileIcon },
+  { key: 'tablet', name: 'Tablet', category: 'tech', Icon: DeviceTabletIcon },
+  { key: 'qr-code', name: 'QR Code', category: 'tech', Icon: QrCodeIcon },
+  { key: 'power', name: 'Power', category: 'tech', Icon: PowerIcon },
+  { key: 'bug', name: 'Bug', category: 'tech', Icon: BugAntIcon },
+  { key: 'layers', name: 'Layers', category: 'tech', Icon: Square3Stack3DIcon },
+  { key: 'data', name: 'Data', category: 'tech', Icon: CircleStackIcon },
+  { key: 'link', name: 'Link', category: 'tech', Icon: LinkIcon },
+  { key: 'upload', name: 'Upload', category: 'tech', Icon: CloudArrowUpIcon },
+  { key: 'download', name: 'Download', category: 'tech', Icon: CloudArrowDownIcon },
 
   // Achievement
-  { key: 'trophy', Icon: TrophyIcon },
+  { key: 'trophy', name: 'Trophy', category: 'achievement', Icon: TrophyIcon },
+  { key: 'star', name: 'Star', category: 'achievement', Icon: StarIcon },
+  { key: 'badge', name: 'Badge', category: 'achievement', Icon: CheckBadgeIcon },
+] as const satisfies readonly {
+  key: string;
+  name: string;
+  category: string;
+  Icon: IconComponent;
+}[];
+
+export type HabitIconOption = (typeof iconCatalog)[number];
+export type HabitIconKey = HabitIconOption['key'];
+export type IconCategory = HabitIconOption['category'];
+
+export const HABIT_ICONS: readonly HabitIconOption[] = iconCatalog;
+
+/** Categories in the order they appear in the icon picker sheet. */
+export const ICON_CATEGORIES: readonly IconCategory[] = [
+  'fitness',
+  'health',
+  'learning',
+  'work',
+  'creative',
+  'music',
+  'money',
+  'social',
+  'home',
+  'travel',
+  'tech',
+  'achievement',
 ];
+
+/** Compact set rendered inline on the add/edit habit screen. */
+export const HABIT_ICON_QUICK_PICKS: readonly HabitIconKey[] = [
+  'fire',
+  'bolt',
+  'scale',
+  'walk',
+  'heart',
+  'grooming',
+  'no-smoking',
+  'moon',
+  'sun',
+  'beaker',
+  'smile',
+  'sparkles',
+  'shield',
+  'book-open',
+  'study',
+  'pencil',
+  'checklist',
+  'check',
+  'clock',
+  'calendar',
+  'idea',
+  'language',
+  'news',
+  'puzzle',
+  'rocket',
+  'settings',
+  'music',
+  'mic',
+  'camera',
+  'photo',
+  'paint',
+  'swatch',
+  'ticket',
+  'money',
+  'shopping-bag',
+  'cart',
+  'friends',
+  'community',
+  'volunteer',
+  'thumbs-up',
+  'speech',
+  'call',
+  'globe',
+  'truck',
+  'home',
+  'house',
+  'cloud',
+  'computer',
+  'cpu',
+  'trophy',
+];
+
+/** Inline quick picks, plus the selected icon when it lives in the full
+ * catalog only — so an icon picked from the sheet is never invisible. */
+export function getQuickPickIcons(selectedKey?: string): readonly HabitIconOption[] {
+  const picks = HABIT_ICON_QUICK_PICKS.map(
+    key => HABIT_ICONS.find(icon => icon.key === key),
+  ).filter((icon): icon is HabitIconOption => Boolean(icon));
+
+  if (!selectedKey || HABIT_ICON_QUICK_PICKS.includes(selectedKey as HabitIconKey)) {
+    return picks;
+  }
+
+  const extra = HABIT_ICONS.find(icon => icon.key === selectedKey);
+  return extra ? [...picks, extra] : picks;
+}
 
 /** Look up an icon component by its stored key, falling back to the fire
  * icon if the key is missing/unrecognized (e.g. old emoji data). */
-export function getHabitIcon(key?: string): HabitIconOption['Icon'] {
-  return HABIT_ICONS.find(i => i.key === key)?.Icon ?? FireIcon;
+export function getHabitIcon(key?: string): IconComponent {
+  const match = HABIT_ICONS.find(icon => icon.key === key);
+  return match ? match.Icon : FireIcon;
 }
 
-// import React from 'react';
-// import {
-//   FireIcon,
-//   BookOpenIcon,
-//   BeakerIcon,
-//   HeartIcon,
-//   MoonIcon,
-//   PencilSquareIcon,
-//   BoltIcon,
-//   SparklesIcon,
-//   MusicalNoteIcon,
-//   CurrencyDollarIcon,
-//   NoSymbolIcon,
-//   SunIcon,
-//   TrophyIcon,
-//   AcademicCapIcon,
-//   HomeModernIcon,
-//   CameraIcon,
-// } from 'react-native-heroicons/outline';
-
-// export type HabitIconKey =
-//   | 'fire'
-//   | 'book-open'
-//   | 'beaker'
-//   | 'heart'
-//   | 'moon'
-//   | 'pencil'
-//   | 'bolt'
-//   | 'sparkles'
-//   | 'music'
-//   | 'money'
-//   | 'no-smoking'
-//   | 'sun'
-//   | 'trophy'
-//   | 'study'
-//   | 'home'
-//   | 'camera';
-
-// export interface HabitIconOption {
-//   key: HabitIconKey;
-//   Icon: React.ComponentType<{ size?: number; color?: string }>;
-// }
-
-// export const HABIT_ICONS: HabitIconOption[] = [
-//   { key: 'fire', Icon: FireIcon },
-//   { key: 'book-open', Icon: BookOpenIcon },
-//   { key: 'beaker', Icon: BeakerIcon },
-//   { key: 'heart', Icon: HeartIcon },
-//   { key: 'moon', Icon: MoonIcon },
-//   { key: 'pencil', Icon: PencilSquareIcon },
-//   { key: 'bolt', Icon: BoltIcon },
-//   { key: 'sparkles', Icon: SparklesIcon },
-//   { key: 'music', Icon: MusicalNoteIcon },
-//   { key: 'money', Icon: CurrencyDollarIcon },
-//   { key: 'no-smoking', Icon: NoSymbolIcon },
-//   { key: 'sun', Icon: SunIcon },
-//   { key: 'trophy', Icon: TrophyIcon },
-//   { key: 'study', Icon: AcademicCapIcon },
-//   { key: 'home', Icon: HomeModernIcon },
-//   { key: 'camera', Icon: CameraIcon },
-// ];
-
-// /** Look up an icon component by its stored key, falling back to the fire
-//  * icon if the key is missing/unrecognized (e.g. old emoji data). */
-// export function getHabitIcon(key?: string): HabitIconOption['Icon'] {
-//   return HABIT_ICONS.find(i => i.key === key)?.Icon ?? FireIcon;
-// }
+export function getHabitIconName(key?: string): string | undefined {
+  return HABIT_ICONS.find(icon => icon.key === key)?.name;
+}

@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "フィットネス",
+    "health": "健康",
+    "learning": "学習",
+    "work": "仕事",
+    "creative": "創作",
+    "music": "音楽・メディア",
+    "money": "お金",
+    "social": "交流",
+    "home": "家",
+    "travel": "旅行",
+    "tech": "テクノロジー",
+    "achievement": "達成"
+  },
   "addHabit": {
     "titleEdit": "習慣を編集",
     "titleNew": "新しい習慣",
@@ -202,7 +216,11 @@
     "createCategory": "＋ 作成",
     "createCategoryPro": "＋ 作成 — Pro",
     "saveChanges": "変更を保存",
-    "createHabit": "習慣を作成"
+    "createHabit": "習慣を作成",
+    "seeAll": "すべて見る",
+    "allIcons": "すべてのアイコン",
+    "searchIcons": "アイコンを検索",
+    "noIconsFound": "アイコンが見つかりません"
   },
   "newCategory": {
     "title": "新しいカテゴリー",

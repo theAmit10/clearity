@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "اللياقة",
+    "health": "الصحة",
+    "learning": "التعلّم",
+    "work": "العمل",
+    "creative": "الإبداع",
+    "music": "الموسيقى والوسائط",
+    "money": "المال",
+    "social": "التواصل",
+    "home": "المنزل",
+    "travel": "السفر",
+    "tech": "التقنية",
+    "achievement": "الإنجازات"
+  },
   "addHabit": {
     "titleEdit": "تعديل العادة",
     "titleNew": "عادة جديدة",
@@ -202,7 +216,11 @@
     "createCategory": "+ إنشاء",
     "createCategoryPro": "+ إنشاء — Pro",
     "saveChanges": "حفظ التغييرات",
-    "createHabit": "إنشاء عادة"
+    "createHabit": "إنشاء عادة",
+    "seeAll": "عرض الكل",
+    "allIcons": "كل الأيقونات",
+    "searchIcons": "بحث عن أيقونات",
+    "noIconsFound": "لم يتم العثور على أيقونات"
   },
   "newCategory": {
     "title": "فئة جديدة",

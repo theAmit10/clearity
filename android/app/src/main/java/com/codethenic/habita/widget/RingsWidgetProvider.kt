@@ -183,6 +183,9 @@ class RingsWidgetProvider : AppWidgetProvider() {
         val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
           textSize = size * 0.40f
           textAlign = Paint.Align.CENTER
+          // Emoji ignore this; it keeps any future non-emoji glyph visible
+          // instead of painting it in the default (near-black) color.
+          color = ring.color
         }
         val fm = text.fontMetrics
         val y = center - (fm.ascent + fm.descent) / 2f

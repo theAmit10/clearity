@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "健身",
+    "health": "健康",
+    "learning": "学习",
+    "work": "工作",
+    "creative": "创意",
+    "music": "音乐与媒体",
+    "money": "理财",
+    "social": "社交",
+    "home": "家居",
+    "travel": "旅行",
+    "tech": "科技",
+    "achievement": "成就"
+  },
   "addHabit": {
     "titleEdit": "编辑习惯",
     "titleNew": "新建习惯",
@@ -202,7 +216,11 @@
     "createCategory": "＋ 创建",
     "createCategoryPro": "＋ 创建 — Pro",
     "saveChanges": "保存更改",
-    "createHabit": "创建习惯"
+    "createHabit": "创建习惯",
+    "seeAll": "查看全部",
+    "allIcons": "所有图标",
+    "searchIcons": "搜索图标",
+    "noIconsFound": "未找到图标"
   },
   "newCategory": {
     "title": "新建分类",

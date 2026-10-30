@@ -16,7 +16,8 @@ import { useGoalStore } from '../store/goalStore';
 import { useHabitStore } from '../store/habitStore';
 import { openPaywall } from '../services/paywallRouter';
 import { getLockedGoalIds } from '../services/proAccess';
-import { HABIT_ICONS } from '../constants/habitIcons';
+import { HABIT_ICONS, getQuickPickIcons } from '../constants/habitIcons';
+import { IconPickerSheet } from '../components/IconPickerSheet';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -85,6 +86,7 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
   const [title, setTitle] = useState(existing?.title ?? '');
   const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
+  const [iconSheetVisible, setIconSheetVisible] = useState(false);
   const [color, setColor] = useState(
     existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? COLORS[0]),
   );
@@ -243,11 +245,22 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
             />
           </Inset>
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            {t('goals.icon')}
-          </Text>
+          <View style={styles.labelRow}>
+            <Text style={[styles.labelInline, { color: theme.colors.textMuted }]}>
+              {t('goals.icon')}
+            </Text>
+            <Pressable
+              onPress={() => setIconSheetVisible(true)}
+              hitSlop={10}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.seeAll, { color: displayColor }]}>
+                {t('addHabit.seeAll')}
+              </Text>
+            </Pressable>
+          </View>
           <View style={styles.row}>
-            {HABIT_ICONS.map(({ key, Icon }) => {
+            {getQuickPickIcons(icon).map(({ key, Icon }) => {
               const selected = icon === key;
               return (
                 <NeumorphicButton
@@ -482,6 +495,17 @@ export default function AddEditGoalScreen({ route, navigation }: any) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <IconPickerSheet
+        visible={iconSheetVisible}
+        selectedKey={icon}
+        accentColor={displayColor}
+        onSelect={key => {
+          setIcon(key);
+          setIconSheetVisible(false);
+        }}
+        onClose={() => setIconSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -503,6 +527,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 22,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 22,
+    marginBottom: 10,
+  },
+  labelInline: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  seeAll: { fontSize: 13, fontWeight: '700', letterSpacing: 0.2, paddingVertical: 5 },
   inputWrap: { paddingHorizontal: 4 },
   input: {
     paddingHorizontal: 14,

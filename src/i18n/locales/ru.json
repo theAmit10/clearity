@@ -177,6 +177,20 @@
     "example2Meta": "Deadline · 3d left",
     "streakDays": "{{count}}-day streak"
   },
+  "iconCategories": {
+    "fitness": "Фитнес",
+    "health": "Здоровье",
+    "learning": "Учёба",
+    "work": "Работа",
+    "creative": "Творчество",
+    "music": "Музыка и медиа",
+    "money": "Деньги",
+    "social": "Общение",
+    "home": "Дом",
+    "travel": "Путешествия",
+    "tech": "Технологии",
+    "achievement": "Достижения"
+  },
   "addHabit": {
     "titleEdit": "Изменить привычку",
     "titleNew": "Новая привычка",
@@ -202,7 +216,11 @@
     "createCategory": "+ Создать",
     "createCategoryPro": "+ Создать — Pro",
     "saveChanges": "Сохранить изменения",
-    "createHabit": "Создать привычку"
+    "createHabit": "Создать привычку",
+    "seeAll": "Смотреть все",
+    "allIcons": "Все иконки",
+    "searchIcons": "Поиск иконок",
+    "noIconsFound": "Иконки не найдены"
   },
   "newCategory": {
     "title": "Новая категория",
