@@ -108,16 +108,24 @@ export default function SettingsScreen({ navigation }: any) {
           {
             text: t('settings.mergeWithCurrent'),
             onPress: () => {
-              mergeHabits(incomingHabits);
-              mergeGoals(incomingGoals);
+              mergeHabits(incomingHabits).catch(err =>
+                logEvent('error', 'Failed to merge habits on import', err),
+              );
+              mergeGoals(incomingGoals).catch(err =>
+                logEvent('error', 'Failed to merge goals on import', err),
+              );
             },
           },
           {
             text: t('settings.replaceEverything'),
             style: 'destructive',
             onPress: () => {
-              replaceAllHabits(incomingHabits);
-              replaceAllGoals(incomingGoals);
+              replaceAllHabits(incomingHabits).catch(err =>
+                logEvent('error', 'Failed to replace habits on import', err),
+              );
+              replaceAllGoals(incomingGoals).catch(err =>
+                logEvent('error', 'Failed to replace goals on import', err),
+              );
             },
           },
         ],

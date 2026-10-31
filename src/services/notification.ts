@@ -1,11 +1,13 @@
 import notifee, {
   AndroidImportance,
+  AuthorizationStatus,
   RepeatFrequency,
   TriggerType,
 } from '@notifee/react-native';
 import type { HabitNotificationConfig, AdminNotificationConfig, GoalNotificationConfig, GoalNotificationKind } from '../types/notification';
 import type { Goal } from '../types/goal';
 import { t } from '../i18n';
+import { logEvent } from './logger';
 
 export const CHANNEL_ID = 'habit_reminders';
 
@@ -19,6 +21,29 @@ export async function setupChannel() {
 
 export async function requestPermission() {
   await notifee.requestPermission();
+}
+
+/**
+ * True only when notifications may actually be scheduled.
+ *
+ * Recent iOS throws `UNErrorDomain: "Repository could not save notification.
+ * Source is not authorized."` from `createTriggerNotification` while the app's
+ * notification authorization is DENIED or NOT_DETERMINED — it rejects instead of
+ * silently no-op'ing. Every schedule path therefore checks this first and skips
+ * rather than letting that error surface as an unhandled rejection.
+ */
+async function isNotificationAuthorized(): Promise<boolean> {
+  try {
+    const { authorizationStatus } = await notifee.getNotificationSettings();
+    return (
+      authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+      authorizationStatus === AuthorizationStatus.PROVISIONAL
+    );
+  } catch (err) {
+    // A failed check must never crash the caller — treat as "not authorized".
+    logEvent('warn', 'Notification authorization check failed', err);
+    return false;
+  }
 }
 
 export function onNotificationEvent(callback: (event: any) => void) {
@@ -41,6 +66,10 @@ export async function scheduleHabitNotification(config: HabitNotificationConfig)
   const notifId = `habit-${config.id}`;
   await notifee.cancelNotification(notifId);
   if (!config.enabled) return;
+  if (!(await isNotificationAuthorized())) {
+    logEvent('info', 'Skipped habit notification — notifications not authorized', { id: config.id });
+    return;
+  }
 
   const now = new Date();
   const scheduled = new Date(now);
@@ -98,6 +127,10 @@ export async function scheduleAdminNotification(config: AdminNotificationConfig)
   const id = `admin-${config.id}`;
   await notifee.cancelNotification(id);
   if (!config.enabled) return;
+  if (!(await isNotificationAuthorized())) {
+    logEvent('info', 'Skipped admin notification — notifications not authorized', { id });
+    return;
+  }
 
   const now = new Date();
   const scheduled = new Date(now);
@@ -167,6 +200,10 @@ export async function scheduleGoalNotification(config: GoalNotificationConfig) {
   await notifee.cancelNotification(notifId);
   if (!config.enabled) return;
   if (config.timestamp <= Date.now()) return;
+  if (!(await isNotificationAuthorized())) {
+    logEvent('info', 'Skipped goal notification — notifications not authorized', { id: config.id });
+    return;
+  }
 
   await notifee.createTriggerNotification(
     {

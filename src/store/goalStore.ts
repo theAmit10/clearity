@@ -316,7 +316,16 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     set({ goals: incoming, goalNotifications: autos });
     persist(incoming);
     persistNotifs(autos);
-    await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+    if (autos.length > 0) {
+      // Prompt once (best-effort) so imported reminders can actually schedule;
+      // if the user denies, scheduling is skipped below instead of throwing.
+      await requestPermissionBestEffort();
+      try {
+        await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+      } catch (err) {
+        logEvent('warn', 'Failed to schedule imported goal reminders', err);
+      }
+    }
     trackEvent('goals_imported', { count: incoming.length, type: 'replace' });
     logEvent('info', 'Goals replaced via import', { count: incoming.length });
   },
@@ -356,7 +365,16 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     set({ goals, goalNotifications });
     persist(goals);
     persistNotifs(goalNotifications);
-    await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+    if (autos.length > 0) {
+      // Prompt once (best-effort) so imported reminders can actually schedule;
+      // if the user denies, scheduling is skipped below instead of throwing.
+      await requestPermissionBestEffort();
+      try {
+        await Promise.all(autos.map(n => scheduleGoalNotification(n)));
+      } catch (err) {
+        logEvent('warn', 'Failed to schedule imported goal reminders', err);
+      }
+    }
     trackEvent('goals_imported', { count: goals.length, type: 'merge' });
     logEvent('info', 'Goals merged via import', { count: goals.length });
   },
