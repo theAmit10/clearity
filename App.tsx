@@ -45,6 +45,7 @@ import {
 import { initRevenueCat } from './src/services/revenueCat';
 import { initI18n, useI18nStore } from './src/i18n';
 import { usePaywallVariantStore } from './src/store/paywallVariantStore';
+import { useAppIconStore } from './src/store/appIconStore';
 import {
   loadOnboardingSeen,
   saveOnboardingSeen,
@@ -69,6 +70,16 @@ function AppContent() {
   // fading video, but the film stays mounted until `onEnd` stops audio.
   const [filmHandoff, setFilmHandoff] = useState(false);
   const { theme } = useTheme();
+  const appIcon = useAppIconStore(s => s.icon);
+  const proExpired = useHabitStore(s => s.proExpired);
+
+  // The dark icon is a Pro perk — a lapsed subscription falls back to the
+  // default icon (mirrors the premium-theme revert in ThemeProvider).
+  useEffect(() => {
+    if (proExpired && appIcon !== 'default') {
+      useAppIconStore.getState().setIcon('default');
+    }
+  }, [proExpired, appIcon]);
 
   useEffect(() => {
     installGlobalErrorHandler();
@@ -76,6 +87,7 @@ function AppContent() {
     initRevenueCat();
     initI18n();
     usePaywallVariantStore.getState().loadVariant();
+    useAppIconStore.getState().loadIcon();
     // Baseline super props for every event; the subscriptions below keep
     // the mutable ones (variant, pro status) correct for the whole session.
     setAnalyticsDefaults({

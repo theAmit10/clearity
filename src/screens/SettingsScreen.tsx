@@ -39,6 +39,10 @@ import {
   FREE_THEMES,
 } from '../constants/appInfo';
 import { useTheme } from '../theme/ThemeProvider';
+import {
+  useAppIconStore,
+  type AppIconName,
+} from '../store/appIconStore';
 import { restorePurchases } from '../services/revenueCat';
 import { openPaywall } from '../services/paywallRouter';
 import { logEvent } from '../services/logger';
@@ -60,6 +64,7 @@ export default function SettingsScreen({ navigation }: any) {
   const mergeGoals = useGoalStore(s => s.mergeGoals);
   const isPro = useHabitStore(s => s.isPro);
   const proExpired = useHabitStore(s => s.proExpired);
+  const appIcon = useAppIconStore(s => s.icon);
   const weekStartsOn = useHabitStore(s => s.weekStartsOn);
   const [busy, setBusy] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -281,6 +286,13 @@ export default function SettingsScreen({ navigation }: any) {
         },
       },
     ]);
+  };
+
+  const handleAppIcon = async (name: AppIconName) => {
+    const applied = await useAppIconStore.getState().setIcon(name);
+    if (applied && appIcon !== name) {
+      trackEvent('app_icon_changed', { icon: name });
+    }
   };
 
   function Section({
@@ -652,6 +664,37 @@ export default function SettingsScreen({ navigation }: any) {
               />
             );
           })}
+        </Section>
+
+        <Section title={t('settings.appIconSection')}>
+          <Text
+            style={[
+              styles.description,
+              { color: theme.colors.iosSecondaryLabel },
+            ]}
+          >
+            {t('settings.appIconDescription')}
+          </Text>
+          <Row
+            label={`${appIcon === 'default' ? '✓ ' : '   '}${t(
+              'themes.light',
+            )}`}
+            onPress={() => handleAppIcon('default')}
+          />
+          <Row
+            label={`${appIcon === 'dark' ? '✓ ' : '   '}${t('themes.dark')}`}
+            rightContent={isPro ? null : proBadge}
+            onPress={() => {
+              if (isPro) {
+                handleAppIcon('dark');
+              } else {
+                openPaywall(navigation, {
+                  ...paywallBase,
+                  source: 'settings_icon',
+                });
+              }
+            }}
+          />
         </Section>
 
         <Section title={t('settings.communitySection')}>

@@ -330,6 +330,8 @@
     "notificationsDescription": "각 습관의 일일 리마인더와 관리자 수준 알림 일정을 설정하세요.",
     "notificationSettings": "알림 설정",
     "themeSection": "테마",
+    "appIconSection": "앱 아이콘",
+    "appIconDescription": "홈화면에 표시될 Habitic 아이콘을 선택하세요. 다크 뉴모픽 아이콘은 Pro에 포함되어 있습니다.",
     "communitySection": "커뮤니티 및 피드백",
     "buildTogether": "함께 만들어요",
     "sendFeedback": "피드백 보내기",

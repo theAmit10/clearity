@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { themes, type Theme, type ThemeName } from './themes';
 import { FREE_THEMES } from '../constants/appInfo';
 import { useHabitStore } from '../store/habitStore';
+import { hideLaunchOverlay } from '../store/appIconStore';
 
 const STORAGE_KEY = '@theme';
 
@@ -22,13 +23,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeName, setThemeName] = useState<ThemeName>('light');
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(stored => {
-      if (stored && stored in themes) {
-        setThemeName(stored as ThemeName);
-      } else if (systemScheme === 'dark') {
-        setThemeName('dark');
-      }
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then(stored => {
+        if (stored && stored in themes) {
+          setThemeName(stored as ThemeName);
+        } else if (systemScheme === 'dark') {
+          setThemeName('dark');
+        }
+      })
+      .finally(() => {
+        // Themed root is about to paint — retire the native launch overlay
+        // (installed by AppDelegate when the dark icon is active).
+        hideLaunchOverlay();
+      });
   }, [systemScheme]);
 
   const setTheme = useCallback(async (name: ThemeName) => {

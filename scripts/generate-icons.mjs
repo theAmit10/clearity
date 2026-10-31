@@ -5,8 +5,9 @@
  *   npm run icons:generate
  *
  * Reads the icon catalog in src/constants/habitIcons.tsx (key -> heroicon
- * component name), forks the geometry out of react-native-heroicons, applies
- * this app's custom stroke spec, and emits:
+ * component name), forks the geometry out of react-native-heroicons' solid
+ * set, applies this app's custom style spec (solid fill, heavy strokes for
+ * figure/line icons), and emits:
  *
  *   1. src/constants/iconShapes.json    — key -> shape data (widget pipeline + tests)
  *   2. src/constants/generatedIcons.tsx — named SVG components imported by habitIcons.tsx
@@ -18,9 +19,10 @@
  * draw the identical glyph from the same data. The in-app copy renders the
  * same shapes through react-native-svg.
  *
- * Icon geometry is forked from Heroicons (MIT, https://github.com/tailwindlabs/heroicons);
- * the stroke spec below is what makes the set ours. Re-run after editing the
- * catalog or STYLE — __tests__/widgetIconParity.test.ts fails on drift.
+ * Icon geometry is forked from Heroicons' solid set (MIT,
+ * https://github.com/tailwindlabs/heroicons); the style spec below is what
+ * makes the set ours. Re-run after editing the catalog or STYLE —
+ * __tests__/widgetIconParity.test.ts fails on drift.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,16 +35,22 @@ const root = path.join(scriptsDir, '..');
 // ---------------------------------------------------------------------------
 // Custom style spec — the ONE definition used by both the in-app components
 // and the widget PNGs. Changing this changes every icon everywhere.
+//
+// Solid set: glyphs are filled silhouettes (Heroicons `solid` geometry), EXCEPT
+// stroke-mode icons (stick figures + line-built objects like bikes) which keep
+// strokes — heavy round strokes are what makes a figure read as solid at
+// widget size instead of a thin wireframe.
 // ---------------------------------------------------------------------------
 const STYLE = {
   viewBox: '0 0 24 24',
-  /** Stroke weight; matches what the app renders today (Heroicons default). */
-  strokeWidth: 1.5,
+  /** Stroke weight for stroke-mode icons (figures, line-built objects). */
+  strokeWidth: 3,
   strokeLinecap: 'round',
   strokeLinejoin: 'round',
-  fill: 'none',
+  /** Solid set: filled silhouettes by default. */
+  fill: 'currentColor',
   /** Widgets rasterize white and tint with the habit color natively. */
-  widgetStroke: '#FFFFFF',
+  widgetFill: '#FFFFFF',
 };
 
 const IOS_IMAGE_SIZES = { '1x': 24, '2x': 48, '3x': 72 }; // logical 24pt
@@ -180,11 +188,26 @@ function normalizeChildren(raw, name) {
 // Hand-drawn custom icons (scripts/custom-icons.json) — glyphs heroicons
 // doesn't ship (dumbbell, footprints, droplet, pill…). Loaded once and
 // validated so bad authoring fails loudly at generate time, not at runtime.
+//
+// Each entry is either
+//   [ ...nodes ]                      -> fill mode (solid silhouette)
+//   { "mode": "stroke", "nodes": [...] } -> stroke mode (figures, line-built
+//                                           objects; rendered with STYLE.strokeWidth)
 function loadCustomIcons() {
   if (!fs.existsSync(CUSTOM_ICONS_PATH)) return {};
   const parsed = JSON.parse(fs.readFileSync(CUSTOM_ICONS_PATH, 'utf8'));
   const icons = parsed?.icons ?? {};
-  for (const [name, nodes] of Object.entries(icons)) {
+  const normalized = {};
+  for (const [name, raw] of Object.entries(icons)) {
+    let mode = 'fill';
+    let nodes = raw;
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      mode = raw.mode === 'stroke' ? 'stroke' : raw.mode === undefined ? 'fill' : raw.mode;
+      if (mode !== 'fill' && mode !== 'stroke') {
+        throw new Error(`custom-icons.json: ${name} has unknown mode "${raw.mode}"`);
+      }
+      nodes = raw.nodes;
+    }
     if (!Array.isArray(nodes) || nodes.length === 0) {
       throw new Error(`custom-icons.json: ${name} has no shape nodes`);
     }
@@ -198,8 +221,9 @@ function loadCustomIcons() {
         throw new Error(`custom-icons.json: ${name} Path node is missing "d"`);
       }
     }
+    normalized[name] = { mode, nodes };
   }
-  return icons;
+  return normalized;
 }
 
 const CUSTOM_ICONS = loadCustomIcons();
@@ -211,12 +235,12 @@ function extractIcon(name) {
 
   // Hand-drawn icons win over heroicons (and reserve names freely).
   if (CUSTOM_ICONS[name]) {
-    const shapes = CUSTOM_ICONS[name];
-    extractCache.set(name, shapes);
-    return shapes;
+    const rec = CUSTOM_ICONS[name];
+    extractCache.set(name, rec);
+    return rec;
   }
 
-  const file = require.resolve(`react-native-heroicons/outline/${name}`);
+  const file = require.resolve(`react-native-heroicons/solid/${name}`);
   const mod = require(file);
   const Component = mod?.default ?? mod;
   if (typeof Component !== 'function') {
@@ -235,8 +259,9 @@ function extractIcon(name) {
 
   const shapes = normalizeChildren(el.props.children, name);
   if (shapes.length === 0) throw new Error(`${name}: no shapes extracted`);
-  extractCache.set(name, shapes);
-  return shapes;
+  const rec = { mode: 'fill', nodes: shapes };
+  extractCache.set(name, rec);
+  return rec;
 }
 
 // ---------------------------------------------------------------------------
@@ -245,9 +270,12 @@ function extractIcon(name) {
 function writeShapesJson(entries) {
   const icons = {};
   const components = {};
+  const iconModes = {};
   for (const entry of entries) {
-    icons[entry.key] = extractIcon(entry.icon);
+    const rec = extractIcon(entry.icon);
+    icons[entry.key] = rec.nodes;
     components[entry.key] = entry.icon;
+    iconModes[entry.key] = rec.mode;
   }
   const payload = {
     $comment:
@@ -260,6 +288,7 @@ function writeShapesJson(entries) {
       fill: STYLE.fill,
     },
     components,
+    iconModes,
     icons,
   };
   fs.writeFileSync(SHAPES_JSON_PATH, `${JSON.stringify(payload, null, 2)}\n`);
@@ -305,24 +334,27 @@ function writeGeneratedTsx(entries, imported) {
   }
 
   const bodies = new Map();
+  const modes = new Map();
   const usedTags = new Set();
   for (const name of uniqueNames) {
-    const shapes = extractIcon(name);
-    bodies.set(name, shapes);
+    const rec = extractIcon(name);
+    bodies.set(name, rec.nodes);
+    modes.set(name, rec.mode);
     const collectTags = nodes =>
       nodes.forEach(n => {
         usedTags.add(n.t);
         if (n.children) collectTags(n.children);
       });
-    collectTags(shapes);
+    collectTags(rec.nodes);
   }
 
   const svgImports = [...usedTags].sort();
   const header = `// AUTO-GENERATED FILE — do not edit by hand. Run \`npm run icons:generate\`.
 //
-// Habit/goal icon set. Geometry forked from Heroicons (MIT, Tailwind Labs —
-// https://github.com/tailwindlabs/heroicons) and restyled with this app's own
-// stroke spec (STROKE_WIDTH). The same spec feeds the widget PNG export in
+// Habit/goal icon set — SOLID style. Geometry forked from Heroicons' solid
+// set (MIT, Tailwind Labs — https://github.com/tailwindlabs/heroicons); most
+// glyphs are filled silhouettes, while figure/line icons (STROKE_WIDTH) keep
+// heavy round strokes. The same spec feeds the widget PNG export in
 // scripts/generate-icons.mjs, so the iOS/Android widgets draw the identical
 // glyph the app renders here.
 import Svg, { ${svgImports.join(', ')} } from 'react-native-svg';
@@ -332,24 +364,31 @@ export type GeneratedIconProps = {
   color?: string;
 };
 
-/** Stroke weight (Heroicons default is 1.5). Regenerated from
- *  scripts/generate-icons.mjs — keep via \`npm run icons:generate\`. */
+/** Stroke weight for stroke-mode icons (figures, line-built objects).
+ *  Regenerated from scripts/generate-icons.mjs — keep via \`npm run icons:generate\`. */
 const STROKE_WIDTH = ${STYLE.strokeWidth};
 `;
 
   const parts = [header];
   for (const name of uniqueNames) {
     const shapes = bodies.get(name);
+    const mode = modes.get(name);
     const body = shapes.map(n => emitJsxNode(n, 4)).join('\n');
+    const rootAttrs =
+      mode === 'stroke'
+        ? `    fill="none"\n` +
+          `    stroke="currentColor"\n` +
+          `    strokeWidth={STROKE_WIDTH}\n` +
+          `    strokeLinecap="${STYLE.strokeLinecap}"\n` +
+          `    strokeLinejoin="${STYLE.strokeLinejoin}"\n`
+        : `    fill="currentColor"\n`;
     parts.push(
       `export const ${name} = ({ size = 24, color }: GeneratedIconProps) => (\n` +
         `  <Svg\n` +
         `    width={size}\n` +
         `    height={size}\n` +
         `    viewBox="${STYLE.viewBox}"\n` +
-        `    fill="${STYLE.fill}"\n` +
-        `    stroke="currentColor"\n` +
-        `    strokeWidth={STROKE_WIDTH}\n` +
+        rootAttrs +
         `    color={color}\n` +
         `  >\n` +
         `${body}\n` +
@@ -388,19 +427,31 @@ function svgNodeMarkup(node) {
   const tag = node.t[0].toLowerCase() + node.t.slice(1);
   const { t: _tag, children, ...attrs } = node;
   const attrText = Object.entries(attrs)
-    .map(([key, value]) => `${camelToKebab(key)}="${escapeAttr(value)}"`)
+    // Custom icons author colors as `currentColor` (the app's semantic);
+    // the widget raster is a white stencil tinted natively, so resolve it here.
+    .map(([key, value]) => {
+      const rendered = String(value).replace(
+        /currentColor/g,
+        STYLE.widgetFill,
+      );
+      return `${camelToKebab(key)}="${escapeAttr(rendered)}"`;
+    })
     .join(' ');
   const open = attrText ? `<${tag} ${attrText}` : `<${tag}`;
   if (!children || children.length === 0) return `${open} />`;
   return `${open}>\n${children.map(svgNodeMarkup).join('\n')}\n</${tag}>`;
 }
 
-function svgMarkup(shapes, px) {
+function svgMarkup(shapes, px, mode) {
+  const root =
+    mode === 'stroke'
+      ? `fill="none" stroke="${STYLE.widgetFill}" ` +
+        `stroke-width="${STYLE.strokeWidth}" stroke-linecap="${STYLE.strokeLinecap}" ` +
+        `stroke-linejoin="${STYLE.strokeLinejoin}"`
+      : `fill="${STYLE.widgetFill}"`;
   const head =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${STYLE.viewBox}" ` +
-    `width="${px}" height="${px}" fill="${STYLE.fill}" stroke="${STYLE.widgetStroke}" ` +
-    `stroke-width="${STYLE.strokeWidth}" stroke-linecap="${STYLE.strokeLinecap}" ` +
-    `stroke-linejoin="${STYLE.strokeLinejoin}">`;
+    `width="${px}" height="${px}" ${root}>`;
   return `${head}\n${shapes.map(svgNodeMarkup).join('\n')}\n</svg>`;
 }
 
@@ -425,10 +476,10 @@ function iosAssetName(key) {
 async function writeWidgetPngs(entries) {
   const { Resvg } = await import('@resvg/resvg-js');
 
-  const render = (shapes, px) =>
+  const render = (shapes, px, mode) =>
     // Icons are pure vector paths — skip font loading (it would enumerate
     // every system font per Resvg instance and dominate the runtime).
-    new Resvg(svgMarkup(shapes, px), {
+    new Resvg(svgMarkup(shapes, px, mode), {
       font: { loadSystemFonts: false },
     })
       .render()
@@ -451,7 +502,8 @@ async function writeWidgetPngs(entries) {
   }
 
   for (const entry of entries) {
-    const shapes = extractIcon(entry.icon);
+    const rec = extractIcon(entry.icon);
+    const shapes = rec.nodes;
 
     // iOS imageset (asset names may contain hyphens; no sanitizing needed)
     const assetName = iosAssetName(entry.key);
@@ -462,7 +514,10 @@ async function writeWidgetPngs(entries) {
     for (const [scale, px] of Object.entries(IOS_IMAGE_SIZES)) {
       const filename =
         scale === '1x' ? `${assetName}.png` : `${assetName}@${scale}.png`;
-      fs.writeFileSync(path.join(imagesetDir, filename), render(shapes, px));
+      fs.writeFileSync(
+        path.join(imagesetDir, filename),
+        render(shapes, px, rec.mode),
+      );
       iosImages.push({ idiom: 'universal', filename, scale });
       pngCount += 1;
     }
@@ -476,7 +531,7 @@ async function writeWidgetPngs(entries) {
     androidFiles.add(`${resName}.png`);
     fs.writeFileSync(
       path.join(ANDROID_DRAWABLE_DIR, `${resName}.png`),
-      render(shapes, ANDROID_IMAGE_SIZE),
+      render(shapes, ANDROID_IMAGE_SIZE, rec.mode),
     );
     pngCount += 1;
   }

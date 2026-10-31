@@ -330,6 +330,8 @@
     "notificationsDescription": "Imposta promemoria giornalieri per ogni abitudine e configura notifiche programmate a livello amministratore.",
     "notificationSettings": "Impostazioni notifiche",
     "themeSection": "Tema",
+    "appIconSection": "Icona dell'app",
+    "appIconDescription": "Scegli come appare Habitic sulla schermata Home. L'icona Neumorphic scura è inclusa in Pro.",
     "communitySection": "Community e feedback",
     "buildTogether": "Costruiamo insieme",
     "sendFeedback": "Invia feedback",

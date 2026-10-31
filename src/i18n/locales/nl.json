@@ -330,6 +330,8 @@
     "notificationsDescription": "Stel dagelijkse herinneringen in voor elke gewoonte en configureer geplande meldingen op beheerdersniveau.",
     "notificationSettings": "Meldingsinstellingen",
     "themeSection": "Thema",
+    "appIconSection": "App-icoon",
+    "appIconDescription": "Kies hoe Habitic op je startscherm verschijnt. Het donkere Neumorphic-icoon is inbegrepen bij Pro.",
     "communitySection": "Community & feedback",
     "buildTogether": "Laten we samen bouwen",
     "sendFeedback": "Feedback versturen",

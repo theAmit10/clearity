@@ -330,6 +330,8 @@
     "notificationsDescription": "اضبط تذكيرات يومية لكل عادة وقم بتهيئة إشعارات مجدولة على مستوى الإدارة.",
     "notificationSettings": "إعدادات الإشعارات",
     "themeSection": "السمة",
+    "appIconSection": "أيقونة التطبيق",
+    "appIconDescription": "اختر كيف يبدو Habitic على شاشتك الرئيسية. أيقونة Neumorphic الداكنة متضمنة في Pro.",
     "communitySection": "المجتمع والملاحظات",
     "buildTogether": "لنبنِ سويًا",
     "sendFeedback": "إرسال ملاحظات",

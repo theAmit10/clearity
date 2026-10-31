@@ -330,6 +330,8 @@
     "notificationsDescription": "Lege tägliche Erinnerungen für jede Gewohnheit fest und konfiguriere geplante Admin-Benachrichtigungen.",
     "notificationSettings": "Benachrichtigungseinstellungen",
     "themeSection": "Design",
+    "appIconSection": "App-Symbol",
+    "appIconDescription": "Lege fest, wie Habitic auf dem Startbildschirm erscheint. Das Dark-Neumorphic-Symbol ist in Pro enthalten.",
     "communitySection": "Community & Feedback",
     "buildTogether": "Lass uns gemeinsam bauen",
     "sendFeedback": "Feedback senden",

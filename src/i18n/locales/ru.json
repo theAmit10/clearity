@@ -330,6 +330,8 @@
     "notificationsDescription": "Настройте ежедневные напоминания для каждой привычки и запланированные уведомления на уровне администратора.",
     "notificationSettings": "Настройки уведомлений",
     "themeSection": "Тема",
+    "appIconSection": "Иконка приложения",
+    "appIconDescription": "Выберите, как Habitic отображается на главном экране. Тёмная иконка Neumorphic входит в Pro.",
     "communitySection": "Сообщество и отзывы",
     "buildTogether": "Давайте развиваться вместе",
     "sendFeedback": "Отправить отзыв",

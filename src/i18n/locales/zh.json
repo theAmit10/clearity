@@ -330,6 +330,8 @@
     "notificationsDescription": "为每个习惯设置每日提醒，并配置管理员级别的定时通知。",
     "notificationSettings": "通知设置",
     "themeSection": "主题",
+    "appIconSection": "应用图标",
+    "appIconDescription": "选择 Habitic 在主屏幕上的显示图标。深色 Neumorphic 图标包含在 Pro 中。",
     "communitySection": "社区与反馈",
     "buildTogether": "一起共建",
     "sendFeedback": "发送反馈",

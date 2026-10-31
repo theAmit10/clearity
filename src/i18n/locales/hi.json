@@ -330,6 +330,8 @@
     "notificationsDescription": "हर आदत के लिए दैनिक रिमाइंडर सेट करें और एडमिन-स्तरीय शेड्यूल्ड सूचनाएं कॉन्फ़िगर करें।",
     "notificationSettings": "सूचना सेटिंग्स",
     "themeSection": "थीम",
+    "appIconSection": "ऐप आइकन",
+    "appIconDescription": "चुनें कि Habitic होम स्क्रीन पर कैसे दिखे। डार्क नियोमॉर्फिक आइकन Pro के साथ शामिल है।",
     "communitySection": "समुदाय और फीडबैक",
     "buildTogether": "आइए साथ मिलकर बनाएं",
     "sendFeedback": "फीडबैक भेजें",

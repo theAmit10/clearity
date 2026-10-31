@@ -330,6 +330,8 @@
     "notificationsDescription": "Configura recordatorios diarios para cada hábito y notificaciones programadas a nivel de administrador.",
     "notificationSettings": "Ajustes de notificaciones",
     "themeSection": "Tema",
+    "appIconSection": "Icono de la app",
+    "appIconDescription": "Elige cómo aparece Habitic en tu pantalla de inicio. El icono Neumorphic oscuro está incluido en Pro.",
     "communitySection": "Comunidad y comentarios",
     "buildTogether": "Construyamos juntos",
     "sendFeedback": "Enviar comentarios",

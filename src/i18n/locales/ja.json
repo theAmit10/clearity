@@ -330,6 +330,8 @@
     "notificationsDescription": "各習慣のデイリーリマインダーや、管理者レベルの通知スケジュールを設定します。",
     "notificationSettings": "通知設定",
     "themeSection": "テーマ",
+    "appIconSection": "アプリアイコン",
+    "appIconDescription": "Habitic のホーム画面表示アイコンを選択できます。ダークネウモフィックアイコンは Pro に含まれます。",
     "communitySection": "コミュニティとフィードバック",
     "buildTogether": "一緒に作りましょう",
     "sendFeedback": "フィードバックを送る",

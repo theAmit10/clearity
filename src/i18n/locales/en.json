@@ -330,6 +330,8 @@
     "notificationsDescription": "Set daily reminders for each habit and configure admin-level scheduled notifications.",
     "notificationSettings": "Notification settings",
     "themeSection": "Theme",
+    "appIconSection": "App Icon",
+    "appIconDescription": "Choose how Habitic appears on your Home Screen. The Dark Neumorphic icon is included with Pro.",
     "communitySection": "Community & Feedback",
     "buildTogether": "Let's build together",
     "sendFeedback": "Send feedback",
