@@ -2387,6 +2387,42 @@ export const BikeIcon = ({ size = 24, color }: GeneratedIconProps) => (
   </Svg>
 );
 
+export const BoxingIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 11.5c0-3 2.2-5.2 5-5.2s5 2.2 5 5.2v2.3c0 2.4-2.2 4.3-5 4.3s-5-1.9-5-4.3v-2.3Z"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 12.2H5.6a1.7 1.7 0 0 0 0 3.4H7"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.4 18.1v.9a1.8 1.8 0 0 0 1.8 1.8h1.6a1.8 1.8 0 0 0 1.8-1.8v-.9"} />
+  </Svg>
+);
+
+export const ClimbingIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M17 2.5 15.6 7l1.6 4.5-1.4 4.5L17 21.5"} />
+    <Circle cx={10} cy={6.2} r={1.8} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.2 8v4.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.1 8.9 14.9 7.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.1 8.9 13.8 11.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.2 12.6 13.2 14.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.2 12.6 7.6 15.8"} />
+  </Svg>
+);
+
 export const CoffeeIcon = ({ size = 24, color }: GeneratedIconProps) => (
   <Svg
     width={size}
@@ -2401,6 +2437,25 @@ export const CoffeeIcon = ({ size = 24, color }: GeneratedIconProps) => (
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M16.5 11.2h1.6a2.9 2.9 0 0 1 0 5.8h-1.4"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9 6.8C8 5.7 10 5.1 9 4"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M13 6.8c-1-1.1 1-1.7 0-2.8"} />
+  </Svg>
+);
+
+export const DancingIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={12.6} cy={4.4} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11.9 6.2 11 11.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11.6 7.6 7.8 5.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11.6 7.6l3.8 2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11 11.4 8.4 16.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11 11.4l4.2 4"} />
   </Svg>
 );
 
@@ -2472,6 +2527,27 @@ export const FootprintsIcon = ({ size = 24, color }: GeneratedIconProps) => (
   </Svg>
 );
 
+export const HikingIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={10.4} cy={4.2} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.6 6.1V11.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10.4 7.9 16.2 8.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M16.4 5.4V19.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10 11.6 12.8 15.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12.8 15.4 12.4 19"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10 11.6 7.6 16"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7.6 16 7 19.2"} />
+  </Svg>
+);
+
 export const HourglassIcon = ({ size = 24, color }: GeneratedIconProps) => (
   <Svg
     width={size}
@@ -2488,6 +2564,80 @@ export const HourglassIcon = ({ size = 24, color }: GeneratedIconProps) => (
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M18 3c0 5-2.6 7.9-6 9 3.4 1.1 6 4 6 9"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.5 6h5"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.6 18.6c.7-.9 1.5-1.3 2.4-1.3s1.7.4 2.4 1.3"} />
+  </Svg>
+);
+
+export const JumpRopeIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={12} cy={3.8} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 5.7V10.3"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 7.2 8.4 9.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 7.2l3.6 2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 10.3 10.4 13.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 10.3l1.6 3.3"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.6 9.6C6.4 16 8.8 20.4 12 20.4s5.6-4.4 5.4-10.8"} />
+  </Svg>
+);
+
+export const JumpingJackIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={12} cy={3.9} r={2} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 5.9V11"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 7 7.4 4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 7l4.6-3"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 11 7.6 19"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 11l4.4 8"} />
+  </Svg>
+);
+
+export const KettlebellIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8.2 8.6h7.6a4 4 0 0 1 3.9 4.9l-1.1 4.8a2.8 2.8 0 0 1-2.7 2.4H8.1a2.8 2.8 0 0 1-2.7-2.4l-1.1-4.8a4 4 0 0 1 3.9-4.9Z"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9 8.6c-.2-2.9 1.2-4.9 3-4.9s3.2 2 3 4.9"} />
+  </Svg>
+);
+
+export const LungeIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={12} cy={3.8} r={2} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 5.8V10.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 10.8 16.4 13.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M16.4 13.6V18"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M14.9 18.4h3"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 10.8 8 17"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.3 17.4h3.2"} />
   </Svg>
 );
 
@@ -2518,13 +2668,13 @@ export const MeditationIcon = ({ size = 24, color }: GeneratedIconProps) => (
     strokeWidth={STROKE_WIDTH}
     color={color}
   >
-    <Circle cx={12} cy={4.8} r={2} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 6.8v5.4"} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 8.8c-1.5 1.2-3 3.2-4.2 6.4"} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 8.8c1.5 1.2 3 3.2 4.2 6.4"} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.5 18.5c1.5-2.5 3.5-3.8 5.5-3.8s4 1.3 5.5 3.8"} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.5 18.5h11"} />
-    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M10 18.5c.8-.7 3.2-.7 4 0"} />
+    <Circle cx={12} cy={4.6} r={2} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 6.6V13"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 8.6C10.3 9.8 9.1 12.4 8.6 15.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 8.6C13.7 9.8 14.9 12.4 15.4 15.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 18.8C7.8 15.6 9.6 14 12 14C14.4 14 16.2 15.6 17 18.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 18.8H17"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.4 18.8C10.4 17.3 13.6 17.3 14.6 18.8"} />
   </Svg>
 );
 
@@ -2564,6 +2714,66 @@ export const PiggyBankIcon = ({ size = 24, color }: GeneratedIconProps) => (
   </Svg>
 );
 
+export const PlankIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={4.8} cy={10.2} r={1.7} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.4 10.9 18.6 14.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 11.9 7.3 17.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7.3 17.8H11.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M18.6 14.2 19.9 17.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M19.2 17.8H21"} />
+  </Svg>
+);
+
+export const PullupIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M3.5 4.5H20.5"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8 4.5v1.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M16 4.5v1.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8 6.1 10 9.5"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M16 6.1 14 9.5"} />
+    <Circle cx={12} cy={8.6} r={2} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 10.6V16"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 16 9.5 19"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 16l2.5 3"} />
+  </Svg>
+);
+
+export const PushupIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={4.6} cy={8.2} r={1.8} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.3 9.4H15.5"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M15.5 9.4 19.6 14.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7.5 9.4 7.9 17.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M19.6 14.6 20.4 17.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M3 18.2H21"} />
+  </Svg>
+);
+
 export const RunIcon = ({ size = 24, color }: GeneratedIconProps) => (
   <Svg
     width={size}
@@ -2579,6 +2789,63 @@ export const RunIcon = ({ size = 24, color }: GeneratedIconProps) => (
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11 13.2 7.8 16.2 5.2 13.8"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M14 9.8l2.9 1.7-1 2.5"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M13.4 10.6 10.6 12.2 9 10.6"} />
+  </Svg>
+);
+
+export const SitupIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={5.6} cy={7.8} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M6.9 9.4 12 16.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 16.8 18.5 10.5"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8.3 11.3 11.4 10.6"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M4 19H20"} />
+  </Svg>
+);
+
+export const SquatIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={11} cy={4.2} r={2} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M7 7.6H17"} />
+    <Circle cx={5.8} cy={7.6} r={1.5} />
+    <Circle cx={18.2} cy={7.6} r={1.5} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M11 6.3 9.5 12.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.5 12.2 15 12.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M15 12.8V17.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M13.4 18.2H16.6"} />
+  </Svg>
+);
+
+export const StretchIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={8.2} cy={6.3} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9 8.1C10.6 9.6 12 11.2 12.5 13.2"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M9.9 9.9 10.7 16.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12.5 13.2 11.4 18.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12.5 13.2 14 18.4"} />
   </Svg>
 );
 
@@ -2598,6 +2865,25 @@ export const StopwatchIcon = ({ size = 24, color }: GeneratedIconProps) => (
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M17.4 8.9 19 7.3"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 14V9.8"} />
     <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M12 14l2.8 1.7"} />
+  </Svg>
+);
+
+export const SwimmingIcon = ({ size = 24, color }: GeneratedIconProps) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={STROKE_WIDTH}
+    color={color}
+  >
+    <Circle cx={15.8} cy={8.6} r={1.9} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M14.2 7.2C12 4.6 8.6 3.9 5.8 5.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M14.2 10.4 8 12.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8 12.4 4.4 11.8"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M8 12.4 5 14.4"} />
+    <Path strokeLinecap={"round"} strokeLinejoin={"round"} d={"M1.8 17.8c1.7-1.3 3.6-1.3 5.3 0s3.6 1.3 5.3 0 3.6-1.3 5.3 0 3.6 1.3 5.3 0"} />
   </Svg>
 );
 

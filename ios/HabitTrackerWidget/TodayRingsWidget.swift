@@ -93,10 +93,6 @@ struct RingsEntryView: View {
   var entry: RingsEntry
   @Environment(\.widgetFamily) var family
 
-  private var columns: [GridItem] {
-    Array(repeating: GridItem(.flexible(), spacing: 12), count: 5)
-  }
-
   /// Floating black card: rounded on top, square on the bottom.
   /// Inset from the widget edges so the system's outer corner mask
   /// doesn't swallow the custom top radius.
@@ -136,27 +132,48 @@ struct RingsEntryView: View {
             .foregroundColor(Color(hex: "#9E9E9E"))
         }
       } else {
-        LazyVGrid(columns: columns, spacing: 16) {
-          ForEach(entry.rings.prefix(10), id: \.id) { ring in
-            RingCell(ring: ring, showName: family == .systemLarge)
+        // Measure the real widget width and size the rings to fill it, instead
+        // of pinning them to a fixed diameter that leaves dead space at the
+        // edges on wider phones. Height-capped so two rows never overflow.
+        GeometryReader { geo in
+          let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
+          let rowSpacing: CGFloat = 16
+          let gridVPadding: CGFloat = 20 // .padding(.vertical, 10) above + below
+          let labelAllowance: CGFloat = family == .systemLarge ? 16 : 0
+          let widthPerRing = (geo.size.width - 4 * 8) / 5
+          let heightPerRing =
+            (geo.size.height - gridVPadding - rowSpacing - labelAllowance * 2) / 2
+          let ringSize = max(36, min(widthPerRing, heightPerRing))
+
+          LazyVGrid(columns: columns, spacing: rowSpacing) {
+            ForEach(entry.rings.prefix(10), id: \.id) { ring in
+              RingCell(ring: ring, size: ringSize, showName: family == .systemLarge)
+            }
           }
+          .padding(.vertical, 10)
+          .frame(width: geo.size.width, alignment: .center)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 12)
       }
     }
-    .padding(7)
+    .padding(4)
     .containerBackground(.black, for: .widget)
   }
 }
 
 struct RingCell: View {
   let ring: RingsSnapshotHabit
+  /// Ring diameter in points. The grid computes this from the widget's actual
+  /// width so the rings fill the card instead of sitting at a fixed size.
+  var size: CGFloat = 46
   var showName: Bool = false
 
   private var ringColor: Color {
     Color(hex: ring.colorHex) ?? Color(hex: "#E8E8E8")!
   }
+
+  /// ~10% of the diameter — matches the reference stroke weight and scales up
+  /// with the ring so larger cells don't look thin-rimmed.
+  private var stroke: CGFloat { size * 0.10 }
 
   var body: some View {
     Button(intent: ToggleHabitIntent(habitId: ring.id)) {
@@ -164,14 +181,14 @@ struct RingCell: View {
         ZStack {
           // Track
           Circle()
-            .stroke(ringColor.opacity(0.28), lineWidth: 5)
+            .stroke(ringColor.opacity(0.28), lineWidth: stroke)
           // Progress
           if ring.progress > 0 {
             Circle()
               .trim(from: 0, to: min(1, max(ring.progress, 0.03)))
               .stroke(
                 ringColor,
-                style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                style: StrokeStyle(lineWidth: stroke, lineCap: .round)
               )
               .rotationEffect(.degrees(-90))
           }
@@ -183,11 +200,11 @@ struct RingCell: View {
               .renderingMode(.template)
               .resizable()
               .scaledToFit()
-              .frame(width: 30, height: 30)
+              .frame(width: size * 0.58, height: size * 0.58)
               .foregroundColor(ring.done ? ringColor : ringColor.opacity(0.85))
           } else {
             Text(ring.name.first.map { String($0).uppercased() } ?? "•")
-              .font(.system(size: 16, weight: .bold, design: .rounded))
+              .font(.system(size: size * 0.35, weight: .bold, design: .rounded))
               .foregroundColor(ringColor)
           }
           // Done veil
@@ -196,7 +213,7 @@ struct RingCell: View {
               .fill(ringColor.opacity(0.12))
           }
         }
-        .frame(width: 46, height: 46)
+        .frame(width: size, height: size)
         if showName {
           Text(ring.name)
             .font(.system(size: 9, weight: .medium, design: .rounded))
