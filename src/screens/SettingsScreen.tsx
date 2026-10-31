@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
+  Pressable,
   TouchableHighlight,
   StyleSheet,
   Alert,
@@ -23,6 +25,7 @@ import { ProUpsellCard } from '../components/ProUpsellCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestReview } from 'react-native-store-review';
 import LockClosedIcon from 'react-native-heroicons/outline/LockClosedIcon';
+import CheckIcon from 'react-native-heroicons/outline/CheckIcon';
 import { useHabitStore } from '../store/habitStore';
 import { useGoalStore } from '../store/goalStore';
 import { exportHabits, pickAndParseImportFile } from '../services/importExport';
@@ -50,7 +53,30 @@ import {
   trackEvent,
   trackSubscriptionActivated,
 } from '../services/analytics';
-import { useTranslation, useI18nStore } from '../i18n';
+import { useTranslation, useI18nStore, type TranslationKey } from '../i18n';
+
+/**
+ * Home Screen icon choices shown as visual tiles in Settings. The light
+ * artwork is the app logo already shipped for upsell/paywall; the dark one is
+ * downscaled from the AppIcon-Dark asset catalog (xcassets images cannot be
+ * require()'d from JS).
+ */
+const APP_ICON_OPTIONS: {
+  name: AppIconName;
+  source: number;
+  labelKey: TranslationKey;
+}[] = [
+  {
+    name: 'default',
+    source: require('../assets/app-logo.png'),
+    labelKey: 'themes.light',
+  },
+  {
+    name: 'dark',
+    source: require('../assets/app-icon-dark.png'),
+    labelKey: 'themes.dark',
+  },
+];
 
 export default function SettingsScreen({ navigation }: any) {
   const { t } = useTranslation();
@@ -683,26 +709,78 @@ export default function SettingsScreen({ navigation }: any) {
           >
             {t('settings.appIconDescription')}
           </Text>
-          <Row
-            label={`${appIcon === 'default' ? '✓ ' : '   '}${t(
-              'themes.light',
-            )}`}
-            onPress={() => handleAppIcon('default')}
-          />
-          <Row
-            label={`${appIcon === 'dark' ? '✓ ' : '   '}${t('themes.dark')}`}
-            rightContent={isPro ? null : proBadge}
-            onPress={() => {
-              if (isPro) {
-                handleAppIcon('dark');
-              } else {
-                openPaywall(navigation, {
-                  ...paywallBase,
-                  source: 'settings_icon',
-                });
-              }
-            }}
-          />
+          <View style={styles.iconStrip}>
+            {APP_ICON_OPTIONS.map(option => {
+              const active = appIcon === option.name;
+              const locked = option.name === 'dark' && !isPro;
+              return (
+                <Pressable
+                  key={option.name}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(option.labelKey)}
+                  accessibilityState={{ selected: active }}
+                  style={({ pressed }) => [
+                    styles.iconTile,
+                    pressed && styles.iconTilePressed,
+                  ]}
+                  onPress={() => {
+                    if (locked) {
+                      openPaywall(navigation, {
+                        ...paywallBase,
+                        source: 'settings_icon',
+                      });
+                    } else {
+                      handleAppIcon(option.name);
+                    }
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.iconImageWrap,
+                      active && { borderColor: theme.colors.iosBlue },
+                    ]}
+                  >
+                    <Image
+                      source={option.source}
+                      resizeMode="cover"
+                      style={[
+                        styles.iconImage,
+                        { borderColor: theme.colors.iosSeparator },
+                      ]}
+                    />
+                    {active && (
+                      <View
+                        style={[
+                          styles.iconCheckBadge,
+                          {
+                            backgroundColor: theme.colors.iosBlue,
+                            borderColor: theme.colors.surface,
+                          },
+                        ]}
+                      >
+                        <CheckIcon size={12} color="#FFFFFF" />
+                      </View>
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.iconCaption,
+                      {
+                        color: active
+                          ? theme.colors.iosBlue
+                          : theme.colors.textPrimary,
+                      },
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                  {locked && (
+                    <View style={styles.iconProBadge}>{proBadge}</View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
         </Section>
 
         <Section title={t('settings.communitySection')}>
@@ -797,6 +875,50 @@ const styles = StyleSheet.create({
   },
   rowLabel: { fontSize: 16, flex: 1 },
   rowLabelDisabled: { opacity: 0.4 },
+  iconStrip: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  iconTile: {
+    alignItems: 'center',
+  },
+  iconTilePressed: { opacity: 0.7 },
+  // Padding keeps the selection ring outside the artwork edge; the radius
+  // follows the card language (sectionBody uses 14 for the icon itself).
+  iconImageWrap: {
+    padding: 3,
+    borderRadius: 19,
+    borderWidth: 2.5,
+    borderColor: 'transparent',
+  },
+  iconImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  iconCheckBadge: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCaption: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  iconProBadge: {
+    marginTop: 4,
+  },
   proBadge: {
     flexDirection: 'row',
     alignItems: 'center',
