@@ -15,6 +15,7 @@ import { requestReview } from 'react-native-store-review';
 import { useHabitStore } from '../store/habitStore';
 import { logEvent } from '../services/logger';
 import { HABIT_ICONS, getQuickPickIcons, getHabitIcon } from '../constants/habitIcons';
+import { getQuickPickColors, QUICK_PICK_COLORS } from '../constants/habitColors';
 import { BUILT_IN_CATEGORIES } from '../constants/habitCategories';
 import { Raised, Inset } from '../components/neumorphic/NeumorphicView';
 import { NeumorphicButton } from '../components/neumorphic/NeumorphicButton';
@@ -25,16 +26,6 @@ import { useTranslation } from '../i18n';
 import type { TranslationKey } from '../i18n';
 import { openPaywall } from '../services/paywallRouter';
 import { getLockedHabitIds } from '../services/proAccess';
-
-const COLORS = [
-  '#FF3B30', '#FF5A5F', '#FF6B35', '#FF9500',
-  '#FFCC00', '#FFD60A', '#4CD964', '#34C759', '#30D158',
-  '#00C7BE', '#00E5A0', '#32ADE6', '#64D2FF', '#007AFF', '#0A84FF',
-  '#5856D6', '#5E5CE6', '#AF52DE', '#BF5AF2',
-  '#FF2D55', '#FF375F',
-  '#A2845E', '#C2703D', '#556B2F', '#2E7D32',
-  '#8E8E93', '#6E6E73', '#48484A',
-];
 
 // Legacy '#1C1C1E' was near-invisible on the dark background (#1E1E1E).
 // Remap it for display so previously saved habits stay visible.
@@ -72,7 +63,7 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
   const [description, setDescription] = useState(existing?.description ?? '');
   const [icon, setIcon] = useState(existing?.icon ?? HABIT_ICONS[0].key);
   const [color, setColor] = useState(
-    existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? COLORS[0]),
+    existing?.color === LEGACY_BLACK ? VISIBLE_DARK : (existing?.color ?? QUICK_PICK_COLORS[0]),
   );
   const displayColor = resolveVisibleColor(color, theme.isDark);
   const [goal, setGoal] = useState(existing?.goal ?? '');
@@ -278,11 +269,27 @@ export default function AddEditHabitScreen({ route, navigation }: any) {
             })}
           </View>
 
-          <Text style={[styles.label, { color: theme.colors.textMuted }]}>
-            {t('addHabit.color')}
-          </Text>
+          <View style={styles.labelRow}>
+            <Text style={[styles.labelInline, { color: theme.colors.textMuted }]}>
+              {t('addHabit.color')}
+            </Text>
+            <Pressable
+              onPress={() =>
+                navigation.navigate('ColorPicker', {
+                  selectedColor: color,
+                  onSelect: setColor,
+                })
+              }
+              hitSlop={10}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.seeAll, { color: displayColor }]}>
+                {t('addHabit.seeAll')}
+              </Text>
+            </Pressable>
+          </View>
           <View style={styles.row}>
-            {COLORS.map(c => {
+            {getQuickPickColors(color).map(c => {
               const selected = color === c;
               return (
                 <Pressable key={c} onPress={() => setColor(c)} hitSlop={4}>

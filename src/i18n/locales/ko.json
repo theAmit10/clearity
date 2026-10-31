@@ -225,8 +225,22 @@
     "createHabit": "습관 만들기",
     "seeAll": "전체 보기",
     "allIcons": "모든 아이콘",
+    "allColors": "모든 색상",
     "searchIcons": "아이콘 검색",
     "noIconsFound": "아이콘을 찾을 수 없습니다"
+  },
+  "colorGroups": {
+    "red": "빨간색",
+    "orange": "주황색",
+    "yellow": "노란색",
+    "green": "초록색",
+    "teal": "청록색",
+    "blue": "파란색",
+    "indigo": "인디고",
+    "purple": "보라색",
+    "pink": "분홍색",
+    "brown": "갈색",
+    "gray": "회색"
   },
   "newCategory": {
     "title": "새 카테고리",

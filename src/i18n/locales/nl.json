@@ -225,8 +225,22 @@
     "createHabit": "Gewoonte aanmaken",
     "seeAll": "Alles bekijken",
     "allIcons": "Alle pictogrammen",
+    "allColors": "Alle kleuren",
     "searchIcons": "Pictogrammen zoeken",
     "noIconsFound": "Geen pictogrammen gevonden"
+  },
+  "colorGroups": {
+    "red": "Rood",
+    "orange": "Oranje",
+    "yellow": "Geel",
+    "green": "Groen",
+    "teal": "Turquoise",
+    "blue": "Blauw",
+    "indigo": "Indigo",
+    "purple": "Paars",
+    "pink": "Roze",
+    "brown": "Bruin",
+    "gray": "Grijs"
   },
   "newCategory": {
     "title": "Nieuwe categorie",

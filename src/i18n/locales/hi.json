@@ -225,8 +225,22 @@
     "createHabit": "आदत बनाएं",
     "seeAll": "सभी देखें",
     "allIcons": "सभी आइकन",
+    "allColors": "सभी रंग",
     "searchIcons": "आइकन खोजें",
     "noIconsFound": "कोई आइकन नहीं मिला"
+  },
+  "colorGroups": {
+    "red": "लाल",
+    "orange": "नारंगी",
+    "yellow": "पीला",
+    "green": "हरा",
+    "teal": "टील",
+    "blue": "नीला",
+    "indigo": "इंडिगो",
+    "purple": "बैंगनी",
+    "pink": "गुलाबी",
+    "brown": "भूरा",
+    "gray": "सलेटी"
   },
   "newCategory": {
     "title": "नई श्रेणी",

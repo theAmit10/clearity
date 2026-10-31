@@ -225,8 +225,22 @@
     "createHabit": "Créer l'habitude",
     "seeAll": "Tout voir",
     "allIcons": "Toutes les icônes",
+    "allColors": "Toutes les couleurs",
     "searchIcons": "Rechercher des icônes",
     "noIconsFound": "Aucune icône trouvée"
+  },
+  "colorGroups": {
+    "red": "Rouge",
+    "orange": "Orange",
+    "yellow": "Jaune",
+    "green": "Vert",
+    "teal": "Sarcelle",
+    "blue": "Bleu",
+    "indigo": "Indigo",
+    "purple": "Violet",
+    "pink": "Rose",
+    "brown": "Marron",
+    "gray": "Gris"
   },
   "newCategory": {
     "title": "Nouvelle catégorie",

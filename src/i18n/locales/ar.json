@@ -225,8 +225,22 @@
     "createHabit": "إنشاء عادة",
     "seeAll": "عرض الكل",
     "allIcons": "كل الأيقونات",
+    "allColors": "كل الألوان",
     "searchIcons": "بحث عن أيقونات",
     "noIconsFound": "لم يتم العثور على أيقونات"
+  },
+  "colorGroups": {
+    "red": "أحمر",
+    "orange": "برتقالي",
+    "yellow": "أصفر",
+    "green": "أخضر",
+    "teal": "فيروزي",
+    "blue": "أزرق",
+    "indigo": "نيلي",
+    "purple": "بنفسجي",
+    "pink": "وردي",
+    "brown": "بني",
+    "gray": "رمادي"
   },
   "newCategory": {
     "title": "فئة جديدة",

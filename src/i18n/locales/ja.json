@@ -225,8 +225,22 @@
     "createHabit": "習慣を作成",
     "seeAll": "すべて見る",
     "allIcons": "すべてのアイコン",
+    "allColors": "すべてのカラー",
     "searchIcons": "アイコンを検索",
     "noIconsFound": "アイコンが見つかりません"
+  },
+  "colorGroups": {
+    "red": "赤",
+    "orange": "オレンジ",
+    "yellow": "黄色",
+    "green": "緑",
+    "teal": "ティール",
+    "blue": "青",
+    "indigo": "インディゴ",
+    "purple": "紫",
+    "pink": "ピンク",
+    "brown": "茶色",
+    "gray": "グレー"
   },
   "newCategory": {
     "title": "新しいカテゴリー",

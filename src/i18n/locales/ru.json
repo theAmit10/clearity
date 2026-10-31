@@ -225,8 +225,22 @@
     "createHabit": "Создать привычку",
     "seeAll": "Смотреть все",
     "allIcons": "Все иконки",
+    "allColors": "Все цвета",
     "searchIcons": "Поиск иконок",
     "noIconsFound": "Иконки не найдены"
+  },
+  "colorGroups": {
+    "red": "Красный",
+    "orange": "Оранжевый",
+    "yellow": "Жёлтый",
+    "green": "Зелёный",
+    "teal": "Бирюзовый",
+    "blue": "Синий",
+    "indigo": "Индиго",
+    "purple": "Фиолетовый",
+    "pink": "Розовый",
+    "brown": "Коричневый",
+    "gray": "Серый"
   },
   "newCategory": {
     "title": "Новая категория",

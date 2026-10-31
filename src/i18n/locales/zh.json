@@ -225,8 +225,22 @@
     "createHabit": "创建习惯",
     "seeAll": "查看全部",
     "allIcons": "所有图标",
+    "allColors": "所有颜色",
     "searchIcons": "搜索图标",
     "noIconsFound": "未找到图标"
+  },
+  "colorGroups": {
+    "red": "红色",
+    "orange": "橙色",
+    "yellow": "黄色",
+    "green": "绿色",
+    "teal": "青色",
+    "blue": "蓝色",
+    "indigo": "靛蓝",
+    "purple": "紫色",
+    "pink": "粉色",
+    "brown": "棕色",
+    "gray": "灰色"
   },
   "newCategory": {
     "title": "新建分类",

@@ -225,8 +225,22 @@
     "createHabit": "Create Habit",
     "seeAll": "See all",
     "allIcons": "All Icons",
+    "allColors": "All Colors",
     "searchIcons": "Search icons",
     "noIconsFound": "No icons found"
+  },
+  "colorGroups": {
+    "red": "Red",
+    "orange": "Orange",
+    "yellow": "Yellow",
+    "green": "Green",
+    "teal": "Teal",
+    "blue": "Blue",
+    "indigo": "Indigo",
+    "purple": "Purple",
+    "pink": "Pink",
+    "brown": "Brown",
+    "gray": "Gray"
   },
   "newCategory": {
     "title": "New Category",

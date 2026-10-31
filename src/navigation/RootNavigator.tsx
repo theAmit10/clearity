@@ -14,6 +14,7 @@ import GoalDetailScreen from '../screens/GoalDetailScreen';
 import AddEditGoalScreen from '../screens/AddEditGoalScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
 import IconPickerScreen from '../screens/IconPickerScreen';
+import ColorPickerScreen from '../screens/ColorPickerScreen';
 import OnboardingScreen, {
   type OnboardingResult,
 } from '../screens/OnboardingScreen';
@@ -84,6 +85,11 @@ function HomeStack() {
       <Stack.Screen
         name="IconPicker"
         component={IconPickerScreen}
+        options={{ headerShown: false, presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="ColorPicker"
+        component={ColorPickerScreen}
         options={{ headerShown: false, presentation: 'modal' }}
       />
       <Stack.Screen

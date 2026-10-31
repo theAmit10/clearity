@@ -21,22 +21,43 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
   const proExpired = useHabitStore(s => s.proExpired);
   const [themeName, setThemeName] = useState<ThemeName>('light');
+  // True once the stored theme has been resolved AND committed — the native
+  // launch overlay must not fade until then, or it can reveal the light
+  // first render for a frame.
+  const [themeLoaded, setThemeLoaded] = useState(false);
 
   useEffect(() => {
+    let active = true;
     AsyncStorage.getItem(STORAGE_KEY)
       .then(stored => {
+        if (!active) return;
         if (stored && stored in themes) {
           setThemeName(stored as ThemeName);
         } else if (systemScheme === 'dark') {
           setThemeName('dark');
         }
       })
+      .catch(() => {
+        // fall back to the default light theme
+      })
       .finally(() => {
-        // Themed root is about to paint — retire the native launch overlay
-        // (installed by AppDelegate when the dark icon is active).
-        hideLaunchOverlay();
+        // Both state updates batch into one commit; the effect below runs
+        // after that commit has painted.
+        if (active) setThemeLoaded(true);
       });
+    return () => {
+      active = false;
+    };
   }, [systemScheme]);
+
+  // Themed root has committed — retire the native launch overlay (installed
+  // by AppDelegate when the dark icon is active). rAF guarantees the dark
+  // render is on screen before the 0.15s fade starts.
+  useEffect(() => {
+    if (!themeLoaded) return;
+    const frame = requestAnimationFrame(() => hideLaunchOverlay());
+    return () => cancelAnimationFrame(frame);
+  }, [themeLoaded]);
 
   const setTheme = useCallback(async (name: ThemeName) => {
     setThemeName(name);
